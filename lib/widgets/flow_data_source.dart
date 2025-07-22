@@ -164,14 +164,23 @@ class FlowDataSource extends DataGridSource {
       flowId = _flows[rowIndex].id;
     }
 
+    // Get the actual displayed index of this row after sorting/filtering
+    final actualDisplayIndex = effectiveRows.indexOf(row);
+    final isEvenRow = actualDisplayIndex % 2 == 0;
+
     // Check if this row is selected by the user
     final isSelected = flowId != null && flowId == _selectedFlowId;
 
-    // Determine the row color based on selection
+    // Determine the row color based on selection and even/odd alternating pattern
     Color? rowColor;
     if (isSelected) {
-      // Selected row gets a darker color
+      // Selected row gets priority with a distinctive color
       rowColor = const Color(0xffD13639);
+    } else {
+      // Use alternating colors for even/odd rows
+      rowColor = isEvenRow
+          ? const Color(0xff1E1E1E) // Even rows - darker (same as background)
+          : const Color(0xff26282A); // Odd rows - slightly lighter
     }
 
     return DataGridRowAdapter(

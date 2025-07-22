@@ -111,7 +111,7 @@ class _FlowDataGridState extends State<FlowDataGrid> {
           showColumnHeaderIconOnHover: true, // Show resize indicator on hover
           highlightRowOnHover: true, // Better UX for desktop
           navigationMode: GridNavigationMode.cell, // Enable keyboard navigation
-          rowHeight: 33,
+          rowHeight: 36,
           headerRowHeight: 30,
           showHorizontalScrollbar: false,
           allowColumnsDragging: true,
@@ -153,7 +153,7 @@ class _FlowDataGridState extends State<FlowDataGrid> {
             });
             return true;
           },
-          gridLinesVisibility: GridLinesVisibility.both,
+          gridLinesVisibility: GridLinesVisibility.none,
           headerGridLinesVisibility: GridLinesVisibility.both,
           columns: <GridColumn>[
             for (final header in headerCells)
