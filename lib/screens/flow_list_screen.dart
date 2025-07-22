@@ -20,9 +20,15 @@ class _FlowListScreenState extends State<FlowListScreen> {
   // Single data source for all flows
   late _FlowDataSource _flowDataSource;
 
+  // Controller for the data grid to track selection and highlighting
+  final DataGridController _dataGridController = DataGridController();
+
   // Selected flow for details view
   models.Flow? _selectedFlow;
   String? _selectedFlowId;
+
+  // Track the currently highlighted row index (by keyboard navigation)
+  int? _currentlyHighlightedRowIndex;
 
   @override
   void initState() {
@@ -43,6 +49,7 @@ class _FlowListScreenState extends State<FlowListScreen> {
       context,
       listen: false,
     );
+    final bg = Color(0xff1D1F21);
 
     return PopScope(
       canPop: true,
@@ -52,7 +59,11 @@ class _FlowListScreenState extends State<FlowListScreen> {
         }
       },
       child: Scaffold(
+        backgroundColor: bg,
         appBar: AppBar(
+          backgroundColor: bg,
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
           toolbarHeight: kTextTabBarHeight - 10,
           actions: [
             // WebSocket connection status indicator
@@ -188,9 +199,7 @@ class _FlowListScreenState extends State<FlowListScreen> {
                     child: _buildRequestPanel(),
                   ),
                   // selected flow response summary
-                  ResizableChild(
-                    child: _buildResponsePanel(),
-                  ),
+                  ResizableChild(child: _buildResponsePanel()),
                 ],
                 direction: Axis.horizontal,
               ),
@@ -205,6 +214,7 @@ class _FlowListScreenState extends State<FlowListScreen> {
     // Update the data source with the flows
     _flowDataSource.updateFlows(flows);
     _flowDataSource._selectedFlowId = _selectedFlowId;
+    _flowDataSource.setHighlightedRowIndex(_currentlyHighlightedRowIndex);
     return _buildSyncfusionDataGrid(_flowDataSource);
   }
 
@@ -296,7 +306,6 @@ class _FlowListScreenState extends State<FlowListScreen> {
           headerRowHeight: 30,
           showHorizontalScrollbar: false,
           allowColumnsDragging: true,
-          // Freeze the method column for better usability
           frozenColumnsCount: 1,
           selectionMode: SelectionMode.single,
           onCellTap: (details) {
@@ -314,6 +323,20 @@ class _FlowListScreenState extends State<FlowListScreen> {
               }
             }
           },
+          // Track currently highlighted row (by keyboard navigation)
+          onCurrentCellActivated:
+              (
+                RowColumnIndex newRowColumnIndex,
+                RowColumnIndex oldRowColumnIndex,
+              ) {
+                // Skip header row (index 0)
+                setState(() {
+                  _currentlyHighlightedRowIndex = newRowColumnIndex.rowIndex;
+                  print(
+                    'Currently highlighted row index: $_currentlyHighlightedRowIndex',
+                  );
+                });
+              },
           onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
             // Don't allow columns to be sized too small
             if (details.width < 60) {
@@ -404,10 +427,7 @@ class _FlowListScreenState extends State<FlowListScreen> {
           // Headers section
           const Text(
             'Headers:',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
 
@@ -432,9 +452,7 @@ class _FlowListScreenState extends State<FlowListScreen> {
                         ),
                         TextSpan(
                           text: header[1],
-                          style: const TextStyle(
-                            color: Colors.white,
-                          ),
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ],
                     ),
@@ -479,17 +497,11 @@ class _FlowListScreenState extends State<FlowListScreen> {
             children: [
               const Text(
                 'Response',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 12),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 2,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(4),
@@ -532,10 +544,7 @@ class _FlowListScreenState extends State<FlowListScreen> {
           // Headers section
           const Text(
             'Headers:',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
 
@@ -560,9 +569,7 @@ class _FlowListScreenState extends State<FlowListScreen> {
                         ),
                         TextSpan(
                           text: header[1],
-                          style: const TextStyle(
-                            color: Colors.white,
-                          ),
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ],
                     ),
@@ -581,6 +588,7 @@ class _FlowDataSource extends DataGridSource {
   List<models.Flow> _flows = [];
   List<DataGridRow> _flowRows = [];
   String? _selectedFlowId;
+  int? _currentlyHighlightedRowIndex;
 
   _FlowDataSource(this._flows) {
     _flowRows = _getFlowRows();
@@ -589,6 +597,11 @@ class _FlowDataSource extends DataGridSource {
   void updateFlows(List<models.Flow> flows) {
     _flows = flows;
     _flowRows = _getFlowRows();
+    notifyListeners();
+  }
+
+  void setHighlightedRowIndex(int? index) {
+    _currentlyHighlightedRowIndex = index;
     notifyListeners();
   }
 
@@ -721,20 +734,38 @@ class _FlowDataSource extends DataGridSource {
   DataGridRowAdapter buildRow(DataGridRow row) {
     // Get the flow ID from this row to check if it's selected
     String? flowId;
+    int? rowIndex;
+
     var idCell = row.getCells().firstWhere(
       (cell) => cell.columnName == 'id',
       orElse: () => DataGridCell<String>(columnName: 'id', value: ''),
     );
-    
-    int? index = int.tryParse(idCell.value.toString());
-    if (index != null && index >= 0 && index < _flows.length) {
-      flowId = _flows[index].id;
+
+    rowIndex = int.tryParse(idCell.value);
+    if (rowIndex != null && rowIndex >= 0 && rowIndex < _flows.length) {
+      flowId = _flows[rowIndex].id;
     }
-    
+
+    // Check if this row is selected by the user
     final isSelected = flowId != null && flowId == _selectedFlowId;
-    
+
+    // Check if this row is highlighted by keyboard navigation
+    final isHighlighted =
+        rowIndex != null && rowIndex == _currentlyHighlightedRowIndex;
+
+    // Determine the row color based on selection and highlighting states
+    Color? rowColor;
+    if (isSelected) {
+      // Selected row gets a darker color
+      rowColor = const Color.fromARGB(255, 39, 39, 42);
+    }
+    if (isHighlighted) {
+      // Highlighted row (keyboard navigation) gets a slightly different color
+      rowColor = const Color.fromARGB(255, 85, 85, 85);
+    }
+
     return DataGridRowAdapter(
-      color: isSelected ? const Color.fromARGB(255, 45, 47, 59) : null,
+      color: rowColor,
       cells: row.getCells().map<Widget>((dataGridCell) {
         // For cells that contain a Widget directly
         if (dataGridCell.value is Widget) {

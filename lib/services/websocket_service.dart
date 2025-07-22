@@ -9,7 +9,7 @@ import '../models/flow_store.dart';
 class WebSocketService {
   static const String websocketUrl = 'ws://127.0.0.1:9090';
   static const String cookieHeader =
-      '_xsrf=2|f1437e72|506e0dd7fde1a4449f495f7b2e8bddcb|1753168013; mitmproxy-auth-8081="2|1:0|10:1753171749|19:mitmproxy-auth-8081|4:eQ==|d85006a8176533962943668e0d63209e5a8984a864da55ade234a63f4de2e93f"';
+      ' mitmproxy-auth-8081="2|1:0|10:1753187602|19:mitmproxy-auth-8081|4:eQ==|89ed72c87fc0c9a43e0e6b75c54347899e3842fa6c075c13a7f04da4c43d3bc5"; _xsrf=2|fcf806bb|e5372d26882fc6c2c6b6c23742626c5b|1753187602';
 
   IOWebSocketChannel? _channel;
   WebSocket? _webSocket;
