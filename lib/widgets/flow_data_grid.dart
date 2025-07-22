@@ -117,25 +117,44 @@ class _FlowDataGridState extends State<FlowDataGrid> {
           allowColumnsDragging: true,
           frozenColumnsCount: 1,
           selectionMode: SelectionMode.single,
-          // onCellTap: (details) {
-          //
-          //   int rowIndex = details.rowColumnIndex.rowIndex;
-          //   if (rowIndex < widget.dataSource.flows.length) {
-          //     final selectedFlow = widget.dataSource.flows[rowIndex];
-          //     widget.onFlowSelected(selectedFlow);
-          //   }
-          // },
           // Track keyboard navigation and select row
           onCurrentCellActivated:
               (
                 RowColumnIndex newRowColumnIndex,
                 RowColumnIndex oldRowColumnIndex,
               ) {
-                //  it only selects the rows, not header, so need to adjust index
-                int rowIndex = newRowColumnIndex.rowIndex;
-                if (rowIndex < widget.dataSource.flows.length) {
-                  final selectedFlow = widget.dataSource.flows[rowIndex];
-                  widget.onFlowSelected(selectedFlow);
+                // no need of rowIndex-1, it does not calls for header row
+                if (newRowColumnIndex.rowIndex < 0) return;
+                try {
+                  // Get the actual row based on current display order (after sorting)
+                  final actualRowIndex = newRowColumnIndex.rowIndex;
+                  if (actualRowIndex < 0 ||
+                      actualRowIndex >=
+                          widget.dataSource.effectiveRows.length) {
+                    return;
+                  }
+
+                  // Get the effective row at the current position
+                  final actualRow =
+                      widget.dataSource.effectiveRows[actualRowIndex];
+
+                  // Find the ID cell to identify which flow this represents
+                  final idCell = actualRow.getCells().firstWhere(
+                    (cell) => cell.columnName == 'id',
+                    orElse: () =>
+                        DataGridCell<String>(columnName: 'id', value: ''),
+                  );
+
+                  // Parse the ID to get the original flow index
+                  final originalIndex = int.tryParse(idCell.value.toString());
+                  if (originalIndex != null &&
+                      originalIndex >= 0 &&
+                      originalIndex < widget.dataSource.flows.length) {
+                    final selectedFlow = widget.dataSource.flows[originalIndex];
+                    widget.onFlowSelected(selectedFlow);
+                  }
+                } catch (e) {
+                  print('Error selecting flow: $e');
                 }
               },
           onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
