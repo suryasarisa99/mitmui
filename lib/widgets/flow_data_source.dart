@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:mitmui/utils/statusCode.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../models/flow.dart' as models;
 import '../utils/extensions.dart';
 
 class FlowDataSource extends DataGridSource {
-  List<models.Flow> _flows = [];
+  List<models.MitmFlow> _flows = [];
   List<DataGridRow> _flowRows = [];
   String? _selectedFlowId;
 
   // Getter to expose the flows list
-  List<models.Flow> get flows => _flows;
+  List<models.MitmFlow> get flows => _flows;
 
   // Setter for selectedFlowId
   set selectedFlowId(String? id) {
@@ -22,7 +23,7 @@ class FlowDataSource extends DataGridSource {
     _flowRows = _getFlowRows();
   }
 
-  void updateFlows(List<models.Flow> flows) {
+  void updateFlows(List<models.MitmFlow> flows) {
     _flows = flows;
     _flowRows = _getFlowRows();
     notifyListeners();
@@ -32,7 +33,7 @@ class FlowDataSource extends DataGridSource {
     return _flows.mapIndexed<DataGridRow>((i, flow) {
       final hasResponse = flow.response != null;
       final methodColor = getMethodColor(flow.request.method);
-      final statusColor = getStatusColor(
+      final statusColor = getStatusCodeColor(
         hasResponse ? flow.response!.statusCode : null,
       );
 
@@ -47,21 +48,20 @@ class FlowDataSource extends DataGridSource {
             value: RichText(
               overflow: TextOverflow.ellipsis,
               text: TextSpan(
-                style: const TextStyle(fontSize: 14, color: Colors.black87),
                 children: [
                   // Hostname part styled differently
                   TextSpan(
                     text: flow.request.prettyHost ?? flow.request.host,
                     style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Color.fromARGB(255, 174, 185, 252),
+                      fontSize: 15,
+                      color: Color(0xFFEEEEEE),
                     ),
                   ),
                   // Path part
                   TextSpan(
                     text: flow.request.path,
                     style: const TextStyle(
-                      color: Color.fromARGB(221, 159, 173, 183),
+                      color: Color.fromARGB(221, 230, 230, 230),
                     ),
                   ),
                 ],
@@ -170,6 +170,7 @@ class FlowDataSource extends DataGridSource {
 
     // Check if this row is selected by the user
     final isSelected = flowId != null && flowId == _selectedFlowId;
+    const textStyle = TextStyle(fontSize: 15, color: Color(0xFFEEEEEE));
 
     // Determine the row color based on selection and even/odd alternating pattern
     Color? rowColor;
@@ -202,6 +203,7 @@ class FlowDataSource extends DataGridSource {
           child: Text(
             dataGridCell.value.toString(),
             overflow: TextOverflow.ellipsis,
+            style: textStyle,
           ),
         );
       }).toList(),
@@ -212,9 +214,9 @@ class FlowDataSource extends DataGridSource {
   Color getMethodColor(String method) {
     switch (method) {
       case 'GET':
-        return Colors.blue;
+        return const Color.fromARGB(255, 102, 186, 255);
       case 'POST':
-        return Colors.green;
+        return const Color(0xFF74E277);
       case 'PUT':
         return Colors.orange;
       case 'DELETE':
@@ -224,22 +226,6 @@ class FlowDataSource extends DataGridSource {
       default:
         return Colors.grey;
     }
-  }
-
-  /// Get the color for a HTTP status code
-  Color getStatusColor(int? statusCode) {
-    if (statusCode == null) return Colors.grey;
-
-    if (statusCode >= 200 && statusCode < 300) {
-      return Colors.green;
-    } else if (statusCode >= 300 && statusCode < 400) {
-      return Colors.blue;
-    } else if (statusCode >= 400 && statusCode < 500) {
-      return Colors.orange;
-    } else if (statusCode >= 500) {
-      return Colors.red;
-    }
-    return Colors.grey;
   }
 
   /// Format bytes into a human-readable string (KB, MB, etc.)

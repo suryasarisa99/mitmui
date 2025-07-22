@@ -4,17 +4,17 @@ import 'flow.dart' as models;
 
 /// Manages a collection of flows with notification capabilities
 class FlowStore extends ChangeNotifier {
-  final Map<String, models.Flow> _flows = {};
-  List<models.Flow> _filteredFlows = [];
+  final Map<String, models.MitmFlow> _flows = {};
+  List<models.MitmFlow> _filteredFlows = [];
   String _filter = '';
 
   FlowStore();
 
   /// Get all flows as a list
-  List<models.Flow> get flows => _flows.values.toList();
+  List<models.MitmFlow> get flows => _flows.values.toList();
 
   /// Get filtered flows
-  List<models.Flow> get filteredFlows => _filteredFlows;
+  List<models.MitmFlow> get filteredFlows => _filteredFlows;
 
   /// Get the current filter text
   String get filter => _filter;
@@ -26,13 +26,13 @@ class FlowStore extends ChangeNotifier {
   int get filteredCount => _filteredFlows.length;
 
   /// Add or update a flow in the store
-  void addOrUpdateFlow(models.Flow flow) {
+  void addOrUpdateFlow(models.MitmFlow flow) {
     _flows[flow.id] = flow;
     _applyFilter();
     notifyListeners();
   }
 
-  void addMultiple(List<models.Flow> flows) {
+  void addMultiple(List<models.MitmFlow> flows) {
     for (final flow in flows) {
       _flows[flow.id] = flow;
     }
@@ -42,7 +42,7 @@ class FlowStore extends ChangeNotifier {
 
   /// Handle a WebSocket message from mitmproxy
   void handleMessage(String message) {
-    final flow = models.Flow.parseFlowMessage(message);
+    final flow = models.MitmFlow.parseFlowMessage(message);
     if (flow != null) {
       addOrUpdateFlow(flow);
     }
@@ -63,7 +63,7 @@ class FlowStore extends ChangeNotifier {
   }
 
   /// Get a flow by ID
-  models.Flow? getFlow(String id) {
+  models.MitmFlow? getFlow(String id) {
     return _flows[id];
   }
 
@@ -120,12 +120,12 @@ class FlowStore extends ChangeNotifier {
   }
 
   /// Get WebSocket flows only
-  List<models.Flow> get webSocketFlows =>
+  List<models.MitmFlow> get webSocketFlows =>
       _flows.values.where((flow) => flow.isWebSocket).toList()
         ..sort((a, b) => b.timestampCreated.compareTo(a.timestampCreated));
 
   /// Get HTTP flows only (non-WebSocket)
-  List<models.Flow> get httpFlows =>
+  List<models.MitmFlow> get httpFlows =>
       _flows.values.where((flow) => !flow.isWebSocket).toList()
         ..sort((a, b) => b.timestampCreated.compareTo(a.timestampCreated));
 }

@@ -6,7 +6,7 @@ import 'flow_data_source.dart';
 
 class FlowDataGrid extends StatefulWidget {
   final FlowDataSource dataSource;
-  final Function(models.Flow) onFlowSelected;
+  final Function(models.MitmFlow) onFlowSelected;
   final DataGridController controller;
 
   const FlowDataGrid({
@@ -23,7 +23,7 @@ class FlowDataGrid extends StatefulWidget {
 class _FlowDataGridState extends State<FlowDataGrid> {
   // Store column widths
   final Map<String, double> _columnWidths = {
-    'id': 50,
+    'id': 44,
     'url': 1180,
     'method': 80,
     'status': 60,

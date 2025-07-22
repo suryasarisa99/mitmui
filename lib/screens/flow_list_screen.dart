@@ -1,6 +1,6 @@
-// flow_list_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_resizable_container/flutter_resizable_container.dart';
+import 'package:mitmui/widgets/flow_detail_url.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
@@ -26,7 +26,7 @@ class _FlowListScreenState extends State<FlowListScreen> {
   final DataGridController _dataGridController = DataGridController();
 
   // Selected flow for details view
-  models.Flow? _selectedFlow;
+  models.MitmFlow? _selectedFlow;
   String? _selectedFlowId;
 
   @override
@@ -126,7 +126,9 @@ class _FlowListScreenState extends State<FlowListScreen> {
     );
   }
 
-  Widget _buildFlowList(List<models.Flow> Function(FlowStore) flowSelector) {
+  Widget _buildFlowList(
+    List<models.MitmFlow> Function(FlowStore) flowSelector,
+  ) {
     // Make sure we can access the provider
     print('Trying to access FlowStore provider...');
 
@@ -178,38 +180,60 @@ class _FlowListScreenState extends State<FlowListScreen> {
           children: [
             ResizableChild(
               divider: ResizableDivider(
-                thickness: 1.0,
-                padding: 18,
-                color: const Color.fromARGB(255, 41, 42, 48),
+                padding: 5,
+                thickness: 0.6,
+
+                color: Colors.grey[800]!,
               ),
               child: _buildDataTable(flows),
             ),
-            ResizableChild(
-              // divider: ResizableDivider(thickness: 8.0, color: Colors.red),
-              child: ResizableContainer(
-                children: [
-                  // selected flow request summary
-                  ResizableChild(
-                    divider: ResizableDivider(
-                      thickness: 1.0,
-                      padding: 18,
-                      color: const Color.fromARGB(255, 56, 57, 63),
-                    ),
-                    child: _buildRequestPanel(),
+            if (_selectedFlowId != null)
+              ResizableChild(
+                // divider: ResizableDivider(thickness: 8.0, color: Colors.red),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FlowDetailURL(
+                        scheme: _selectedFlow?.request.scheme ?? '',
+                        host: _selectedFlow?.request.prettyHost ?? '',
+                        path: _selectedFlow?.request.path ?? '',
+                        statusCode: _selectedFlow?.response?.statusCode ?? 0,
+                        method: _selectedFlow?.request.method ?? '',
+                      ),
+                      Expanded(
+                        child: ResizableContainer(
+                          children: [
+                            // selected flow request summary
+                            ResizableChild(
+                              divider: ResizableDivider(
+                                thickness: 1.0,
+                                padding: 18,
+                                color: const Color.fromARGB(255, 56, 57, 63),
+                              ),
+                              child: RequestDetailsPanel(flow: _selectedFlow),
+                            ),
+                            // selected flow response summary
+                            ResizableChild(
+                              child: ResponseDetailsPanel(flow: _selectedFlow),
+                            ),
+                          ],
+                          direction: Axis.horizontal,
+                        ),
+                      ),
+                    ],
                   ),
-                  // selected flow response summary
-                  ResizableChild(child: _buildResponsePanel()),
-                ],
-                direction: Axis.horizontal,
+                ),
               ),
-            ),
           ],
         );
       },
     );
   }
 
-  Widget _buildDataTable(List<models.Flow> flows) {
+  Widget _buildDataTable(List<models.MitmFlow> flows) {
     // Update the data source with the flows
     _flowDataSource.updateFlows(flows);
 
@@ -229,15 +253,5 @@ class _FlowListScreenState extends State<FlowListScreen> {
         });
       },
     );
-  }
-
-  // Build the request panel with details from the selected flow
-  Widget _buildRequestPanel() {
-    return RequestPanel(flow: _selectedFlow, dataSource: _flowDataSource);
-  }
-
-  // Build the response panel with details from the selected flow
-  Widget _buildResponsePanel() {
-    return ResponsePanel(flow: _selectedFlow, dataSource: _flowDataSource);
   }
 }

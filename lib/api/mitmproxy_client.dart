@@ -29,7 +29,7 @@ class MitmproxyClient {
   }
 
   /// Fetches all existing flows from mitmproxy
-  Future<List<Flow>> getFlows() async {
+  Future<List<MitmFlow>> getFlows() async {
     try {
       print('Fetching flows from $baseUrl/flows');
       final response = await _dio.get('/flows');
@@ -37,7 +37,7 @@ class MitmproxyClient {
       if (response.statusCode == 200) {
         final List<dynamic> flows = response.data;
         print('Received ${flows.length} flows from API');
-        return flows.map((f) => Flow.fromJson(f)).toList();
+        return flows.map((f) => MitmFlow.fromJson(f)).toList();
       } else {
         print('Failed to fetch flows: ${response.statusCode}');
         return [];
@@ -70,7 +70,7 @@ class MitmproxyClient {
     }
   }
 
-  Future<dynamic> getMitmContent(String flowId, String type) async {
+  Future<String> getMitmContent(String flowId, String type) async {
     try {
       final response = await _dio.get('/flows/$flowId/$type/content.data');
 

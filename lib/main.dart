@@ -64,14 +64,17 @@ class MainApp extends StatelessWidget {
     // Use a desktop-optimized theme with more neutral colors and less rounded corners
     final baseTheme = ThemeData(
       useMaterial3: true,
-      colorSchemeSeed: Colors.blue,
+      colorSchemeSeed: Colors.red,
       brightness: Brightness.light,
     );
 
     final darkTheme = ThemeData(
       useMaterial3: false,
-      colorSchemeSeed: Colors.blue,
+      colorSchemeSeed: const Color.fromARGB(255, 255, 55, 55),
       brightness: Brightness.dark,
+      textTheme: const TextTheme(
+        bodyMedium: TextStyle(fontSize: 14, color: Colors.white),
+      ),
     );
 
     return MultiProvider(

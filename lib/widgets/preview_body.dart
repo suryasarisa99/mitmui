@@ -1,13 +1,12 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:mitmui/models/flow.dart' as models;
 
 import 'package:flutter/material.dart';
 import 'package:mitmui/models/response_body.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
 
-class PreviewResponseBody extends StatelessWidget {
-  const PreviewResponseBody({
+class PreviewBody extends StatelessWidget {
+  const PreviewBody({
     super.key,
     required this.response,
     required this.responseBodyFuture,

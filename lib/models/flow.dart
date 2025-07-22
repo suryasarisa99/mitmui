@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 /// Represents a complete mitmproxy flow with all its components
-class Flow {
+class MitmFlow {
   final String id;
   final bool intercepted;
   final dynamic isReplay; // Can be null
@@ -19,7 +19,7 @@ class Flow {
 
   String get prettyUrl => request.prettyHost ?? "" + request.path;
 
-  Flow({
+  MitmFlow({
     required this.id,
     required this.intercepted,
     this.isReplay,
@@ -35,8 +35,8 @@ class Flow {
     this.websocket,
   });
 
-  factory Flow.fromJson(Map<String, dynamic> json) {
-    return Flow(
+  factory MitmFlow.fromJson(Map<String, dynamic> json) {
+    return MitmFlow(
       id: json['id'],
       intercepted: json['intercepted'],
       isReplay: json['is_replay'],
@@ -84,12 +84,12 @@ class Flow {
   }
 
   /// Parse a flow update message from the WebSocket connection
-  static Flow? parseFlowMessage(String message) {
+  static MitmFlow? parseFlowMessage(String message) {
     try {
       final Map<String, dynamic> json = jsonDecode(message);
 
       if (json['type'] == 'flows/add' || json['type'] == 'flows/update') {
-        return Flow.fromJson(json['payload']['flow']);
+        return MitmFlow.fromJson(json['payload']['flow']);
       }
       return null;
     } catch (e) {
