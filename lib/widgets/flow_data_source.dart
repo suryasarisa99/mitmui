@@ -121,7 +121,7 @@ class FlowDataSource extends DataGridSource {
                 hasResponse &&
                     flow.response?.timestampEnd != null &&
                     flow.request.timestampStart != null
-                ? '${((flow.response!.timestampEnd - flow.request.timestampStart!) * 1000).round()} ms'
+                ? '${((flow.response!.timestampEnd! - flow.request.timestampStart!) * 1000).round()} ms'
                 : '-',
           ),
 

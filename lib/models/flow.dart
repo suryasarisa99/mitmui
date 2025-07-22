@@ -141,20 +141,25 @@ class ClientConnection {
   });
 
   factory ClientConnection.fromJson(Map<String, dynamic> json) {
-    return ClientConnection(
-      id: json['id'],
-      peername: json['peername'],
-      sockname: json['sockname'],
-      tlsEstablished: json['tls_established'],
-      cert: json['cert'],
-      sni: json['sni'],
-      cipher: json['cipher'],
-      alpn: json['alpn'],
-      tlsVersion: json['tls_version'],
-      timestampStart: json['timestamp_start'],
-      timestampTlsSetup: json['timestamp_tls_setup'],
-      timestampEnd: json['timestamp_end'],
-    );
+    try {
+      return ClientConnection(
+        id: json['id'],
+        peername: json['peername'],
+        sockname: json['sockname'],
+        tlsEstablished: json['tls_established'],
+        cert: json['cert'],
+        sni: json['sni'],
+        cipher: json['cipher'],
+        alpn: json['alpn'],
+        tlsVersion: json['tls_version'],
+        timestampStart: json['timestamp_start'],
+        timestampTlsSetup: json['timestamp_tls_setup'],
+        timestampEnd: json['timestamp_end'],
+      );
+    } catch (err) {
+      print("error parsing ClientConnection: $err");
+      throw FormatException('Invalid ClientConnection data: $err');
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -213,22 +218,27 @@ class ServerConnection {
   });
 
   factory ServerConnection.fromJson(Map<String, dynamic> json) {
-    return ServerConnection(
-      id: json['id'],
-      peername: json['peername'],
-      sockname: json['sockname'],
-      address: json['address'],
-      tlsEstablished: json['tls_established'],
-      cert: json['cert'] != null ? Certificate.fromJson(json['cert']) : null,
-      sni: json['sni'],
-      cipher: json['cipher'],
-      alpn: json['alpn'],
-      tlsVersion: json['tls_version'],
-      timestampStart: json['timestamp_start'],
-      timestampTcpSetup: json['timestamp_tcp_setup'],
-      timestampTlsSetup: json['timestamp_tls_setup'],
-      timestampEnd: json['timestamp_end'],
-    );
+    try {
+      return ServerConnection(
+        id: json['id'],
+        peername: json['peername'],
+        sockname: json['sockname'],
+        address: json['address'],
+        tlsEstablished: json['tls_established'],
+        cert: json['cert'] != null ? Certificate.fromJson(json['cert']) : null,
+        sni: json['sni'],
+        cipher: json['cipher'],
+        alpn: json['alpn'],
+        tlsVersion: json['tls_version'],
+        timestampStart: json['timestamp_start'],
+        timestampTcpSetup: json['timestamp_tcp_setup'],
+        timestampTlsSetup: json['timestamp_tls_setup'],
+        timestampEnd: json['timestamp_end'],
+      );
+    } catch (err) {
+      print("error parsing ServerConnection: $err");
+      throw FormatException('Invalid ServerConnection data: $err');
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -371,26 +381,31 @@ class HttpRequest {
   });
 
   factory HttpRequest.fromJson(Map<String, dynamic> json) {
-    List<List<String>> parseHeaders(dynamic jsonHeaders) {
-      return (jsonHeaders as List<dynamic>)
-          .map((header) => [header[0].toString(), header[1].toString()])
-          .toList();
-    }
+    try {
+      List<List<String>> parseHeaders(dynamic jsonHeaders) {
+        return (jsonHeaders as List<dynamic>)
+            .map((header) => [header[0].toString(), header[1].toString()])
+            .toList();
+      }
 
-    return HttpRequest(
-      method: json['method'],
-      scheme: json['scheme'],
-      host: json['host'],
-      port: json['port'],
-      path: json['path'],
-      httpVersion: json['http_version'],
-      headers: parseHeaders(json['headers']),
-      contentLength: json['contentLength'],
-      contentHash: json['contentHash'],
-      timestampStart: json['timestamp_start'],
-      timestampEnd: json['timestamp_end'],
-      prettyHost: json['pretty_host'],
-    );
+      return HttpRequest(
+        method: json['method'],
+        scheme: json['scheme'],
+        host: json['host'],
+        port: json['port'],
+        path: json['path'],
+        httpVersion: json['http_version'],
+        headers: parseHeaders(json['headers']),
+        contentLength: json['contentLength'],
+        contentHash: json['contentHash'],
+        timestampStart: json['timestamp_start'],
+        timestampEnd: json['timestamp_end'],
+        prettyHost: json['pretty_host'],
+      );
+    } catch (err) {
+      print("error parsing HttpRequest: $err");
+      throw FormatException('Invalid HttpRequest data: $err');
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -440,7 +455,7 @@ class HttpResponse {
   final int? contentLength; // Can be null
   final String? contentHash; // Can be null
   final double timestampStart;
-  final double timestampEnd;
+  final double? timestampEnd;
 
   HttpResponse({
     required this.httpVersion,
@@ -464,22 +479,27 @@ class HttpResponse {
   }
 
   factory HttpResponse.fromJson(Map<String, dynamic> json) {
-    List<List<String>> parseHeaders(dynamic jsonHeaders) {
-      return (jsonHeaders as List<dynamic>)
-          .map((header) => [header[0].toString(), header[1].toString()])
-          .toList();
-    }
+    try {
+      List<List<String>> parseHeaders(dynamic jsonHeaders) {
+        return (jsonHeaders as List<dynamic>)
+            .map((header) => [header[0].toString(), header[1].toString()])
+            .toList();
+      }
 
-    return HttpResponse(
-      httpVersion: json['http_version'],
-      statusCode: json['status_code'],
-      reason: json['reason'],
-      headers: parseHeaders(json['headers']),
-      contentLength: json['contentLength'],
-      contentHash: json['contentHash'],
-      timestampStart: json['timestamp_start'],
-      timestampEnd: json['timestamp_end'],
-    );
+      return HttpResponse(
+        httpVersion: json['http_version'],
+        statusCode: json['status_code'],
+        reason: json['reason'],
+        headers: parseHeaders(json['headers']),
+        contentLength: json['contentLength'],
+        contentHash: json['contentHash'],
+        timestampStart: json['timestamp_start'],
+        timestampEnd: json['timestamp_end'],
+      );
+    } catch (err) {
+      print("error parsing HttpResponse: $err");
+      throw FormatException('Invalid HttpResponse data: $err');
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -510,7 +530,8 @@ class HttpResponse {
   }
 
   /// Calculate response time in milliseconds
-  double get responseTimeMs => (timestampEnd - timestampStart) * 1000;
+  double? get responseTimeMs =>
+      timestampEnd != null ? (timestampEnd! - timestampStart) * 1000 : null;
 
   /// Check if the response is an error
   bool get isError => statusCode >= 400;
@@ -536,13 +557,18 @@ class WebSocketInfo {
   });
 
   factory WebSocketInfo.fromJson(Map<String, dynamic> json) {
-    return WebSocketInfo(
-      messagesMeta: json['messages_meta'],
-      closedByClient: json['closed_by_client'],
-      closeCode: json['close_code'],
-      closeReason: json['close_reason'],
-      timestampEnd: json['timestamp_end'],
-    );
+    try {
+      return WebSocketInfo(
+        messagesMeta: json['messages_meta'],
+        closedByClient: json['closed_by_client'],
+        closeCode: json['close_code'],
+        closeReason: json['close_reason'],
+        timestampEnd: json['timestamp_end'],
+      );
+    } catch (err) {
+      print("error parsing WebSocketInfo: $err");
+      throw FormatException('Invalid WebSocketInfo data: $err');
+    }
   }
 
   Map<String, dynamic> toJson() {

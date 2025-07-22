@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:mitmui/models/flow.dart';
+import 'package:mitmui/models/response_body.dart';
 import '../models/flow_store.dart';
 
 /// Base URL for mitmproxy web interface
@@ -44,6 +45,47 @@ class MitmproxyClient {
     } catch (e) {
       print('Error fetching flows: $e');
       return [];
+    }
+  }
+
+  Future<MitmBody> getMitmBody(String flowId, String type) async {
+    try {
+      final response = await _dio.get(
+        '/flows/$flowId/$type/content/Auto.json',
+        queryParameters: {'lines': 513},
+      );
+
+      if (response.statusCode == 200) {
+        print('Response body fetched successfully for flow $flowId');
+        return MitmBody.fromJson(response.data);
+      } else {
+        print('Failed to fetch response body: ${response.statusCode}');
+        throw Exception(
+          'Failed to fetch response body: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      print('Error fetching response body: $e');
+      throw Exception('Error fetching response body: $e');
+    }
+  }
+
+  Future<dynamic> getMitmContent(String flowId, String type) async {
+    try {
+      final response = await _dio.get('/flows/$flowId/$type/content.data');
+
+      if (response.statusCode == 200) {
+        print('Response body fetched successfully for flow $flowId');
+        return response.data;
+      } else {
+        print('Failed to fetch response body: ${response.statusCode}');
+        throw Exception(
+          'Failed to fetch response body: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      print('Error fetching response body: $e');
+      throw Exception('Error fetching response body: $e');
     }
   }
 
