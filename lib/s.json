@@ -1,0 +1,239 @@
+[
+  {
+    "type": "flows/update",
+    "payload": {
+      "flow": {
+        "id": "5b864419-6e41-4574-b78c-3c8ebceb4a9c",
+        "intercepted": false,
+        "is_replay": null,
+        "type": "http",
+        "modified": false,
+        "marked": "",
+        "comment": "",
+        "timestamp_created": 1753172361.03849,
+        "client_conn": {
+          "id": "d48fd663-dde5-42a0-bacd-29d18f7bbf57",
+          "peername": ["192.168.1.7", 43046],
+          "sockname": ["192.168.1.14", 8080],
+          "tls_established": true,
+          "cert": null,
+          "sni": "gateway.instagram.com",
+          "cipher": "TLS_AES_256_GCM_SHA384",
+          "alpn": "http/1.1",
+          "tls_version": "TLSv1.3",
+          "timestamp_start": 1753172360.862132,
+          "timestamp_tls_setup": 1753172361.036887,
+          "timestamp_end": null
+        },
+        "server_conn": {
+          "id": "e9edbd9c-1606-4b92-b723-974bd4a74fb3",
+          "peername": ["2a03:2880:f0a4:106:face:b00c:0:6206", 443, 0, 0],
+          "sockname": ["2401:4900:8fce:f5d6:21f9:3daa:a5f6:fb3a", 49881, 0, 0],
+          "address": ["2a03:2880:f0a4:106:face:b00c:0:6206", 443],
+          "tls_established": true,
+          "cert": {
+            "keyinfo": ["EC (secp256r1)", 256],
+            "sha256": "982b760601ec409eebba9b6d996168018ffa63e19baeb25ecd31f0abd41c3e0d",
+            "notbefore": 1745971200,
+            "notafter": 1753833599,
+            "serial": "10267941578913480389388808227858711935",
+            "subject": [
+              ["C", "US"],
+              ["ST", "California"],
+              ["L", "Menlo Park"],
+              ["O", "Meta Platforms, Inc."],
+              ["CN", "*.instagram.com"]
+            ],
+            "issuer": [
+              ["C", "US"],
+              ["O", "DigiCert Inc"],
+              ["CN", "DigiCert Global G2 TLS RSA SHA256 2020 CA1"]
+            ],
+            "altnames": [
+              "*.instagram.com",
+              "*.cdninstagram.com",
+              "*.igsonar.com",
+              "cdninstagram.com",
+              "igsonar.com",
+              "instagram.com"
+            ]
+          },
+          "sni": "gateway.instagram.com",
+          "cipher": "TLS_CHACHA20_POLY1305_SHA256",
+          "alpn": "http/1.1",
+          "tls_version": "TLSv1.3",
+          "timestamp_start": 1753172360.866461,
+          "timestamp_tcp_setup": 1753172360.911235,
+          "timestamp_tls_setup": 1753172361.00173,
+          "timestamp_end": null
+        },
+        "request": {
+          "method": "GET",
+          "scheme": "https",
+          "host": "2a03:2880:f0a4:106:face:b00c:0:6206",
+          "port": 443,
+          "path": "/ws/realtime?x-dgw-appid=1217981644879628&x-dgw-appversion=0&x-dgw-authtype=6:0&x-dgw-version=5&x-dgw-uuid=0&x-dgw-tier=prod&x-dgw-deviceid=5edf3afe-3307-4312-bd4f-c0cc28c74a76&x-dgw-app-stream-group=group1",
+          "http_version": "HTTP/1.1",
+          "headers": [
+            ["Host", "gateway.instagram.com"],
+            ["Connection", "Upgrade"],
+            ["Pragma", "no-cache"],
+            ["Cache-Control", "no-cache"],
+            [
+              "User-Agent",
+              "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36"
+            ],
+            ["Upgrade", "websocket"],
+            ["Origin", "https://www.instagram.com"],
+            ["Sec-WebSocket-Version", "13"],
+            ["Accept-Encoding", "gzip, deflate, br, zstd"],
+            ["Accept-Language", "en-US,en;q=0.9"],
+            [
+              "Cookie",
+              "ps_l=1; ps_n=1; mid=aGIv0wABAAHYGwKwp_N-ii76TCf1; ig_did=0CBC3C37-A441-45FF-9BD9-5DC6F247AEFE; ig_nrcb=1; datr=0C9iaHBSmnprpw89ObUiDQk5; csrftoken=KVOQ1TgMjBCmfNkzCnEDahKl1TaPXfth; ds_user_id=52985209347; dpr=2.8125; sessionid=52985209347%3AkSAvwRWJKWryBp%3A27%3AAYezR5e2yV-tkoo5ZHedG9MAeqETfq7AcXFzbixZJg; wd=383x754; rur=\"CCO\\05452985209347\\0541784708359:01fe46d3a9a3cb57cb55914521d5d78ba1d66808ba0b1f64c07b1a185eb8aefa9cb3fce2\""
+            ],
+            ["Sec-WebSocket-Key", "rNb3k+zwbPeGbn3UATQOGQ=="],
+            [
+              "Sec-WebSocket-Extensions",
+              "permessage-deflate; client_max_window_bits"
+            ]
+          ],
+          "contentLength": 0,
+          "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "timestamp_start": 1753172361.038202,
+          "timestamp_end": 1753172361.040401,
+          "pretty_host": "gateway.instagram.com"
+        },
+        "response": {
+          "http_version": "HTTP/1.1",
+          "status_code": 101,
+          "reason": "Switching Protocols",
+          "headers": [
+            ["Date", "Tue, 22 Jul 2025 08:19:21 GMT"],
+            ["Upgrade", "websocket"],
+            ["Sec-WebSocket-Accept", "tUquHe9P5doysSNz7cE/N1qlzMQ="],
+            ["Connection", "Upgrade"]
+          ],
+          "contentLength": 0,
+          "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "timestamp_start": 1753172361.224544,
+          "timestamp_end": 1753172361.225756
+        },
+        "websocket": {
+          "messages_meta": {
+            "contentLength": 491,
+            "count": 19,
+            "timestamp_last": 1753172424.063649
+          },
+          "closed_by_client": null,
+          "close_code": null,
+          "close_reason": null,
+          "timestamp_end": null
+        }
+      },
+      "matching_filters": {}
+    }
+  },
+  {
+    "type": "flows/add",
+    "payload": {
+      "flow": {
+        "id": "51b38eb3-3f18-44b8-bee6-a45ef5499a65",
+        "intercepted": false,
+        "is_replay": null,
+        "type": "http",
+        "modified": false,
+        "marked": "",
+        "comment": "",
+        "timestamp_created": 1753172510.414313,
+        "client_conn": {
+          "id": "3759d0cc-2297-4444-8984-3239222c0334",
+          "peername": ["192.168.1.7", 43030],
+          "sockname": ["192.168.1.14", 8080],
+          "tls_established": true,
+          "cert": null,
+          "sni": "instagram.fvga2-2.fna.fbcdn.net",
+          "cipher": "TLS_AES_256_GCM_SHA384",
+          "alpn": "h2",
+          "tls_version": "TLSv1.3",
+          "timestamp_start": 1753172359.0684311,
+          "timestamp_tls_setup": 1753172359.1912582,
+          "timestamp_end": null
+        },
+        "server_conn": {
+          "id": "5f360f82-3abc-4179-a664-692613c44bc6",
+          "peername": ["2404:a800:6:9b:face:b00c:3333:a3f", 443, 0, 0],
+          "sockname": ["2401:4900:8fce:f5d6:21f9:3daa:a5f6:fb3a", 49867, 0, 0],
+          "address": ["2404:a800:6:9b:face:b00c:3333:a3f", 443],
+          "tls_established": true,
+          "cert": {
+            "keyinfo": ["EC (secp256r1)", 256],
+            "sha256": "1f15d26d068a84d39ecad07c4725222439d27130991f9fcb501868be29356a82",
+            "notbefore": 1752278400,
+            "notafter": 1760140799,
+            "serial": "3045783827646120198858032247729760288",
+            "subject": [
+              ["C", "US"],
+              ["ST", "California"],
+              ["L", "Menlo Park"],
+              ["O", "Meta Platforms, Inc."],
+              ["CN", "*.fvga2-2.fna.fbcdn.net"]
+            ],
+            "issuer": [
+              ["C", "US"],
+              ["O", "DigiCert Inc"],
+              ["OU", "www.digicert.com"],
+              ["CN", "DigiCert SHA2 High Assurance Server CA"]
+            ],
+            "altnames": ["*.fvga2-2.fna.fbcdn.net", "fvga2-2.fna.fbcdn.net"]
+          },
+          "sni": "instagram.fvga2-2.fna.fbcdn.net",
+          "cipher": "TLS_CHACHA20_POLY1305_SHA256",
+          "alpn": "h2",
+          "tls_version": "TLSv1.3",
+          "timestamp_start": 1753172359.082685,
+          "timestamp_tcp_setup": 1753172359.11217,
+          "timestamp_tls_setup": 1753172359.163818,
+          "timestamp_end": null
+        },
+        "request": {
+          "method": "GET",
+          "scheme": "https",
+          "host": "2404:a800:6:9b:face:b00c:3333:a3f",
+          "port": 443,
+          "path": "/o1/v/t16/f2/m69/AQMAWeL48RHIrFC8d6YaqFKGxruQmJNGLvwDy2KGZ9wX7Kcklt9a0bS9mNPtz44GkPQWJAt4oCXbtEMt5nviEAIo.mp4?strext=1&_nc_cat=1&_nc_oc=AdkHKqrBbWpQVDFUaw8e3hUsHX8O4Ss6FhYlpEvf_Q7b2BoJlcxI7YkPcBkHRmIIQ22V1EEYT2_OR_3kwaDbPr-b&_nc_sid=9ca052&_nc_ht=instagram.fvga2-2.fna.fbcdn.net&_nc_ohc=rguJnxyu8joQ7kNvwGfLi2q&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNhcm91c2VsX2l0ZW0uZXhwZXJpbWVudGFsLUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6MTIxNzk4MTY0NDg3OTYyOCwiY2xpZW50X25hbWUiOiJpZyIsInhwdl9hc3NldF9pZCI6NzQ4MDE2ODgwOTM5Mzg0LCJ2aV91c2VjYXNlX2lkIjoxMDE0NiwiZHVyYXRpb25fcyI6NSwidXJsZ2VuX3NvdXJjZSI6Ind3dyJ9&ccb=17-1&_nc_zt=28&oh=00_AfRnzq-ZiyyYhxoSq_Vjp09TNJWDvptf2qafY28Ljay_Jw&oe=688512FC&bytestart=0&byteend=823",
+          "http_version": "HTTP/2.0",
+          "headers": [
+            ["sec-gpc", "1"],
+            ["sec-ch-ua-platform", "\"Android\""],
+            [
+              "user-agent",
+              "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36"
+            ],
+            [
+              "sec-ch-ua",
+              "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\""
+            ],
+            ["dnt", "1"],
+            ["sec-ch-ua-mobile", "?1"],
+            ["accept", "*/*"],
+            ["origin", "https://www.instagram.com"],
+            ["sec-fetch-site", "cross-site"],
+            ["sec-fetch-mode", "cors"],
+            ["sec-fetch-dest", "empty"],
+            ["referer", "https://www.instagram.com/"],
+            ["accept-encoding", "gzip, deflate, br, zstd"],
+            ["accept-language", "en-US,en;q=0.9"],
+            ["priority", "u=1, i"]
+          ],
+          "contentLength": null,
+          "contentHash": null,
+          "timestamp_start": 1753172510.4139578,
+          "timestamp_end": null,
+          "pretty_host": "instagram.fvga2-2.fna.fbcdn.net"
+        }
+      },
+      "matching_filters": {}
+    }
+  }
+]
