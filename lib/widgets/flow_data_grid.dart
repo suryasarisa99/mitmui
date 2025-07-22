@@ -7,14 +7,12 @@ import 'flow_data_source.dart';
 class FlowDataGrid extends StatefulWidget {
   final FlowDataSource dataSource;
   final Function(models.Flow) onFlowSelected;
-  final Function(int) onRowHighlighted;
   final DataGridController controller;
 
   const FlowDataGrid({
     super.key,
     required this.dataSource,
     required this.onFlowSelected,
-    required this.onRowHighlighted,
     required this.controller,
   });
 
@@ -26,7 +24,7 @@ class _FlowDataGridState extends State<FlowDataGrid> {
   // Store column widths
   final Map<String, double> _columnWidths = {
     'id': 50,
-    'url': 1100,
+    'url': 1180,
     'method': 80,
     'status': 60,
     'type': 150,
@@ -119,25 +117,25 @@ class _FlowDataGridState extends State<FlowDataGrid> {
           allowColumnsDragging: true,
           frozenColumnsCount: 1,
           selectionMode: SelectionMode.single,
-          onCellTap: (details) {
-            if (details.rowColumnIndex.rowIndex > 0) {
-              // Skip header row (index 0)
-              int rowIndex = details.rowColumnIndex.rowIndex - 1;
-              if (rowIndex < widget.dataSource.flows.length) {
-                final selectedFlow = widget.dataSource.flows[rowIndex];
-                widget.onFlowSelected(selectedFlow);
-              }
-            }
-          },
-          // Track currently highlighted row (by keyboard navigation)
+          // onCellTap: (details) {
+          //
+          //   int rowIndex = details.rowColumnIndex.rowIndex;
+          //   if (rowIndex < widget.dataSource.flows.length) {
+          //     final selectedFlow = widget.dataSource.flows[rowIndex];
+          //     widget.onFlowSelected(selectedFlow);
+          //   }
+          // },
+          // Track keyboard navigation and select row
           onCurrentCellActivated:
               (
                 RowColumnIndex newRowColumnIndex,
                 RowColumnIndex oldRowColumnIndex,
               ) {
-                if (newRowColumnIndex.rowIndex > 0) {
-                  // Skip header row (index 0)
-                  widget.onRowHighlighted(newRowColumnIndex.rowIndex - 1);
+                //  it only selects the rows, not header, so need to adjust index
+                int rowIndex = newRowColumnIndex.rowIndex;
+                if (rowIndex < widget.dataSource.flows.length) {
+                  final selectedFlow = widget.dataSource.flows[rowIndex];
+                  widget.onFlowSelected(selectedFlow);
                 }
               },
           onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {

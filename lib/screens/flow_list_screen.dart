@@ -29,9 +29,6 @@ class _FlowListScreenState extends State<FlowListScreen> {
   models.Flow? _selectedFlow;
   String? _selectedFlowId;
 
-  // Track the currently highlighted row index (by keyboard navigation)
-  int? _currentlyHighlightedRowIndex;
-
   @override
   void initState() {
     super.initState();
@@ -219,9 +216,6 @@ class _FlowListScreenState extends State<FlowListScreen> {
     // Set the selected flow ID in the data source using the public setter
     _flowDataSource.selectedFlowId = _selectedFlowId;
 
-    // Set the highlighted row index
-    _flowDataSource.setHighlightedRowIndex(_currentlyHighlightedRowIndex);
-
     return FlowDataGrid(
       dataSource: _flowDataSource,
       controller: _dataGridController,
@@ -231,14 +225,6 @@ class _FlowListScreenState extends State<FlowListScreen> {
           _selectedFlowId = flow.id;
           print(
             'Selected flow: ${_selectedFlow?.id} - ${_selectedFlow?.request.url}',
-          );
-        });
-      },
-      onRowHighlighted: (index) {
-        setState(() {
-          _currentlyHighlightedRowIndex = index;
-          print(
-            'Currently highlighted row index: $_currentlyHighlightedRowIndex',
           );
         });
       },

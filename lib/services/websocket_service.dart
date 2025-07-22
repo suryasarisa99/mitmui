@@ -2,14 +2,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:web_socket_channel/io.dart';
+import '../api/mitmproxy_client.dart';
 import '../models/flow_store.dart';
 
 class WebSocketService {
   static const String websocketUrl = 'ws://127.0.0.1:9090';
   static const String cookieHeader =
-      ' mitmproxy-auth-8081="2|1:0|10:1753187602|19:mitmproxy-auth-8081|4:eQ==|89ed72c87fc0c9a43e0e6b75c54347899e3842fa6c075c13a7f04da4c43d3bc5"; _xsrf=2|fcf806bb|e5372d26882fc6c2c6b6c23742626c5b|1753187602';
+      '_xsrf=2|86f6d839|79a267d98bb715d1e7cfaeedbe13690c|1753192344; mitmproxy-auth-8081="2|1:0|10:1753192428|19:mitmproxy-auth-8081|4:eQ==|706d3645a40d02ac50a4b30c8ddf57a03661b40a64e2189c2ec70cf6990bed26"';
 
   IOWebSocketChannel? _channel;
   WebSocket? _webSocket;
@@ -26,6 +26,9 @@ class WebSocketService {
   bool get isConnected => _isConnected;
 
   WebSocketService(this._flowStore);
+
+  // MitmproxyClient instance for API requests
+  final MitmproxyClient _apiClient = MitmproxyClient();
 
   Future<void> connect() async {
     if (_isConnected) {
@@ -57,6 +60,9 @@ class WebSocketService {
         onError: _handleError,
         onDone: _handleDisconnection,
       );
+
+      // Now fetch existing flows after connection is established
+      await fetchExistingFlows();
     } catch (e) {
       _isConnected = false;
       _connectionStatusController.add(
@@ -147,6 +153,35 @@ class WebSocketService {
   void dispose() {
     disconnect();
     _connectionStatusController.close();
+  }
+
+  /// Fetches existing flows from mitmproxy API
+  /// This is called automatically when connecting,
+  /// but can also be called manually to refresh flows
+  Future<void> fetchExistingFlows() async {
+    // Try to fetch flows even if not connected to WebSocket
+    // This allows manual refresh
+
+    try {
+      print('Fetching existing flows from mitmproxy API');
+
+      // Use the API client to load flows into the store
+      await _apiClient.loadFlowsIntoStore(_flowStore);
+
+      // Get the flow count after loading
+      final flowCount = _flowStore.count;
+
+      // Notify that we've loaded existing flows
+      _connectionStatusController.add(
+        ConnectionStatus(
+          isConnected: true,
+          message: 'Loaded $flowCount existing flows',
+          hasNewData: true,
+        ),
+      );
+    } catch (e) {
+      print('Error fetching existing flows: $e');
+    }
   }
 }
 

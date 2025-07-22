@@ -32,6 +32,14 @@ class FlowStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  void addMultiple(List<models.Flow> flows) {
+    for (final flow in flows) {
+      _flows[flow.id] = flow;
+    }
+    _applyFilter();
+    notifyListeners();
+  }
+
   /// Handle a WebSocket message from mitmproxy
   void handleMessage(String message) {
     final flow = models.Flow.parseFlowMessage(message);

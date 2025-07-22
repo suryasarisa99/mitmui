@@ -8,7 +8,6 @@ class FlowDataSource extends DataGridSource {
   List<models.Flow> _flows = [];
   List<DataGridRow> _flowRows = [];
   String? _selectedFlowId;
-  int? _currentlyHighlightedRowIndex;
 
   // Getter to expose the flows list
   List<models.Flow> get flows => _flows;
@@ -26,11 +25,6 @@ class FlowDataSource extends DataGridSource {
   void updateFlows(List<models.Flow> flows) {
     _flows = flows;
     _flowRows = _getFlowRows();
-    notifyListeners();
-  }
-
-  void setHighlightedRowIndex(int? index) {
-    _currentlyHighlightedRowIndex = index;
     notifyListeners();
   }
 
@@ -173,19 +167,11 @@ class FlowDataSource extends DataGridSource {
     // Check if this row is selected by the user
     final isSelected = flowId != null && flowId == _selectedFlowId;
 
-    // Check if this row is highlighted by keyboard navigation
-    final isHighlighted =
-        rowIndex != null && rowIndex == _currentlyHighlightedRowIndex;
-
-    // Determine the row color based on selection and highlighting states
+    // Determine the row color based on selection
     Color? rowColor;
     if (isSelected) {
       // Selected row gets a darker color
-      rowColor = const Color.fromARGB(255, 39, 39, 42);
-    }
-    if (isHighlighted) {
-      // Highlighted row (keyboard navigation) gets a slightly different color
-      rowColor = const Color.fromARGB(255, 85, 85, 85);
+      rowColor = const Color(0xffD13639);
     }
 
     return DataGridRowAdapter(
