@@ -73,7 +73,6 @@ class _FlowDataGridState extends State<FlowDataGrid> {
           // Show context menu on right-click
           final RenderBox overlay =
               Overlay.of(context).context.findRenderObject() as RenderBox;
-
           showMenu(
             context: context,
             position: RelativeRect.fromRect(
@@ -116,7 +115,7 @@ class _FlowDataGridState extends State<FlowDataGrid> {
           showHorizontalScrollbar: false,
           allowColumnsDragging: true,
           frozenColumnsCount: 1,
-          selectionMode: SelectionMode.single,
+          selectionMode: SelectionMode.multiple,
           // Track keyboard navigation and select row
           onCurrentCellActivated:
               (

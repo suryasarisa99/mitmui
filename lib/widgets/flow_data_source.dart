@@ -148,6 +148,63 @@ class FlowDataSource extends DataGridSource {
   @override
   List<DataGridRow> get rows => _flowRows;
 
+  // Override the sorting behavior to handle numeric columns correctly
+  @override
+  int compare(DataGridRow? a, DataGridRow? b, SortColumnDetails sortColumn) {
+    // Get the column name that's being sorted
+    final String columnName = sortColumn.name;
+
+    // Handle numeric columns specially
+    if (columnName == 'id' ||
+        columnName == 'status' ||
+        columnName == 'duration' ||
+        columnName == 'reqLen' ||
+        columnName == 'resLen') {
+      // Get the cell values
+      final aCellValue = getCellValue(a!, columnName);
+      final bCellValue = getCellValue(b!, columnName);
+      print('Comparing $columnName: $aCellValue vs $bCellValue');
+
+      // Parse as integers if possible
+      late int? aValue;
+      late int? bValue;
+      if (aCellValue is Text) {
+        print(
+          "Parsing Text cell values for $columnName, ${int.tryParse(aCellValue.data ?? '')}",
+        );
+        aValue = int.tryParse(aCellValue.data ?? '');
+        bValue = int.tryParse(bCellValue.data ?? '');
+      } else {
+        aValue = int.tryParse(aCellValue);
+        bValue = int.tryParse(bCellValue);
+      }
+
+      // If both values are valid integers, compare them numerically
+      if (aValue != null && bValue != null) {
+        return sortColumn.sortDirection == DataGridSortDirection.ascending
+            ? aValue.compareTo(bValue)
+            : bValue.compareTo(aValue);
+      } else {
+        // may have null or parse fails
+        return sortColumn.sortDirection == DataGridSortDirection.ascending
+            ? aCellValue.toString().compareTo(bCellValue.toString())
+            : bCellValue.toString().compareTo(aCellValue.toString());
+      }
+    } else {
+      return super.compare(a, b, sortColumn);
+    }
+    // For all other columns or if numeric parsing failed, use default behavior
+  }
+
+  // Helper method to get a cell's value by column name
+  dynamic getCellValue(DataGridRow row, String columnName) {
+    final cell = row.getCells().firstWhere(
+      (cell) => cell.columnName == columnName,
+      orElse: () => DataGridCell<String>(columnName: columnName, value: ''),
+    );
+    return cell.value;
+  }
+
   @override
   DataGridRowAdapter buildRow(DataGridRow row) {
     // Get the flow ID from this row to check if it's selected
