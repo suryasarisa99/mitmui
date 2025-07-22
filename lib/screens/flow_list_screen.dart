@@ -1,5 +1,4 @@
 // flow_list_screen.dart
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_resizable_container/flutter_resizable_container.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +7,9 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import '../models/flow.dart' as models;
 import '../models/flow_store.dart';
 import '../services/websocket_service.dart';
+import '../widgets/flow_data_grid.dart';
+import '../widgets/flow_data_source.dart';
+import '../widgets/flow_detail_panels.dart';
 
 class FlowListScreen extends StatefulWidget {
   const FlowListScreen({super.key});
@@ -18,7 +20,7 @@ class FlowListScreen extends StatefulWidget {
 
 class _FlowListScreenState extends State<FlowListScreen> {
   // Single data source for all flows
-  late _FlowDataSource _flowDataSource;
+  late FlowDataSource _flowDataSource;
 
   // Controller for the data grid to track selection and highlighting
   final DataGridController _dataGridController = DataGridController();
@@ -34,7 +36,7 @@ class _FlowListScreenState extends State<FlowListScreen> {
   void initState() {
     super.initState();
     // Initialize with empty data - will be updated by the Consumer
-    _flowDataSource = _FlowDataSource([]);
+    _flowDataSource = FlowDataSource([]);
   }
 
   @override
@@ -213,624 +215,43 @@ class _FlowListScreenState extends State<FlowListScreen> {
   Widget _buildDataTable(List<models.Flow> flows) {
     // Update the data source with the flows
     _flowDataSource.updateFlows(flows);
-    _flowDataSource._selectedFlowId = _selectedFlowId;
+
+    // Set the selected flow ID in the data source using the public setter
+    _flowDataSource.selectedFlowId = _selectedFlowId;
+
+    // Set the highlighted row index
     _flowDataSource.setHighlightedRowIndex(_currentlyHighlightedRowIndex);
-    return _buildSyncfusionDataGrid(_flowDataSource);
-  }
 
-  // Store column widths
-  final Map<String, double> _columnWidths = {
-    'id': 50,
-    'url': 1100,
-    'method': 80,
-    'status': 60,
-    'type': 150,
-    'time': 100,
-    'duration': 100,
-    'reqLen': 100,
-    'resLen': 100,
-  };
-
-  // Reset all column widths to their default values
-  void _resetColumnWidths() {
-    setState(() {
-      _columnWidths['url'] = 1100;
-      _columnWidths['method'] = 85;
-      _columnWidths['status'] = 65;
-      _columnWidths['type'] = 150;
-      _columnWidths['time'] = 100;
-      _columnWidths['duration'] = 90;
-      _columnWidths['reqLen'] = 90;
-      _columnWidths['resLen'] = 90;
-    });
-  }
-
-  Widget _buildSyncfusionDataGrid(_FlowDataSource dataSource) {
-    final headerCells = [
-      (title: "Id", key: 'id'),
-      (title: "URL", key: 'url'),
-      (title: "Method", key: 'method'),
-      (title: "Status", key: 'status'),
-      (title: "Type", key: 'type'),
-      (title: "Time", key: 'time'),
-      (title: "Duration", key: 'duration'),
-      (title: "Req", key: 'reqLen'),
-      (title: "Res", key: 'resLen'),
-    ];
-    return Scrollbar(
-      thickness: 8,
-      radius: const Radius.circular(8.0),
-      child: GestureDetector(
-        onSecondaryTapDown: (details) {
-          // Show context menu on right-click
-          final RenderBox overlay =
-              Overlay.of(context).context.findRenderObject() as RenderBox;
-
-          showMenu(
-            context: context,
-            position: RelativeRect.fromRect(
-              details.globalPosition & const Size(1, 1),
-              Offset.zero & overlay.size,
-            ),
-            items: [
-              PopupMenuItem(
-                value: 'reset',
-                child: Row(
-                  children: const [
-                    Icon(Icons.restore),
-                    SizedBox(width: 8),
-                    Text('Reset Column Widths'),
-                  ],
-                ),
-              ),
-            ],
-          ).then((value) {
-            if (value == 'reset') {
-              _resetColumnWidths();
-            }
-          });
-        },
-        child: SfDataGrid(
-          source: dataSource,
-          allowColumnsResizing: true,
-          allowSorting: true,
-          allowMultiColumnSorting: true,
-          allowTriStateSorting: true,
-          isScrollbarAlwaysShown: true,
-          columnResizeMode: ColumnResizeMode.onResize,
-          columnWidthMode: ColumnWidthMode.fill, // Fill available space
-          showColumnHeaderIconOnHover: true, // Show resize indicator on hover
-          highlightRowOnHover: true, // Better UX for desktop
-          navigationMode: GridNavigationMode.cell, // Enable keyboard navigation
-          rowHeight: 33,
-          headerRowHeight: 30,
-          showHorizontalScrollbar: false,
-          allowColumnsDragging: true,
-          frozenColumnsCount: 1,
-          selectionMode: SelectionMode.single,
-          onCellTap: (details) {
-            if (details.rowColumnIndex.rowIndex > 0) {
-              // Skip header row (index 0)
-              int rowIndex = details.rowColumnIndex.rowIndex - 1;
-              if (rowIndex < dataSource._flows.length) {
-                setState(() {
-                  _selectedFlow = dataSource._flows[rowIndex];
-                  _selectedFlowId = _selectedFlow?.id;
-                  print(
-                    'Selected flow: ${_selectedFlow?.id} - ${_selectedFlow?.request.url}',
-                  );
-                });
-              }
-            }
-          },
-          // Track currently highlighted row (by keyboard navigation)
-          onCurrentCellActivated:
-              (
-                RowColumnIndex newRowColumnIndex,
-                RowColumnIndex oldRowColumnIndex,
-              ) {
-                // Skip header row (index 0)
-                setState(() {
-                  _currentlyHighlightedRowIndex = newRowColumnIndex.rowIndex;
-                  print(
-                    'Currently highlighted row index: $_currentlyHighlightedRowIndex',
-                  );
-                });
-              },
-          onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
-            // Don't allow columns to be sized too small
-            if (details.width < 60) {
-              return false;
-            }
-
-            setState(() {
-              // Update the column width in our map
-              _columnWidths[details.column.columnName] = details.width;
-              print(
-                "Column ${details.column.columnName} resized to ${details.width}",
-              );
-            });
-            return true;
-          },
-          gridLinesVisibility: GridLinesVisibility.both,
-          headerGridLinesVisibility: GridLinesVisibility.both,
-          columns: <GridColumn>[
-            for (final header in headerCells)
-              GridColumn(
-                columnName: header.key,
-                width: _columnWidths[header.key]!,
-                label: Container(
-                  padding: EdgeInsets.only(left: header.key == 'url' ? 8.0 : 0),
-                  alignment: header.key == 'url'
-                      ? Alignment.centerLeft
-                      : Alignment.center,
-                  child: Text(
-                    header.title,
-                    style: const TextStyle(fontWeight: FontWeight.w400),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
+    return FlowDataGrid(
+      dataSource: _flowDataSource,
+      controller: _dataGridController,
+      onFlowSelected: (flow) {
+        setState(() {
+          _selectedFlow = flow;
+          _selectedFlowId = flow.id;
+          print(
+            'Selected flow: ${_selectedFlow?.id} - ${_selectedFlow?.request.url}',
+          );
+        });
+      },
+      onRowHighlighted: (index) {
+        setState(() {
+          _currentlyHighlightedRowIndex = index;
+          print(
+            'Currently highlighted row index: $_currentlyHighlightedRowIndex',
+          );
+        });
+      },
     );
   }
 
   // Build the request panel with details from the selected flow
   Widget _buildRequestPanel() {
-    if (_selectedFlow == null) {
-      return const Center(child: Text('Select a flow to view details'));
-    }
-
-    final flow = _selectedFlow!;
-    final request = flow.request;
-
-    return Container(
-      color: const Color.fromARGB(255, 25, 26, 32),
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Request summary title
-          Text(
-            'Request',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: _flowDataSource._getMethodColor(request.method),
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Request URL
-          Text(
-            'URL: ${request.url}',
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 8),
-
-          // Request method and HTTP version
-          Text(
-            'Method: ${request.method} (HTTP/${request.httpVersion})',
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 8),
-
-          // Content length if available
-          if (request.contentLength != null)
-            Text(
-              'Content Length: ${_flowDataSource._formatBytes(request.contentLength!)}',
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
-          const SizedBox(height: 16),
-
-          // Headers section
-          const Text(
-            'Headers:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-
-          // Headers list
-          Expanded(
-            child: ListView.builder(
-              itemCount: request.headers.length,
-              itemBuilder: (context, index) {
-                final header = request.headers[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2.0),
-                  child: RichText(
-                    text: TextSpan(
-                      style: const TextStyle(fontSize: 14),
-                      children: [
-                        TextSpan(
-                          text: '${header[0]}: ',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Color.fromARGB(255, 174, 185, 252),
-                          ),
-                        ),
-                        TextSpan(
-                          text: header[1],
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
+    return RequestPanel(flow: _selectedFlow, dataSource: _flowDataSource);
   }
 
   // Build the response panel with details from the selected flow
   Widget _buildResponsePanel() {
-    if (_selectedFlow == null) {
-      return const Center(child: Text('Select a flow to view details'));
-    }
-
-    final flow = _selectedFlow!;
-    final response = flow.response;
-
-    if (response == null) {
-      return const Center(
-        child: Text(
-          'No response available',
-          style: TextStyle(color: Colors.orange),
-        ),
-      );
-    }
-
-    final statusColor = _flowDataSource._getStatusColor(response.statusCode);
-
-    return Container(
-      color: const Color.fromARGB(255, 25, 26, 32),
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Response summary title with status code
-          Row(
-            children: [
-              const Text(
-                'Response',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  '${response.statusCode} ${response.reason}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: statusColor,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          // HTTP version
-          Text(
-            'HTTP Version: ${response.httpVersion}',
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 8),
-
-          // Content type if available
-          if (response.contentType != null)
-            Text(
-              'Content Type: ${response.contentType}',
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
-          const SizedBox(height: 8),
-
-          // Content length if available
-          if (response.contentLength != null)
-            Text(
-              'Content Length: ${_flowDataSource._formatBytes(response.contentLength!)}',
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
-          const SizedBox(height: 16),
-
-          // Headers section
-          const Text(
-            'Headers:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-
-          // Headers list
-          Expanded(
-            child: ListView.builder(
-              itemCount: response.headers.length,
-              itemBuilder: (context, index) {
-                final header = response.headers[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2.0),
-                  child: RichText(
-                    text: TextSpan(
-                      style: const TextStyle(fontSize: 14),
-                      children: [
-                        TextSpan(
-                          text: '${header[0]}: ',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Color.fromARGB(255, 174, 185, 252),
-                          ),
-                        ),
-                        TextSpan(
-                          text: header[1],
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FlowDataSource extends DataGridSource {
-  List<models.Flow> _flows = [];
-  List<DataGridRow> _flowRows = [];
-  String? _selectedFlowId;
-  int? _currentlyHighlightedRowIndex;
-
-  _FlowDataSource(this._flows) {
-    _flowRows = _getFlowRows();
-  }
-
-  void updateFlows(List<models.Flow> flows) {
-    _flows = flows;
-    _flowRows = _getFlowRows();
-    notifyListeners();
-  }
-
-  void setHighlightedRowIndex(int? index) {
-    _currentlyHighlightedRowIndex = index;
-    notifyListeners();
-  }
-
-  List<DataGridRow> _getFlowRows() {
-    return _flows.mapIndexed<DataGridRow>((i, flow) {
-      final hasResponse = flow.response != null;
-      final methodColor = _getMethodColor(flow.request.method);
-      final statusColor = _getStatusColor(
-        hasResponse ? flow.response!.statusCode : null,
-      );
-
-      return DataGridRow(
-        cells: [
-          // ID Cell
-          DataGridCell<String>(columnName: 'id', value: i.toString()),
-
-          // URL Cell with styled hostname and path
-          DataGridCell<Widget>(
-            columnName: 'url',
-            value: RichText(
-              overflow: TextOverflow.ellipsis,
-              text: TextSpan(
-                style: const TextStyle(fontSize: 14, color: Colors.black87),
-                children: [
-                  // Hostname part styled differently
-                  TextSpan(
-                    text: flow.request.prettyHost ?? flow.request.host,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Color.fromARGB(255, 174, 185, 252),
-                    ),
-                  ),
-                  // Path part
-                  TextSpan(
-                    text: flow.request.path,
-                    style: const TextStyle(
-                      color: Color.fromARGB(221, 159, 173, 183),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Method Cell
-          DataGridCell<Widget>(
-            columnName: 'method',
-            value: Container(
-              // padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-              // decoration: BoxDecoration(
-              //   color: methodColor.withOpacity(0.2),
-              //   borderRadius: BorderRadius.circular(4),
-              // ),
-              child: Text(
-                flow.request.method,
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 12,
-                  color: methodColor,
-                ),
-              ),
-            ),
-          ),
-
-          // Status Cell
-          DataGridCell<Widget>(
-            columnName: 'status',
-            value: flow.isWebSocket
-                ? const Text('WS')
-                : hasResponse
-                ? Text(
-                    flow.response!.statusCode.toString(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: statusColor,
-                    ),
-                  )
-                : const Text('-'),
-          ),
-
-          // Type Cell
-          DataGridCell<String>(
-            columnName: 'type',
-            value: flow.isWebSocket
-                ? 'WebSocket'
-                : flow.response?.contentType?.split(';').first ?? '-',
-          ),
-
-          // Time Cell
-          DataGridCell<String>(
-            columnName: 'time',
-            value: flow.createdDateTime.toLocal().toString().substring(11, 19),
-          ),
-
-          // Duration Cell - time between request and response in ms
-          DataGridCell<String>(
-            columnName: 'duration',
-            value:
-                hasResponse &&
-                    flow.response?.timestampEnd != null &&
-                    flow.request.timestampStart != null
-                ? '${((flow.response!.timestampEnd - flow.request.timestampStart!) * 1000).round()} ms'
-                : '-',
-          ),
-
-          // Request Length Cell
-          DataGridCell<String>(
-            columnName: 'reqLen',
-            value: flow.request.contentLength != null
-                ? _formatBytes(flow.request.contentLength!)
-                : '-',
-          ),
-
-          // Response Length Cell
-          DataGridCell<String>(
-            columnName: 'resLen',
-            value: hasResponse && flow.response?.contentLength != null
-                ? _formatBytes(flow.response!.contentLength!)
-                : '-',
-          ),
-        ],
-      );
-    }).toList();
-  }
-
-  @override
-  List<DataGridRow> get rows => _flowRows;
-
-  @override
-  DataGridRowAdapter buildRow(DataGridRow row) {
-    // Get the flow ID from this row to check if it's selected
-    String? flowId;
-    int? rowIndex;
-
-    var idCell = row.getCells().firstWhere(
-      (cell) => cell.columnName == 'id',
-      orElse: () => DataGridCell<String>(columnName: 'id', value: ''),
-    );
-
-    rowIndex = int.tryParse(idCell.value);
-    if (rowIndex != null && rowIndex >= 0 && rowIndex < _flows.length) {
-      flowId = _flows[rowIndex].id;
-    }
-
-    // Check if this row is selected by the user
-    final isSelected = flowId != null && flowId == _selectedFlowId;
-
-    // Check if this row is highlighted by keyboard navigation
-    final isHighlighted =
-        rowIndex != null && rowIndex == _currentlyHighlightedRowIndex;
-
-    // Determine the row color based on selection and highlighting states
-    Color? rowColor;
-    if (isSelected) {
-      // Selected row gets a darker color
-      rowColor = const Color.fromARGB(255, 39, 39, 42);
-    }
-    if (isHighlighted) {
-      // Highlighted row (keyboard navigation) gets a slightly different color
-      rowColor = const Color.fromARGB(255, 85, 85, 85);
-    }
-
-    return DataGridRowAdapter(
-      color: rowColor,
-      cells: row.getCells().map<Widget>((dataGridCell) {
-        // For cells that contain a Widget directly
-        if (dataGridCell.value is Widget) {
-          return Container(
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.all(8.0),
-            child: dataGridCell.value as Widget,
-          );
-        }
-
-        // For text cells (strings)
-        return Container(
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            dataGridCell.value.toString(),
-            overflow: TextOverflow.ellipsis,
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Color _getMethodColor(String method) {
-    switch (method) {
-      case 'GET':
-        return Colors.blue;
-      case 'POST':
-        return Colors.green;
-      case 'PUT':
-        return Colors.orange;
-      case 'DELETE':
-        return Colors.red;
-      case 'PATCH':
-        return Colors.purple;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Color _getStatusColor(int? statusCode) {
-    if (statusCode == null) return Colors.grey;
-
-    if (statusCode >= 200 && statusCode < 300) {
-      return Colors.green;
-    } else if (statusCode >= 300 && statusCode < 400) {
-      return Colors.blue;
-    } else if (statusCode >= 400 && statusCode < 500) {
-      return Colors.orange;
-    } else if (statusCode >= 500) {
-      return Colors.red;
-    }
-    return Colors.grey;
-  }
-
-  /// Format bytes into a human-readable string (KB, MB, etc.)
-  String _formatBytes(int bytes) {
-    if (bytes < 1024) {
-      return '$bytes B';
-    } else if (bytes < 1024 * 1024) {
-      return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    } else if (bytes < 1024 * 1024 * 1024) {
-      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-    } else {
-      return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
-    }
+    return ResponsePanel(flow: _selectedFlow, dataSource: _flowDataSource);
   }
 }
