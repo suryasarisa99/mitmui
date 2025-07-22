@@ -55,7 +55,7 @@ class _FlowDataGridState extends State<FlowDataGrid> {
 
   Widget _buildSyncfusionDataGrid() {
     final headerCells = [
-      (title: "Id", key: 'id'),
+      (title: "ID", key: 'id'),
       (title: "URL", key: 'url'),
       (title: "Method", key: 'method'),
       (title: "Status", key: 'status'),
@@ -111,11 +111,14 @@ class _FlowDataGridState extends State<FlowDataGrid> {
           highlightRowOnHover: true, // Better UX for desktop
           navigationMode: GridNavigationMode.cell, // Enable keyboard navigation
           rowHeight: 36,
-          headerRowHeight: 30,
+          headerRowHeight: 26,
           showHorizontalScrollbar: false,
           allowColumnsDragging: true,
           frozenColumnsCount: 1,
           selectionMode: SelectionMode.multiple,
+          gridLinesVisibility: GridLinesVisibility.none,
+          headerGridLinesVisibility: GridLinesVisibility.both,
+
           // Track keyboard navigation and select row
           onCurrentCellActivated:
               (
@@ -171,8 +174,7 @@ class _FlowDataGridState extends State<FlowDataGrid> {
             });
             return true;
           },
-          gridLinesVisibility: GridLinesVisibility.none,
-          headerGridLinesVisibility: GridLinesVisibility.both,
+
           columns: <GridColumn>[
             for (final header in headerCells)
               GridColumn(
@@ -185,7 +187,11 @@ class _FlowDataGridState extends State<FlowDataGrid> {
                       : Alignment.center,
                   child: Text(
                     header.title,
-                    style: const TextStyle(fontWeight: FontWeight.w400),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 11,
+                      color: Color(0xFFEEEEEE),
+                    ),
                   ),
                 ),
               ),
