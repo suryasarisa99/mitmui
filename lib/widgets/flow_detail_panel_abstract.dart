@@ -33,8 +33,8 @@ abstract class DetailsPanelState extends State<DetailsPanel>
 
     // Initialize futures for body and data
     final type = title.toLowerCase();
-    mitmBodyFuture = MitmproxyClient().getMitmBody(widget.flow!.id, type);
-    mitmDataFuture = MitmproxyClient().getMitmContent(widget.flow!.id, type);
+    mitmBodyFuture = MitmproxyClient.getMitmBody(widget.flow!.id, type);
+    mitmDataFuture = MitmproxyClient.getMitmContent(widget.flow!.id, type);
   }
 
   Widget buildHeader() {

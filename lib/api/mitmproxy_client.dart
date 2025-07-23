@@ -1,4 +1,5 @@
-import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:mitmui/models/flow.dart';
 import 'package:mitmui/models/response_body.dart';
@@ -6,32 +7,96 @@ import '../models/flow_store.dart';
 
 /// Base URL for mitmproxy web interface
 const String baseUrl = 'http://127.0.0.1:9090';
-
-/// Cookie header for authentication
-const String cookieHeader =
-    '_xsrf=2|86f6d839|79a267d98bb715d1e7cfaeedbe13690c|1753192344; mitmproxy-auth-8081="2|1:0|10:1753192428|19:mitmproxy-auth-8081|4:eQ==|706d3645a40d02ac50a4b30c8ddf57a03661b40a64e2189c2ec70cf6990bed26"';
+const int port = 9090;
 
 class MitmproxyClient {
-  final Dio _dio;
+  // Use Dio's cookie manager to automatically handle cookies
+  static final Dio _dio = _createDioInstance();
+  static const String _baseUrl = 'http://127.0.0.1:$port';
+  static const String websocketUrl = 'ws://127.0.0.1:$port';
+  static String cookies = '';
+  // Private constructor for singleton
+  MitmproxyClient._internal();
 
-  /// Constructor that initializes the HTTP client
-  MitmproxyClient() : _dio = Dio() {
-    // Configure default options
-    _dio.options.headers = {
-      'Accept': '*/*',
-      'Accept-Language': 'en-US,en;q=0.9',
-      'Connection': 'keep-alive',
-      'Cookie': cookieHeader,
-      'Referer': baseUrl,
-      'User-Agent': 'Flutter/MITMUI',
-    };
-    _dio.options.baseUrl = baseUrl;
+  // Create Dio instance with cookie jar
+  static Dio _createDioInstance() {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: _baseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'User-Agent': 'Flutter/MITMUI',
+        },
+      ),
+    );
+
+    // Set up interceptors to log requests and responses
+    // dio.interceptors.add(
+    //   LogInterceptor(
+    //     request: true,
+    //     requestHeader: true,
+    //     requestBody: false,
+    //     responseHeader: true,
+    //     responseBody: false,
+    //   ),
+    // );
+    // dio.interceptors.add(
+    //   InterceptorsWrapper(
+    //     onResponse: (response, handler) {
+    //       final cookies = response.headers['set-cookie'];
+    //       if (cookies != null && cookies.isNotEmpty) {
+    //         print('Received cookies: $cookies');
+    //       }
+    //       return handler.next(response);
+    //     },
+    //   ),
+    // );
+    return dio;
+  }
+
+  static Future<void> startMitm() async {
+    // start mitmproxy with a random password
+    final password = generateRandomString(32);
+    print("password: $password");
+    final res = await Process.start('mitmweb', [
+      '--web-port',
+      port.toString(),
+      '--no-web-open-browser',
+      '--set',
+      'web_password=$password',
+    ]);
+    // get cookie, by sending password as token
+    await Future.delayed(const Duration(seconds: 2));
+    _dio
+        .get('/?token=$password')
+        .then((response) {
+          final newCookies = response.headers['set-cookie']?.join('; ') ?? '';
+          updateCookies(newCookies);
+          print('Cookies set: $cookies');
+        })
+        .catchError((error) {
+          print('Error setting cookies: $error');
+        });
+    print('MITM Proxy started: $stdout');
+  }
+
+  static String generateRandomString(int length) {
+    const characters =
+        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final random = Random();
+    return List.generate(
+      length,
+      (_) => characters[random.nextInt(characters.length)],
+    ).join();
   }
 
   /// Fetches all existing flows from mitmproxy
-  Future<List<MitmFlow>> getFlows() async {
+  static Future<List<MitmFlow>> getFlows() async {
     try {
-      print('Fetching flows from $baseUrl/flows');
+      print('Fetching flows from $_baseUrl/flows');
       final response = await _dio.get('/flows');
 
       if (response.statusCode == 200) {
@@ -48,7 +113,7 @@ class MitmproxyClient {
     }
   }
 
-  Future<MitmBody> getMitmBody(String flowId, String type) async {
+  static Future<MitmBody> getMitmBody(String flowId, String type) async {
     try {
       final response = await _dio.get(
         '/flows/$flowId/$type/content/Auto.json',
@@ -70,7 +135,7 @@ class MitmproxyClient {
     }
   }
 
-  Future<String> getMitmContent(String flowId, String type) async {
+  static Future<String> getMitmContent(String flowId, String type) async {
     try {
       final response = await _dio.get('/flows/$flowId/$type/content.data');
 
@@ -90,7 +155,7 @@ class MitmproxyClient {
   }
 
   /// Fetches all existing flows and adds them to the FlowStore
-  Future<void> loadFlowsIntoStore(FlowStore flowStore) async {
+  static Future<void> loadFlowsIntoStore(FlowStore flowStore) async {
     try {
       final flows = await getFlows();
       flowStore.addMultiple(flows);
@@ -98,5 +163,12 @@ class MitmproxyClient {
     } catch (e) {
       print('Error loading flows into store: $e');
     }
+  }
+
+  /// Update cookies manually if needed
+  static void updateCookies(String newCookies) {
+    cookies = newCookies;
+    _dio.options.headers['Cookie'] = newCookies;
+    print('Updated cookies, newCookies: $newCookies ');
   }
 }

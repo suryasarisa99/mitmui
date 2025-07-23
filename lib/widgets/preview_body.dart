@@ -21,6 +21,7 @@ class PreviewBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('Building PreviewBody for flowId: $flowId');
     final hasContent =
         response.contentLength != null && response.contentLength! > 0;
 
@@ -64,7 +65,7 @@ class PreviewBody extends StatelessWidget {
             return Image.network(
               imageUrl,
               fit: BoxFit.contain,
-              headers: {'Cookie': cookieHeader, 'Referer': baseUrl},
+              headers: {'Cookie': MitmproxyClient.cookies, 'Referer': baseUrl},
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
                 return Center(

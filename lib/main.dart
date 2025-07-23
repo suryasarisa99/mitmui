@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:provider/provider.dart';
 import 'package:window_size/window_size.dart';
 import 'screens/flow_list_screen.dart';
@@ -10,28 +11,26 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Set minimum window size for desktop platforms
-  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    setWindowTitle('MITMproxy UI');
-    setWindowMinSize(const Size(1200, 800));
-    setWindowMaxSize(Size.infinite);
+  setWindowTitle('MITMproxy UI');
+  setWindowMinSize(const Size(1200, 800));
+  setWindowMaxSize(Size.infinite);
 
-    // Default window size
-    getCurrentScreen().then((screen) {
-      if (screen != null) {
-        final screenFrame = screen.visibleFrame;
-        final width = screenFrame.width * 0.8;
-        final height = screenFrame.height * 0.8;
-        setWindowFrame(
-          Rect.fromCenter(
-            center: Offset(screenFrame.center.dx, screenFrame.center.dy),
-            width: width,
-            height: height,
-          ),
-        );
-      }
-    });
-  }
-
+  // Default window size
+  getCurrentScreen().then((screen) {
+    if (screen != null) {
+      final screenFrame = screen.visibleFrame;
+      final width = screenFrame.width * 0.8;
+      final height = screenFrame.height * 0.8;
+      setWindowFrame(
+        Rect.fromCenter(
+          center: Offset(screenFrame.center.dx, screenFrame.center.dy),
+          width: width,
+          height: height,
+        ),
+      );
+    }
+  });
+  await MitmproxyClient.startMitm();
   // Create and initialize the FlowStore
   final flowStore = FlowStore();
 

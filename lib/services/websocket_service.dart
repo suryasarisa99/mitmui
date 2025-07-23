@@ -7,10 +7,6 @@ import '../api/mitmproxy_client.dart';
 import '../models/flow_store.dart';
 
 class WebSocketService {
-  static const String websocketUrl = 'ws://127.0.0.1:9090';
-  static const String cookieHeader =
-      '_xsrf=2|86f6d839|79a267d98bb715d1e7cfaeedbe13690c|1753192344; mitmproxy-auth-8081="2|1:0|10:1753192428|19:mitmproxy-auth-8081|4:eQ==|706d3645a40d02ac50a4b30c8ddf57a03661b40a64e2189c2ec70cf6990bed26"';
-
   IOWebSocketChannel? _channel;
   WebSocket? _webSocket;
   StreamSubscription? _subscription;
@@ -28,7 +24,6 @@ class WebSocketService {
   WebSocketService(this._flowStore);
 
   // MitmproxyClient instance for API requests
-  final MitmproxyClient _apiClient = MitmproxyClient();
 
   Future<void> connect() async {
     if (_isConnected) {
@@ -37,13 +32,13 @@ class WebSocketService {
     }
 
     final wsUrl =
-        '$websocketUrl/updates?token=39d24913dbee653e3157035f5193e045';
+        '${MitmproxyClient.websocketUrl}/updates?token=39d24913dbee653e3157035f5193e045';
     print('Attempting to connect to WebSocket: $wsUrl with cookies');
 
     try {
       _webSocket = await WebSocket.connect(
         wsUrl,
-        headers: {'Cookie': cookieHeader},
+        headers: {'Cookie': MitmproxyClient.cookies},
       );
 
       _channel = IOWebSocketChannel(_webSocket!);
@@ -166,7 +161,7 @@ class WebSocketService {
       print('Fetching existing flows from mitmproxy API');
 
       // Use the API client to load flows into the store
-      await _apiClient.loadFlowsIntoStore(_flowStore);
+      await MitmproxyClient.loadFlowsIntoStore(_flowStore);
 
       // Get the flow count after loading
       final flowCount = _flowStore.count;
