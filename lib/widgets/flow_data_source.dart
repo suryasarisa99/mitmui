@@ -180,16 +180,21 @@ class FlowDataSource extends DataGridSource {
         return sortColumn.sortDirection == DataGridSortDirection.ascending
             ? aValue.compareTo(bValue)
             : bValue.compareTo(aValue);
-      } else {
-        // may have null or parse fails
+      } else if (aValue == null && bValue == null) {
+        return 0;
+      } else if (aValue == null) {
         return sortColumn.sortDirection == DataGridSortDirection.ascending
-            ? aCellValue.toString().compareTo(bCellValue.toString())
-            : bCellValue.toString().compareTo(aCellValue.toString());
+            ? -1
+            : 1;
+      } else {
+        // bValue is null, aValue is not null
+        return sortColumn.sortDirection == DataGridSortDirection.ascending
+            ? 1
+            : -1;
       }
     } else {
       return super.compare(a, b, sortColumn);
     }
-    // For all other columns or if numeric parsing failed, use default behavior
   }
 
   // Helper method to get a cell's value by column name
