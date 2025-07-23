@@ -1,5 +1,7 @@
-// flow.dart
 import 'dart:convert';
+import 'package:mitmui/utils/logger.dart';
+
+const _log = Logger("flow");
 
 /// Represents a complete mitmproxy flow with all its components
 class MitmFlow {
@@ -93,7 +95,7 @@ class MitmFlow {
       }
       return null;
     } catch (e) {
-      print('Error parsing flow message: $e');
+      _log.error('Error parsing flow message: $e');
       return null;
     }
   }
@@ -157,7 +159,7 @@ class ClientConnection {
         timestampEnd: json['timestamp_end'],
       );
     } catch (err) {
-      print("error parsing ClientConnection: $err");
+      _log.error("error parsing ClientConnection: $err");
       throw FormatException('Invalid ClientConnection data: $err');
     }
   }
@@ -236,7 +238,7 @@ class ServerConnection {
         timestampEnd: json['timestamp_end'],
       );
     } catch (err) {
-      print("error parsing ServerConnection: $err");
+      _log.error("error parsing ServerConnection: $err");
       throw FormatException('Invalid ServerConnection data: $err');
     }
   }
@@ -403,7 +405,7 @@ class HttpRequest {
         prettyHost: json['pretty_host'],
       );
     } catch (err) {
-      print("error parsing HttpRequest: $err");
+      _log.error("error parsing HttpRequest: $err");
       throw FormatException('Invalid HttpRequest data: $err');
     }
   }
@@ -497,7 +499,7 @@ class HttpResponse {
         timestampEnd: json['timestamp_end'],
       );
     } catch (err) {
-      print("error parsing HttpResponse: $err");
+      _log.error("error parsing HttpResponse: $err");
       throw FormatException('Invalid HttpResponse data: $err');
     }
   }
@@ -566,7 +568,7 @@ class WebSocketInfo {
         timestampEnd: json['timestamp_end'],
       );
     } catch (err) {
-      print("error parsing WebSocketInfo: $err");
+      _log.error("error parsing WebSocketInfo: $err");
       throw FormatException('Invalid WebSocketInfo data: $err');
     }
   }

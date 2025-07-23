@@ -2,9 +2,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:mitmui/utils/logger.dart';
 import 'package:web_socket_channel/io.dart';
 import '../api/mitmproxy_client.dart';
 import '../models/flow_store.dart';
+
+const _log = Logger("websocket_service");
 
 class WebSocketService {
   IOWebSocketChannel? _channel;
@@ -27,13 +30,13 @@ class WebSocketService {
 
   Future<void> connect() async {
     if (_isConnected) {
-      print('WebSocket already connected');
+      _log.success('WebSocket already connected');
       return;
     }
 
     final wsUrl =
         '${MitmproxyClient.websocketUrl}/updates?token=39d24913dbee653e3157035f5193e045';
-    print('Attempting to connect to WebSocket: $wsUrl with cookies');
+    _log.debug('Attempting to connect to WebSocket: $wsUrl with cookies');
 
     try {
       _webSocket = await WebSocket.connect(
@@ -47,7 +50,7 @@ class WebSocketService {
         ConnectionStatus(isConnected: true, message: 'Connected to mitmproxy'),
       );
 
-      print('WebSocket connected successfully');
+      _log.success('WebSocket connected successfully');
 
       // Set up stream listener
       _subscription = _channel!.stream.listen(
@@ -67,7 +70,7 @@ class WebSocketService {
           error: e,
         ),
       );
-      print('WebSocket connection failed: $e');
+      _log.error('WebSocket connection failed: $e');
     }
   }
 
@@ -77,7 +80,7 @@ class WebSocketService {
       final flowType = decodedMessage['type'];
       final flow = decodedMessage['payload']['flow'];
       if (flowType == "flows/add" || flowType == "flows/update") {
-        print(
+        _log.debug(
           "$flowType: ${flow['request']['pretty_host']}, id: ${flow['id']}",
         );
 
@@ -95,12 +98,12 @@ class WebSocketService {
         );
       }
     } catch (e) {
-      print('Error parsing WebSocket message: $e');
+      _log.error('Error parsing WebSocket message: $e');
     }
   }
 
   void _handleError(dynamic error) {
-    print('WebSocket Error: $error');
+    _log.error('WebSocket Error: $error');
     _connectionStatusController.add(
       ConnectionStatus(
         isConnected: false,
@@ -111,7 +114,7 @@ class WebSocketService {
   }
 
   void _handleDisconnection() {
-    print('WebSocket Disconnected');
+    _log.warn('WebSocket Disconnected');
     _isConnected = false;
     _connectionStatusController.add(
       ConnectionStatus(
@@ -142,7 +145,7 @@ class WebSocketService {
       ConnectionStatus(isConnected: false, message: 'Disconnected manually'),
     );
 
-    print('WebSocket connection closed');
+    _log.info('WebSocket connection closed');
   }
 
   void dispose() {
@@ -154,28 +157,10 @@ class WebSocketService {
   /// This is called automatically when connecting,
   /// but can also be called manually to refresh flows
   Future<void> fetchExistingFlows() async {
-    // Try to fetch flows even if not connected to WebSocket
-    // This allows manual refresh
-
     try {
-      print('Fetching existing flows from mitmproxy API');
-
-      // Use the API client to load flows into the store
       await MitmproxyClient.loadFlowsIntoStore(_flowStore);
-
-      // Get the flow count after loading
-      final flowCount = _flowStore.count;
-
-      // Notify that we've loaded existing flows
-      _connectionStatusController.add(
-        ConnectionStatus(
-          isConnected: true,
-          message: 'Loaded $flowCount existing flows',
-          hasNewData: true,
-        ),
-      );
     } catch (e) {
-      print('Error fetching existing flows: $e');
+      _log.error('Error fetching existing flows: $e');
     }
   }
 }

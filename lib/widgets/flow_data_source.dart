@@ -163,15 +163,11 @@ class FlowDataSource extends DataGridSource {
       // Get the cell values
       final aCellValue = getCellValue(a!, columnName);
       final bCellValue = getCellValue(b!, columnName);
-      print('Comparing $columnName: $aCellValue vs $bCellValue');
 
       // Parse as integers if possible
       late int? aValue;
       late int? bValue;
       if (aCellValue is Text) {
-        print(
-          "Parsing Text cell values for $columnName, ${int.tryParse(aCellValue.data ?? '')}",
-        );
         aValue = int.tryParse(aCellValue.data ?? '');
         bValue = int.tryParse(bCellValue.data ?? '');
       } else {

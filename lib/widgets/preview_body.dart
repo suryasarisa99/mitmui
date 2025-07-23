@@ -4,6 +4,9 @@ import 'package:mitmui/models/flow.dart' as models;
 import 'package:flutter/material.dart';
 import 'package:mitmui/models/response_body.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
+import 'package:mitmui/utils/logger.dart';
+
+const _log = Logger("preview_body");
 
 class PreviewBody extends StatelessWidget {
   const PreviewBody({
@@ -21,7 +24,6 @@ class PreviewBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('Building PreviewBody for flowId: $flowId');
     final hasContent =
         response.contentLength != null && response.contentLength! > 0;
 
@@ -52,16 +54,13 @@ class PreviewBody extends StatelessWidget {
           final result = snapshot.data!;
           final mitmBody = result[0] as MitmBody;
           final contentData = result[1];
-          print(
+          _log.info(
             "mitmBody.viewName: ${mitmBody.viewName}, ${mitmBody.syntaxHighlight}, ${mitmBody.viewName}",
           );
-          print("content:${contentData}");
           if (mitmBody.viewName == "Image" || contentType.contains('image')) {
             // Get the URL directly from the server for the image
             final String imageUrl =
                 '$baseUrl/flows/$flowId/response/content.data';
-            print("Loading image from URL: $imageUrl");
-
             return Image.network(
               imageUrl,
               fit: BoxFit.contain,
@@ -78,7 +77,7 @@ class PreviewBody extends StatelessWidget {
                 );
               },
               errorBuilder: (context, error, stackTrace) {
-                print("Error loading image: $error");
+                _log.error("Error loading image: $error");
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -125,7 +124,6 @@ class PreviewBody extends StatelessWidget {
 
     //   try {
     //     if (contentType.contains('json')) {
-    //       // Pretty print JSON (in a real app, this would be the actual JSON content)
     //       final jsonObj = json.decode(
     //         '{"message": "This is a placeholder for JSON content"}',
     //       );

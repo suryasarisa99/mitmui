@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
+import 'package:mitmui/utils/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:window_size/window_size.dart';
 import 'screens/flow_list_screen.dart';
@@ -30,6 +30,7 @@ void main() async {
       );
     }
   });
+  Logger.logLevel = LogLevel.debug;
   await MitmproxyClient.startMitm();
   // Create and initialize the FlowStore
   final flowStore = FlowStore();
@@ -37,7 +38,7 @@ void main() async {
   // Create the WebSocket service and pass the FlowStore
   final webSocketService = WebSocketService(flowStore);
 
-  print('Initializing FlowStore and WebSocket service...');
+  debugPrint('Initializing FlowStore and WebSocket service...');
 
   // Run the app immediately
   runApp(MainApp(flowStore: flowStore, webSocketService: webSocketService));

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_resizable_container/flutter_resizable_container.dart';
+import 'package:mitmui/utils/logger.dart';
 import 'package:mitmui/widgets/flow_detail_url.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
@@ -10,6 +11,8 @@ import '../services/websocket_service.dart';
 import '../widgets/flow_data_grid.dart';
 import '../widgets/flow_data_source.dart';
 import '../widgets/flow_detail_panels.dart';
+
+const _log = Logger("flow_list_screen");
 
 class FlowListScreen extends StatefulWidget {
   const FlowListScreen({super.key});
@@ -129,17 +132,11 @@ class _FlowListScreenState extends State<FlowListScreen> {
   Widget _buildFlowList(
     List<models.MitmFlow> Function(FlowStore) flowSelector,
   ) {
-    // Make sure we can access the provider
-    print('Trying to access FlowStore provider...');
-
     try {
       // Try to verify provider is available
-      final directCheck = Provider.of<FlowStore>(context, listen: false);
-      print(
-        'SUCCESS: Direct Provider check - FlowStore found with ${directCheck.count} flows',
-      );
+      Provider.of<FlowStore>(context, listen: false);
     } catch (e) {
-      print('ERROR: Direct Provider check failed: $e');
+      _log.error('ERROR: Direct Provider check failed: $e');
       // Return an error placeholder if provider is not available
       return Center(
         child: Column(
@@ -164,12 +161,12 @@ class _FlowListScreenState extends State<FlowListScreen> {
     // If we get here, the provider exists, use a Consumer to listen to changes
     return Consumer<FlowStore>(
       builder: (context, flowStore, child) {
-        print(
-          'SUCCESS: Consumer builder called with FlowStore, count: ${flowStore.count}',
+        _log.info(
+          'Consumer builder called with FlowStore, count: ${flowStore.count}',
         );
 
         final flows = flowSelector(flowStore);
-        print('Filtered ${flows.length} flows based on selector');
+        _log.debug('Filtered ${flows.length} flows based on selector');
 
         if (flows.isEmpty) {
           return const Center(child: Text('No flows available'));
@@ -247,7 +244,7 @@ class _FlowListScreenState extends State<FlowListScreen> {
         setState(() {
           _selectedFlow = flow;
           _selectedFlowId = flow.id;
-          print(
+          _log.debug(
             'Selected flow: ${_selectedFlow?.id} - ${_selectedFlow?.request.url}',
           );
         });

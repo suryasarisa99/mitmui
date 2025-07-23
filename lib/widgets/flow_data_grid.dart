@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mitmui/utils/logger.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../models/flow.dart' as models;
 import 'flow_data_source.dart';
+
+const _log = Logger("flow_data_grid");
 
 class FlowDataGrid extends StatefulWidget {
   final FlowDataSource dataSource;
@@ -156,21 +159,15 @@ class _FlowDataGridState extends State<FlowDataGrid> {
                     widget.onFlowSelected(selectedFlow);
                   }
                 } catch (e) {
-                  print('Error selecting flow: $e');
+                  _log.error('Error selecting flow: $e');
                 }
               },
           onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
-            // Don't allow columns to be sized too small
-            if (details.width < 60) {
+            if (details.width < 44) {
               return false;
             }
-
             setState(() {
-              // Update the column width in our map
               _columnWidths[details.column.columnName] = details.width;
-              print(
-                "Column ${details.column.columnName} resized to ${details.width}",
-              );
             });
             return true;
           },

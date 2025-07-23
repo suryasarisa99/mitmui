@@ -3,7 +3,11 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:mitmui/models/flow.dart';
 import 'package:mitmui/models/response_body.dart';
+import 'package:mitmui/utils/logger.dart';
 import '../models/flow_store.dart';
+
+// Create logger instance for this file
+const _log = Logger("mitmproxy_client");
 
 /// Base URL for mitmproxy web interface
 const String baseUrl = 'http://127.0.0.1:9090';
@@ -47,9 +51,6 @@ class MitmproxyClient {
     //   InterceptorsWrapper(
     //     onResponse: (response, handler) {
     //       final cookies = response.headers['set-cookie'];
-    //       if (cookies != null && cookies.isNotEmpty) {
-    //         print('Received cookies: $cookies');
-    //       }
     //       return handler.next(response);
     //     },
     //   ),
@@ -60,7 +61,7 @@ class MitmproxyClient {
   static Future<void> startMitm() async {
     // start mitmproxy with a random password
     final password = generateRandomString(32);
-    print("password: $password");
+    _log.debug("password: $password");
     final res = await Process.start('mitmweb', [
       '--web-port',
       port.toString(),
@@ -75,12 +76,12 @@ class MitmproxyClient {
         .then((response) {
           final newCookies = response.headers['set-cookie']?.join('; ') ?? '';
           updateCookies(newCookies);
-          print('Cookies set: $cookies');
+          _log.info('Cookies set: $cookies');
         })
         .catchError((error) {
-          print('Error setting cookies: $error');
+          _log.error('Error setting cookies: $error');
         });
-    print('MITM Proxy started: $stdout');
+    _log.success('MITM Proxy started');
   }
 
   static String generateRandomString(int length) {
@@ -96,19 +97,19 @@ class MitmproxyClient {
   /// Fetches all existing flows from mitmproxy
   static Future<List<MitmFlow>> getFlows() async {
     try {
-      print('Fetching flows from $_baseUrl/flows');
+      _log.info('Fetching flows from $_baseUrl/flows');
       final response = await _dio.get('/flows');
 
       if (response.statusCode == 200) {
         final List<dynamic> flows = response.data;
-        print('Received ${flows.length} flows from API');
+        _log.info('Received ${flows.length} flows from API');
         return flows.map((f) => MitmFlow.fromJson(f)).toList();
       } else {
-        print('Failed to fetch flows: ${response.statusCode}');
+        _log.error('Failed to fetch flows: ${response.statusCode}');
         return [];
       }
     } catch (e) {
-      print('Error fetching flows: $e');
+      _log.error('Error fetching flows: $e');
       return [];
     }
   }
@@ -121,16 +122,16 @@ class MitmproxyClient {
       );
 
       if (response.statusCode == 200) {
-        print('Response body fetched successfully for flow $flowId');
+        _log.info('Response body fetched successfully for flow $flowId');
         return MitmBody.fromJson(response.data);
       } else {
-        print('Failed to fetch response body: ${response.statusCode}');
+        _log.error('Failed to fetch response body: ${response.statusCode}');
         throw Exception(
           'Failed to fetch response body: ${response.statusCode}',
         );
       }
     } catch (e) {
-      print('Error fetching response body: $e');
+      _log.error('Error fetching response body: $e');
       throw Exception('Error fetching response body: $e');
     }
   }
@@ -140,16 +141,16 @@ class MitmproxyClient {
       final response = await _dio.get('/flows/$flowId/$type/content.data');
 
       if (response.statusCode == 200) {
-        print('Response body fetched successfully for flow $flowId');
+        _log.debug('Response body fetched successfully for flow $flowId');
         return response.data;
       } else {
-        print('Failed to fetch response body: ${response.statusCode}');
+        _log.error('Failed to fetch response body: ${response.statusCode}');
         throw Exception(
           'Failed to fetch response body: ${response.statusCode}',
         );
       }
     } catch (e) {
-      print('Error fetching response body: $e');
+      _log.error('Error fetching response body: $e');
       throw Exception('Error fetching response body: $e');
     }
   }
@@ -159,9 +160,9 @@ class MitmproxyClient {
     try {
       final flows = await getFlows();
       flowStore.addMultiple(flows);
-      print('Added ${flows.length} flows to FlowStore');
+      _log.info('Added ${flows.length} flows to FlowStore');
     } catch (e) {
-      print('Error loading flows into store: $e');
+      _log.error('Error loading flows into store: $e');
     }
   }
 
@@ -169,6 +170,6 @@ class MitmproxyClient {
   static void updateCookies(String newCookies) {
     cookies = newCookies;
     _dio.options.headers['Cookie'] = newCookies;
-    print('Updated cookies, newCookies: $newCookies ');
+    _log.info('Updated cookies, newCookies: $newCookies ');
   }
 }
