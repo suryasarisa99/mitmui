@@ -60,11 +60,14 @@ class PreviewBody extends StatelessWidget {
           if (mitmBody.viewName == "Image" || contentType.contains('image')) {
             // Get the URL directly from the server for the image
             final String imageUrl =
-                '$baseUrl/flows/$flowId/response/content.data';
+                '${MitmproxyClient.baseUrl}/flows/$flowId/response/content.data';
             return Image.network(
               imageUrl,
               fit: BoxFit.contain,
-              headers: {'Cookie': MitmproxyClient.cookies, 'Referer': baseUrl},
+              headers: {
+                'Cookie': MitmproxyClient.cookies,
+                'Referer': MitmproxyClient.baseUrl,
+              },
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
                 return Center(

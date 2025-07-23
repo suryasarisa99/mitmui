@@ -6,17 +6,14 @@ import 'package:mitmui/models/response_body.dart';
 import 'package:mitmui/utils/logger.dart';
 import '../models/flow_store.dart';
 
-// Create logger instance for this file
 const _log = Logger("mitmproxy_client");
 
-/// Base URL for mitmproxy web interface
-const String baseUrl = 'http://127.0.0.1:9090';
 const int port = 9090;
 
 class MitmproxyClient {
   // Use Dio's cookie manager to automatically handle cookies
   static final Dio _dio = _createDioInstance();
-  static const String _baseUrl = 'http://127.0.0.1:$port';
+  static const String baseUrl = 'http://127.0.0.1:$port';
   static const String websocketUrl = 'ws://127.0.0.1:$port';
   static String cookies = '';
   // Private constructor for singleton
@@ -26,7 +23,7 @@ class MitmproxyClient {
   static Dio _createDioInstance() {
     final dio = Dio(
       BaseOptions(
-        baseUrl: _baseUrl,
+        baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
         headers: {
@@ -97,7 +94,7 @@ class MitmproxyClient {
   /// Fetches all existing flows from mitmproxy
   static Future<List<MitmFlow>> getFlows() async {
     try {
-      _log.info('Fetching flows from $_baseUrl/flows');
+      _log.info('Fetching flows from $baseUrl/flows');
       final response = await _dio.get('/flows');
 
       if (response.statusCode == 200) {
