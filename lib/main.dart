@@ -30,7 +30,7 @@ void main() async {
       );
     }
   });
-  Logger.logLevel = LogLevel.debug;
+  Logger.logLevel = LogLevel.info;
   await MitmproxyClient.startMitm();
   // Create and initialize the FlowStore
   final flowStore = FlowStore();

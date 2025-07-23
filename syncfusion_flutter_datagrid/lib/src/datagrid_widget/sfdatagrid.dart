@@ -529,11 +529,14 @@ class SfDataGrid extends StatefulWidget {
     this.groupCollapsing,
     this.groupCollapsed,
     this.groupCaptionTitleFormat = '{ColumnName} : {Key} - {ItemsCount} Items',
+    this.onKeyEvent,
   }) : assert(frozenColumnsCount >= 0),
        assert(footerFrozenColumnsCount >= 0),
        assert(frozenRowsCount >= 0),
        assert(footerFrozenRowsCount >= 0),
        super(key: key);
+
+  final bool Function(KeyEvent keyEvent)? onKeyEvent;
 
   /// The height of each row except the column header.
   ///
@@ -2001,7 +2004,8 @@ class SfDataGridState extends State<SfDataGrid>
     //Selection Manager initializing
     _rowSelectionManager =
         _dataGridConfiguration.rowSelectionManager =
-            widget.selectionManager ?? RowSelectionManager();
+            widget.selectionManager ??
+            RowSelectionManager(onKeyEvent: widget.onKeyEvent);
     selection_manager.setStateDetailsInSelectionManagerBase(
       _rowSelectionManager!,
       _dataGridStateDetails!,

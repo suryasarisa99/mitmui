@@ -93,7 +93,8 @@ class SelectionManagerBase extends ChangeNotifier {
 /// ```
 class RowSelectionManager extends SelectionManagerBase {
   /// Creates the [RowSelectionManager] for [SfDataGrid] widget.
-  RowSelectionManager() : super();
+  RowSelectionManager({this.onKeyEvent}) : super();
+  final bool Function(KeyEvent keyEvent)? onKeyEvent;
 
   RowColumnIndex _pressedRowColumnIndex = RowColumnIndex(-1, -1);
 
@@ -741,10 +742,30 @@ class RowSelectionManager extends SelectionManagerBase {
       _pressedRowIndex = recordIndex;
     }
 
+    /// @added-by-me
+    /// automatically clear if meta/ctrl key is not pressed.
+    /// it prevents multiple selection without meta/ctrl key.
+    if (!(dataGridConfiguration.isMacPlatform
+        ? HardwareKeyboard.instance.isMetaPressed
+        : HardwareKeyboard.instance.isControlPressed)) {
+      _clearSelectedRows(dataGridConfiguration);
+    }
+
+    /// @added-by-me
+    /// even current cell sets to last selected row,
+    /// the default behaviour is current cell same for single selection mode, but not applies for multiple selection mode.
+    /// so we updated the current cell to the tapped row.
+    dataGridConfiguration.currentCell._moveCurrentCellTo(
+      dataGridConfiguration,
+      rowColumnIndex,
+      isSelectionChanged: true,
+    );
+
     // Issue:
     // FLUT-920028-The HeaderCheckboxState changes when tapping on the header checkbox and normal rows, while setting onSelectionChanging to false and onCurrentCellActivating to true, with the selection mode set to multiple.
     // We resolved the issue by verifying that onSelectionChanging is set to false
     if (!isShiftPressed && _raiseSelectionChanging()) {
+      print("@handleTap - _raiseSelectionChanging");
       _shiftSelectedRows.clear();
       _processSelection(
         dataGridConfiguration,
@@ -1141,6 +1162,12 @@ class RowSelectionManager extends SelectionManagerBase {
   //KeyNavigation
   @override
   Future<void> handleKeyEvent(KeyEvent keyEvent) async {
+    if (onKeyEvent != null) {
+      final userHandled = onKeyEvent!(keyEvent);
+      if (userHandled) {
+        return;
+      }
+    }
     final DataGridConfiguration dataGridConfiguration =
         _dataGridStateDetails!();
     if (dataGridConfiguration.currentCell.isEditing &&
@@ -1179,6 +1206,7 @@ class RowSelectionManager extends SelectionManagerBase {
 
     if (keyEvent.logicalKey == LogicalKeyboardKey.arrowUp) {
       _processKeyUp(keyEvent);
+      // select the row
     }
 
     if (keyEvent.logicalKey == LogicalKeyboardKey.arrowDown ||
@@ -1206,7 +1234,11 @@ class RowSelectionManager extends SelectionManagerBase {
     }
 
     if (keyEvent.logicalKey == LogicalKeyboardKey.keyA) {
-      if (HardwareKeyboard.instance.isControlPressed) {
+      ///@added-by-me
+      /// it uses meta key for windows and control key for mac.
+      if (dataGridConfiguration.isMacPlatform
+          ? HardwareKeyboard.instance.isMetaPressed
+          : HardwareKeyboard.instance.isControlPressed) {
         _processSelectedAll();
       }
     }
@@ -1391,11 +1423,35 @@ class RowSelectionManager extends SelectionManagerBase {
         RowColumnIndex(lastRowIndex, nextColumnIndex),
         isShiftKeyPressed: HardwareKeyboard.instance.isShiftPressed,
       );
-    } else {
+    } else if (HardwareKeyboard.instance.isShiftPressed) {
       _processSelectionAndCurrentCell(
         dataGridConfiguration,
         RowColumnIndex(nextRowIndex, nextColumnIndex),
-        isShiftKeyPressed: HardwareKeyboard.instance.isShiftPressed,
+        isShiftKeyPressed: true,
+      );
+    } else {
+      /// @added-by-me: commented
+      /// the default behaviour is updates current cell, not selects
+      // _processSelectionAndCurrentCell(
+      //   dataGridConfiguration,
+      //   RowColumnIndex(nextRowIndex, nextColumnIndex),
+      //   isShiftKeyPressed: HardwareKeyboard.instance.isShiftPressed,
+      // );
+
+      /// @added-by-me:
+      /// we need to clear previous selection and select the next row
+      _clearSelectedRows(dataGridConfiguration);
+      _shiftSelectedRows.clear();
+      print("curr: ${currentCell.rowIndex}, next: $nextRowIndex");
+      _processSelection(
+        dataGridConfiguration,
+        RowColumnIndex(nextRowIndex, nextColumnIndex),
+        // RowColumnIndex(nextRowIndex, nextColumnIndex),
+        RowColumnIndex(currentCell.rowIndex, currentCell.columnIndex),
+      );
+      _processSelectionAndCurrentCell(
+        dataGridConfiguration,
+        RowColumnIndex(nextRowIndex, nextColumnIndex),
       );
     }
   }
@@ -1432,11 +1488,32 @@ class RowSelectionManager extends SelectionManagerBase {
         RowColumnIndex(firstRowIndex, columnIndex),
         isShiftKeyPressed: HardwareKeyboard.instance.isShiftPressed,
       );
-    } else {
+    } else if (HardwareKeyboard.instance.isShiftPressed) {
       _processSelectionAndCurrentCell(
         dataGridConfiguration,
         RowColumnIndex(previousRowIndex, columnIndex),
-        isShiftKeyPressed: HardwareKeyboard.instance.isShiftPressed,
+        isShiftKeyPressed: true,
+      );
+    } else {
+      /// @added-by-me: commented
+      // _processSelectionAndCurrentCell(
+      //   dataGridConfiguration,
+      //   RowColumnIndex(previousRowIndex, columnIndex),
+      //   isShiftKeyPressed: HardwareKeyboard.instance.isShiftPressed,
+      // );
+
+      /// @added-by-me:
+      /// we need to clear previous selection and select the previous row
+      _clearSelectedRows(dataGridConfiguration);
+      _shiftSelectedRows.clear();
+      _processSelection(
+        dataGridConfiguration,
+        RowColumnIndex(previousRowIndex, columnIndex),
+        RowColumnIndex(currentCell.rowIndex, currentCell.columnIndex),
+      );
+      _processSelectionAndCurrentCell(
+        dataGridConfiguration,
+        RowColumnIndex(previousRowIndex, columnIndex),
       );
     }
   }

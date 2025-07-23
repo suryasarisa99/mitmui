@@ -118,141 +118,102 @@ class _FlowDataGridState extends State<FlowDataGrid> {
       (title: "Req", key: 'reqLen'),
       (title: "Res", key: 'resLen'),
     ];
-    return FocusScope(
-      node: focusScoeNode,
-      autofocus: true,
-      debugLabel: 'focusScope',
-      onFocusChange: (f) {
-        _log.debug('focusScopeNode focus changed: $f');
-        if (f) {
-          _focusNode.requestFocus();
+    return SfDataGrid(
+      source: widget.dataSource,
+      controller: widget.controller,
+      allowColumnsResizing: true,
+      allowSorting: true,
+      allowMultiColumnSorting: true,
+      allowTriStateSorting: true,
+      isScrollbarAlwaysShown: true,
+      columnResizeMode: ColumnResizeMode.onResize,
+      columnWidthMode: ColumnWidthMode.fill, // Fill available space
+      showColumnHeaderIconOnHover: true, // Show resize indicator on hover
+      highlightRowOnHover: true, // Better UX for desktop
+      navigationMode: GridNavigationMode.row, // Enable keyboard navigation
+      rowHeight: 36,
+      headerRowHeight: 26,
+      showHorizontalScrollbar: false,
+      allowColumnsDragging: true,
+      frozenColumnsCount: 1,
+      selectionMode: SelectionMode.multiple,
+      gridLinesVisibility: GridLinesVisibility.none,
+      headerGridLinesVisibility: GridLinesVisibility.both,
+      onKeyEvent: (keyEvent) {
+        _log.info("Key event: ${keyEvent.logicalKey.debugName}");
+        if (HardwareKeyboard.instance.isMetaPressed &&
+            keyEvent.logicalKey == LogicalKeyboardKey.keyC) {
+          _log.info("Copying selected flows");
+          return true; // Indicate that we handled this key event
         }
+        return false; // Let the grid handle other key events
       },
-      child: CallbackShortcuts(
-        bindings: {
-          LogicalKeySet(
-            // LogicalKeyboardKey.meta,
-            LogicalKeyboardKey.keyA,
-          ): () {
-            _log.success("A is Pressed");
-          },
-        },
-        child: Focus(
-          focusNode: _focusNode,
-          autofocus: true,
-          onFocusChange: (f) {
-            _log.debug('Focus changed: $f');
-          },
-          child: SfDataGrid(
-            source: widget.dataSource,
-            controller: widget.controller,
-            allowColumnsResizing: true,
-            allowSorting: true,
-            allowMultiColumnSorting: true,
-            allowTriStateSorting: true,
-            isScrollbarAlwaysShown: true,
-            columnResizeMode: ColumnResizeMode.onResize,
-            columnWidthMode: ColumnWidthMode.fill, // Fill available space
-            showColumnHeaderIconOnHover: true, // Show resize indicator on hover
-            highlightRowOnHover: true, // Better UX for desktop
-            navigationMode:
-                GridNavigationMode.cell, // Enable keyboard navigation
-            rowHeight: 36,
-            headerRowHeight: 26,
-            showHorizontalScrollbar: false,
-            allowColumnsDragging: true,
-            frozenColumnsCount: 1,
-            selectionMode: SelectionMode.multiple,
-            gridLinesVisibility: GridLinesVisibility.none,
-            headerGridLinesVisibility: GridLinesVisibility.both,
-            onSelectionChanging: (oldDataGrid, newDataGrid) {
-              _log.info("keys: ${_pressedKeys.join(', ')}");
-              if (_pressedKeys.firstWhereOrNull(
-                    (key) =>
-                        key == LogicalKeyboardKey.meta ||
-                        key == LogicalKeyboardKey.metaLeft ||
-                        key == LogicalKeyboardKey.metaRight,
-                  ) !=
-                  null) {
-                _log.info("Meta key pressed, allowing selection change");
-                return true;
+      // onSelectionChanged: (oldGrid, newGrid) {
+      //   _log.info("Selection changed from $oldGrid to $newGrid");
+      // },
+
+      // Track keyboard navigation and select row
+      onCurrentCellActivated:
+          (RowColumnIndex newRowColumnIndex, RowColumnIndex oldRowColumnIndex) {
+            // no need of rowIndex-1, it does not calls for header row
+            if (newRowColumnIndex.rowIndex < 0) return;
+            try {
+              // Get the actual row based on current display order (after sorting)
+              final actualRowIndex = newRowColumnIndex.rowIndex;
+              if (actualRowIndex < 0 ||
+                  actualRowIndex >= widget.dataSource.effectiveRows.length) {
+                return;
               }
-              return false;
-            },
-            // Track keyboard navigation and select row
-            onCurrentCellActivated:
-                (
-                  RowColumnIndex newRowColumnIndex,
-                  RowColumnIndex oldRowColumnIndex,
-                ) {
-                  // no need of rowIndex-1, it does not calls for header row
-                  if (newRowColumnIndex.rowIndex < 0) return;
-                  try {
-                    // Get the actual row based on current display order (after sorting)
-                    final actualRowIndex = newRowColumnIndex.rowIndex;
-                    if (actualRowIndex < 0 ||
-                        actualRowIndex >=
-                            widget.dataSource.effectiveRows.length) {
-                      return;
-                    }
 
-                    // Get the effective row at the current position
-                    final actualRow =
-                        widget.dataSource.effectiveRows[actualRowIndex];
+              // Get the effective row at the current position
+              final actualRow = widget.dataSource.effectiveRows[actualRowIndex];
 
-                    // Find the ID cell to identify which flow this represents
-                    final idCell = actualRow.getCells().firstWhere(
-                      (cell) => cell.columnName == 'id',
-                      orElse: () =>
-                          DataGridCell<String>(columnName: 'id', value: ''),
-                    );
+              // Find the ID cell to identify which flow this represents
+              final idCell = actualRow.getCells().firstWhere(
+                (cell) => cell.columnName == 'id',
+                orElse: () => DataGridCell<String>(columnName: 'id', value: ''),
+              );
 
-                    // Parse the ID to get the original flow index
-                    final originalIndex = int.tryParse(idCell.value.toString());
-                    if (originalIndex != null &&
-                        originalIndex >= 0 &&
-                        originalIndex < widget.dataSource.flows.length) {
-                      final selectedFlow =
-                          widget.dataSource.flows[originalIndex];
-                      widget.onFlowSelected(selectedFlow);
-                    }
-                  } catch (e) {
-                    _log.error('Error selecting flow: $e');
-                  }
-                },
-            onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
-              if (details.width < 44) return false;
-              setState(() {
-                _columnWidths[details.column.columnName] = details.width;
-              });
-              return true;
-            },
-            columns: <GridColumn>[
-              for (final header in headerCells)
-                GridColumn(
-                  columnName: header.key,
-                  width: _columnWidths[header.key]!,
-                  label: Container(
-                    padding: EdgeInsets.only(
-                      left: header.key == 'url' ? 8.0 : 0,
-                    ),
-                    alignment: header.key == 'url'
-                        ? Alignment.centerLeft
-                        : Alignment.center,
-                    child: Text(
-                      header.title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 11,
-                        color: Color(0xFFEEEEEE),
-                      ),
-                    ),
-                  ),
+              // Parse the ID to get the original flow index
+              final originalIndex = int.tryParse(idCell.value.toString());
+              if (originalIndex != null &&
+                  originalIndex >= 0 &&
+                  originalIndex < widget.dataSource.flows.length) {
+                final selectedFlow = widget.dataSource.flows[originalIndex];
+                widget.onFlowSelected(selectedFlow);
+              }
+            } catch (e) {
+              _log.error('Error selecting flow: $e');
+            }
+          },
+      onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
+        if (details.width < 44) return false;
+        setState(() {
+          _columnWidths[details.column.columnName] = details.width;
+        });
+        return true;
+      },
+      columns: <GridColumn>[
+        for (final header in headerCells)
+          GridColumn(
+            columnName: header.key,
+            width: _columnWidths[header.key]!,
+            label: Container(
+              padding: EdgeInsets.only(left: header.key == 'url' ? 8.0 : 0),
+              alignment: header.key == 'url'
+                  ? Alignment.centerLeft
+                  : Alignment.center,
+              child: Text(
+                header.title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 11,
+                  color: Color(0xFFEEEEEE),
                 ),
-            ],
+              ),
+            ),
           ),
-        ),
-      ),
+      ],
     );
   }
 }
