@@ -12,7 +12,6 @@ class MitmBody {
   });
 
   factory MitmBody.fromJson(Map<String, dynamic> json) {
-    print("========== parsing MitmResponseBody from JSON ==========");
     return MitmBody(
       text: json['text'] as String,
       viewName: json['view_name'] as String,

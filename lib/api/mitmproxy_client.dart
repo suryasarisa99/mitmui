@@ -57,7 +57,9 @@ class MitmproxyClient {
 
   static Future<void> startMitm() async {
     // start mitmproxy with a random password
-    final password = generateRandomString(32);
+    // final password = generateRandomString(32);
+    // for testing purposes, use a fixed password
+    final password = '12345678';
     _log.debug("password: $password");
     final res = await Process.start('mitmweb', [
       '--web-port',
