@@ -128,7 +128,7 @@ typedef _DataGridSourceListener =
     void Function({RowColumnIndex? rowColumnIndex});
 
 /// Signature for the [DataGridSourceChangeNotifier] listener.
-typedef _DataGridPropertyChangeListener =
+typedef DataGridPropertyChangeListener =
     void Function({
       RowColumnIndex? rowColumnIndex,
       String? propertyName,
@@ -4660,6 +4660,7 @@ class DataGridController extends DataGridSourceChangeNotifier {
   /// The collection of objects that contains object of corresponding
   /// to the selected rows in [SfDataGrid].
   set selectedRows(List<DataGridRow> newSelectedRows) {
+    print("data-grid-controller: selectedRows set called");
     if (_selectedRows == newSelectedRows) {
       return;
     }
@@ -5328,20 +5329,20 @@ class DataGridSourceChangeNotifier extends ChangeNotifier {
     _dataGridSourceListeners.remove(listener);
   }
 
-  final ObserverList<_DataGridPropertyChangeListener>
-  _dataGridPropertyChangeListeners =
-      ObserverList<_DataGridPropertyChangeListener>();
+  final ObserverList<DataGridPropertyChangeListener>
+  dataGridPropertyChangeListeners =
+      ObserverList<DataGridPropertyChangeListener>();
 
   void _addDataGridPropertyChangeListener(
-    _DataGridPropertyChangeListener listener,
+    DataGridPropertyChangeListener listener,
   ) {
-    _dataGridPropertyChangeListeners.add(listener);
+    dataGridPropertyChangeListeners.add(listener);
   }
 
   void _removeDataGridPropertyChangeListener(
-    _DataGridPropertyChangeListener listener,
+    DataGridPropertyChangeListener listener,
   ) {
-    _dataGridPropertyChangeListeners.remove(listener);
+    dataGridPropertyChangeListeners.remove(listener);
   }
 
   @override
@@ -5353,6 +5354,9 @@ class DataGridSourceChangeNotifier extends ChangeNotifier {
   /// Call this method whenever the underlying data is added or removed. If the value of the specific cell is updated, call this method with RowColumnIndex argument where it refers the corresponding row and column index of the cell.
   @protected
   void notifyDataSourceListeners({RowColumnIndex? rowColumnIndex}) {
+    print(
+      "DataGridSource.notifyDataSourceListeners called with rowColumnIndex: $rowColumnIndex",
+    );
     for (final Function listener in _dataGridSourceListeners) {
       listener(rowColumnIndex: rowColumnIndex);
     }
@@ -5364,7 +5368,10 @@ class DataGridSourceChangeNotifier extends ChangeNotifier {
     String? propertyName,
     bool recalculateRowHeight = false,
   }) {
-    for (final Function listener in _dataGridPropertyChangeListeners) {
+    print(
+      "DataGridSource._notifyDataGridPropertyChangeListeners called with rowColumnIndex: $rowColumnIndex, propertyName: $propertyName, recalculateRowHeight: $recalculateRowHeight",
+    );
+    for (final Function listener in dataGridPropertyChangeListeners) {
       listener(
         rowColumnIndex: rowColumnIndex,
         propertyName: propertyName,

@@ -6,32 +6,32 @@ import '../models/flow.dart' as models;
 import '../utils/extensions.dart';
 
 class FlowDataSource extends DataGridSource {
-  List<models.MitmFlow> _flows = [];
+  List<models.MitmFlow> initialFlows = [];
   List<DataGridRow> _flowRows = [];
-  String? _selectedFlowId;
   final DataGridController dataGridController;
 
-  // Getter to expose the flows list
-  List<models.MitmFlow> get flows => _flows;
-
-  // Setter for selectedFlowId
-  set selectedFlowId(String? id) {
-    _selectedFlowId = id;
-    notifyListeners();
-  }
-
-  FlowDataSource(this._flows, {required this.dataGridController}) {
-    _flowRows = _getFlowRows();
+  FlowDataSource({
+    required this.initialFlows,
+    required this.dataGridController,
+  }) {
+    buildFlowRows(initialFlows);
   }
 
   void updateFlows(List<models.MitmFlow> flows) {
-    _flows = flows;
-    _flowRows = _getFlowRows();
-    notifyListeners();
+    initialFlows = flows;
+    buildFlowRows([]);
+    // notifyListeners();
+    // notifyDataSourceListeners();
   }
 
-  List<DataGridRow> _getFlowRows() {
-    return _flows.mapIndexed<DataGridRow>((i, flow) {
+  @override
+  Future<void> handleLoadMoreRows() async {
+    // Implement your logic to load more rows here
+  }
+
+  void buildFlowRows(List<models.MitmFlow> flows) {
+    print("buildFlowRows called with ${flows.length} flows");
+    _flowRows = flows.mapIndexed<DataGridRow>((i, flow) {
       final hasResponse = flow.response != null;
       final methodColor = getMethodColor(flow.request.method);
       final statusColor = getStatusCodeColor(
@@ -144,6 +144,8 @@ class FlowDataSource extends DataGridSource {
         ],
       );
     }).toList();
+    // notifyListeners();
+    // notifyDataSourceListeners();
   }
 
   @override

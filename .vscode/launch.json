@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "mitmui",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "mitmui (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "mitmui (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "syncfusion_flutter_datagrid",
+            "cwd": "syncfusion_flutter_datagrid",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "syncfusion_flutter_datagrid (profile mode)",
+            "cwd": "syncfusion_flutter_datagrid",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "syncfusion_flutter_datagrid (release mode)",
+            "cwd": "syncfusion_flutter_datagrid",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

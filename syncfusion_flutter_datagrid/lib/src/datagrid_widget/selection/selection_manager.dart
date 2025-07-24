@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart' hide DataCell, DataRow;
 import 'package:flutter/services.dart';
@@ -451,6 +453,7 @@ class RowSelectionManager extends SelectionManagerBase {
   }
 
   void _clearSelectedRows(DataGridConfiguration dataGridConfiguration) {
+    log("@clearSelectedRows called", stackTrace: StackTrace.current);
     if (_selectedRows.isNotEmpty) {
       _selectedRows.removeWhere(
         (row) => dataGridConfiguration.source.effectiveRows.contains(row),
@@ -803,7 +806,10 @@ class RowSelectionManager extends SelectionManagerBase {
   void handleDataGridSourceChanges() {
     final DataGridConfiguration dataGridConfiguration =
         _dataGridStateDetails!();
-    _clearSelectedRows(dataGridConfiguration);
+    print(
+      "@handleDataGridSourceChanges - length: ${dataGridConfiguration.controller.selectedRows.length}",
+    );
+    // _clearSelectedRows(dataGridConfiguration);
   }
 
   @override
@@ -964,6 +970,9 @@ class RowSelectionManager extends SelectionManagerBase {
         dataGridConfiguration.selectionMode == SelectionMode.none) {
       return;
     }
+    print(
+      "@onSelectedRowsChanged - dataGridConfiguration.controller.selectedRows.length: ${dataGridConfiguration.controller.selectedRows.length}",
+    );
 
     final List<DataGridRow> newValue = dataGridConfiguration
         .controller
@@ -976,16 +985,16 @@ class RowSelectionManager extends SelectionManagerBase {
       return;
     }
 
-    _clearSelectedRows(dataGridConfiguration);
-    final List<DataGridRow> visibleRows =
-        newValue
-            .where(
-              (row) =>
-                  effectiveRows(dataGridConfiguration.source).contains(row),
-            )
-            .toList();
-    _selectedRows.addAll(visibleRows);
-    dataGridConfiguration.controller.selectedRows.addAll(visibleRows);
+    // _clearSelectedRows(dataGridConfiguration);
+    // final List<DataGridRow> visibleRows =
+    //     newValue
+    //         .where(
+    //           (row) =>
+    //               effectiveRows(dataGridConfiguration.source).contains(row),
+    //         )
+    //         .toList();
+    // _selectedRows.addAll(visibleRows);
+    // dataGridConfiguration.controller.selectedRows.addAll(visibleRows);
     _refreshSelection();
     dataGridConfiguration.container
       ..isDirty = true

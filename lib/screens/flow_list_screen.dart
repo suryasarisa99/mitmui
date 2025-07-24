@@ -22,7 +22,6 @@ class FlowListScreen extends StatefulWidget {
 
 class _FlowListScreenState extends State<FlowListScreen> {
   // Single data source for all flows
-  late FlowDataSource _flowDataSource;
 
   // Controller for the data grid to track selection and highlighting
   final DataGridController _dataGridController = DataGridController();
@@ -30,10 +29,6 @@ class _FlowListScreenState extends State<FlowListScreen> {
   @override
   void initState() {
     super.initState();
-    _flowDataSource = FlowDataSource(
-      [],
-      dataGridController: _dataGridController,
-    );
   }
 
   @override
@@ -148,15 +143,6 @@ class _FlowListScreenState extends State<FlowListScreen> {
   }
 
   Widget _buildDataTable() {
-    return Consumer(
-      builder: (context, ref, child) {
-        final flowsMap = ref.watch(flowsProvider);
-        _flowDataSource.updateFlows(flowsMap.values.toList());
-        return FlowDataGrid(
-          dataSource: _flowDataSource,
-          controller: _dataGridController,
-        );
-      },
-    );
+    return FlowDataGrid(controller: _dataGridController);
   }
 }

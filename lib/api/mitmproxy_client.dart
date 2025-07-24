@@ -101,7 +101,7 @@ class MitmproxyClient {
 
       if (response.statusCode == 200) {
         final List<dynamic> flows = response.data;
-        _log.info('Received ${flows.length} flows from API, ${response.data}');
+        // _log.info('Received ${flows.length} flows from API, ${response.data}');
         return flows.map((f) => MitmFlow.fromJson(f)).toList();
       } else {
         _log.error(

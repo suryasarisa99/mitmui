@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mitmui/store/flows_provider.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
@@ -8,23 +10,30 @@ import '../store/selected_ids_notifier.dart';
 
 const _log = Logger("flow_data_grid");
 
-class FlowDataGrid extends StatefulWidget {
-  final FlowDataSource dataSource;
+class FlowDataGrid extends ConsumerStatefulWidget {
   final DataGridController controller;
 
-  // Notifier for selected row IDs
-
-  const FlowDataGrid({
-    super.key,
-    required this.dataSource,
-    required this.controller,
-  });
+  const FlowDataGrid({super.key, required this.controller});
 
   @override
-  State<FlowDataGrid> createState() => _FlowDataGridState();
+  ConsumerState<FlowDataGrid> createState() => _FlowDataGridState();
 }
 
-class _FlowDataGridState extends State<FlowDataGrid> {
+class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
+  late final FlowDataSource _flowDataSource = FlowDataSource(
+    initialFlows: ref.read(flowsProvider).values.toList(),
+    dataGridController: widget.controller,
+  );
+  @override
+  void initState() {
+    super.initState();
+    ref.listenManual(flowsProvider, (oldFlows, newFlows) {
+      int flowsAdded = newFlows.length - (oldFlows?.length ?? 0);
+      if (flowsAdded > 0) {}
+      _flowDataSource.buildFlowRows(newFlows.values.toList());
+    });
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -44,18 +53,18 @@ class _FlowDataGridState extends State<FlowDataGrid> {
   };
 
   // Reset all column widths to their default values
-  void _resetColumnWidths() {
-    setState(() {
-      _columnWidths['url'] = 1100;
-      _columnWidths['method'] = 85;
-      _columnWidths['status'] = 65;
-      _columnWidths['type'] = 150;
-      _columnWidths['time'] = 100;
-      _columnWidths['duration'] = 90;
-      _columnWidths['reqLen'] = 90;
-      _columnWidths['resLen'] = 90;
-    });
-  }
+  // void _resetColumnWidths() {
+  //   setState(() {
+  //     _columnWidths['url'] = 1100;
+  //     _columnWidths['method'] = 85;
+  //     _columnWidths['status'] = 65;
+  //     _columnWidths['type'] = 150;
+  //     _columnWidths['time'] = 100;
+  //     _columnWidths['duration'] = 90;
+  //     _columnWidths['reqLen'] = 90;
+  //     _columnWidths['resLen'] = 90;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +84,7 @@ class _FlowDataGridState extends State<FlowDataGrid> {
       (title: "Res", key: 'resLen'),
     ];
     return SfDataGrid(
-      source: widget.dataSource,
+      source: _flowDataSource,
       controller: widget.controller,
       allowColumnsResizing: true,
       allowSorting: true,
