@@ -5,7 +5,7 @@ import 'package:mitmui/utils/logger.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../models/flow.dart' as models;
-import '../store/flow_store.dart';
+import '../store/flows_provider.dart';
 import '../services/websocket_service.dart';
 import '../widgets/flow_data_grid.dart';
 import '../widgets/flow_data_source.dart';

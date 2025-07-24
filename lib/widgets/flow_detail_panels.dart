@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mitmui/store/flow_store.dart';
+import 'package:mitmui/store/flows_provider.dart';
 import 'package:mitmui/store/selected_ids_notifier.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:mitmui/widgets/flow_detail_panel_abstract.dart';

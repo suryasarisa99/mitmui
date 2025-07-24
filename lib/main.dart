@@ -7,7 +7,7 @@ import 'package:mitmui/utils/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:window_size/window_size.dart';
 import 'screens/flow_list_screen.dart';
-import 'store/flow_store.dart';
+import 'store/flows_provider.dart';
 import 'services/websocket_service.dart';
 
 void main() async {

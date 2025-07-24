@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:mitmui/models/flow.dart';
 import 'package:mitmui/models/response_body.dart';
 import 'package:mitmui/utils/logger.dart';
-import '../store/flow_store.dart';
+import '../store/flows_provider.dart';
 
 const _log = Logger("mitmproxy_client");
 

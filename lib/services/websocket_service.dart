@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:web_socket_channel/io.dart';
 import '../api/mitmproxy_client.dart';
-import '../store/flow_store.dart';
+import '../store/flows_provider.dart';
 
 const _log = Logger("websocket_service");
 
