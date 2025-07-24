@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:mitmui/models/flow.dart';
 import 'package:mitmui/models/response_body.dart';
 import 'package:mitmui/utils/logger.dart';
-import '../models/flow_store.dart';
+import '../store/flow_store.dart';
 
 const _log = Logger("mitmproxy_client");
 
@@ -64,7 +64,7 @@ class MitmproxyClient {
     final res = await Process.start('mitmweb', [
       '--web-port',
       port.toString(),
-      '--no-web-open-browser',
+      // '--no-web-open-browser',
       '--set',
       'web_password=$password',
     ]);
@@ -101,12 +101,15 @@ class MitmproxyClient {
 
       if (response.statusCode == 200) {
         final List<dynamic> flows = response.data;
-        _log.info('Received ${flows.length} flows from API');
+        _log.info('Received ${flows.length} flows from API, ${response.data}');
         return flows.map((f) => MitmFlow.fromJson(f)).toList();
       } else {
-        _log.error('Failed to fetch flows: ${response.statusCode}');
+        _log.error(
+          'Failed to fetch flows: ${response.statusCode}, ${response.data}',
+        );
         return [];
       }
+      // return [];
     } catch (e) {
       _log.error('Error fetching flows: $e');
       return [];
@@ -155,10 +158,10 @@ class MitmproxyClient {
   }
 
   /// Fetches all existing flows and adds them to the FlowStore
-  static Future<void> loadFlowsIntoStore(FlowStore flowStore) async {
+  static Future<void> loadFlowsIntoStore(FlowsProvider flowStore) async {
     try {
       final flows = await getFlows();
-      flowStore.addMultiple(flows);
+      flowStore.addAll(flows);
       _log.info('Added ${flows.length} flows to FlowStore');
     } catch (e) {
       _log.error('Error loading flows into store: $e');

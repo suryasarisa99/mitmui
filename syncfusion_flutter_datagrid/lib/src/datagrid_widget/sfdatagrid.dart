@@ -5989,12 +5989,14 @@ class _SfDataGridThemeData extends SfDataGridThemeData {
 
   @override
   Color? get gridLineColor => colorScheme.onSurface[33];
+  // Color? get gridLineColor => Colors.blueAccent;
 
   @override
   double get gridLineStrokeWidth => 1;
 
   @override
-  Color? get selectionColor => colorScheme.onSurface[19];
+  // Color? get selectionColor => colorScheme.onSurface[19];
+  Color? get selectionColor => const Color(0xffd93639);
 
   @override
   DataGridCurrentCellStyle get currentCellStyle => DataGridCurrentCellStyle(
@@ -6028,6 +6030,7 @@ class _SfDataGridThemeData extends SfDataGridThemeData {
 
   @override
   Color? get rowHoverColor => colorScheme.onSurface[10];
+  // Color? get rowHoverColor => Colors.amber;
 
   @override
   TextStyle get rowHoverTextStyle => TextStyle(

@@ -1,19 +1,22 @@
 // status_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../services/websocket_service.dart';
-import '../models/flow_store.dart';
+import '../store/flow_store.dart';
 
-class StatusScreen extends StatefulWidget {
+class StatusScreen extends ConsumerStatefulWidget {
   const StatusScreen({super.key});
 
   @override
-  State<StatusScreen> createState() => _StatusScreenState();
+  ConsumerState<StatusScreen> createState() => _StatusScreenState();
 }
 
-class _StatusScreenState extends State<StatusScreen> {
+class _StatusScreenState extends ConsumerState<StatusScreen> {
   final List<String> _statusMessages = [];
   bool _isConnected = false;
+  late final webSocketService = ref.read(websocketServiceProvider);
 
   @override
   void initState() {
@@ -25,11 +28,6 @@ class _StatusScreenState extends State<StatusScreen> {
   }
 
   void _subscribeToWebSocketService() {
-    final webSocketService = Provider.of<WebSocketService>(
-      context,
-      listen: false,
-    );
-
     if (!webSocketService.isConnected) {
       webSocketService.connect();
     }
@@ -52,10 +50,6 @@ class _StatusScreenState extends State<StatusScreen> {
   }
 
   void _reconnect() {
-    final webSocketService = Provider.of<WebSocketService>(
-      context,
-      listen: false,
-    );
     // Disconnect first if already connected
     if (webSocketService.isConnected) {
       webSocketService.disconnect().then((_) {
@@ -79,9 +73,8 @@ class _StatusScreenState extends State<StatusScreen> {
           ),
           TextButton(
             onPressed: () {
-              Provider.of<FlowStore>(context, listen: false).clear();
+              ref.read(flowsProvider.notifier).clear();
               Navigator.pop(context);
-
               setState(() {
                 _statusMessages.add(
                   '${DateTime.now().toString().substring(0, 19)}: Cleared all flows',
@@ -97,8 +90,6 @@ class _StatusScreenState extends State<StatusScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final flowStore = Provider.of<FlowStore>(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('mitmproxy Status'),
@@ -146,11 +137,11 @@ class _StatusScreenState extends State<StatusScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Text('Total flows captured: ${flowStore.count}'),
-                    const SizedBox(height: 4),
-                    Text('HTTP flows: ${flowStore.httpFlows.length}'),
-                    const SizedBox(height: 4),
-                    Text('WebSocket flows: ${flowStore.webSocketFlows.length}'),
+                    // Text('Total flows captured: ${flowStore.count}'),
+                    // const SizedBox(height: 4),
+                    // Text('HTTP flows: ${flowStore.httpFlows.length}'),
+                    // const SizedBox(height: 4),
+                    // Text('WebSocket flows: ${flowStore.webSocketFlows.length}'),
                   ],
                 ),
               ),
@@ -187,7 +178,7 @@ class _StatusScreenState extends State<StatusScreen> {
 
             // Reconnect button
             SizedBox(
-              width: double.infinity,
+              width: 300,
               child: ElevatedButton.icon(
                 onPressed: _reconnect,
                 icon: const Icon(Icons.refresh),
@@ -195,6 +186,16 @@ class _StatusScreenState extends State<StatusScreen> {
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
+              ),
+            ),
+            SizedBox(
+              width: 300,
+              child: ElevatedButton(
+                onPressed: () => GoRouter.of(context).replace('/'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text('Flow List'),
               ),
             ),
           ],

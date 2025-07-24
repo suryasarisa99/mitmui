@@ -1,23 +1,22 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
-import '../models/flow.dart' as models;
 import 'flow_data_source.dart';
+import '../store/selected_ids_notifier.dart';
 
 const _log = Logger("flow_data_grid");
 
 class FlowDataGrid extends StatefulWidget {
   final FlowDataSource dataSource;
-  final Function(models.MitmFlow) onFlowSelected;
   final DataGridController controller;
+
+  // Notifier for selected row IDs
 
   const FlowDataGrid({
     super.key,
     required this.dataSource,
-    required this.onFlowSelected,
     required this.controller,
   });
 
@@ -26,51 +25,9 @@ class FlowDataGrid extends StatefulWidget {
 }
 
 class _FlowDataGridState extends State<FlowDataGrid> {
-  final FocusNode _focusNode = FocusNode();
-  final Set<LogicalKeyboardKey> _pressedKeys = {};
-  String _message = 'Press and hold a key...';
-  final focusScoeNode = FocusScopeNode();
-  @override
-  void initState() {
-    super.initState();
-    _focusNode.requestFocus();
-    focusScoeNode.requestFocus();
-    // _focusNode.addListener(_onFocusChange);
-  }
-
   @override
   void dispose() {
-    // _focusNode.removeListener(_onFocusChange);
-    _focusNode.dispose();
     super.dispose();
-  }
-
-  // void _onFocusChange() {
-  //   if (!_focusNode.hasFocus) {
-  //     setState(() {
-  //       _message = 'Click to focus';
-  //       _pressedKeys.clear(); // Clear pressed keys if focus is lost
-  //     });
-  //   }
-  // }
-
-  void _handleKeyEvent(KeyEvent event) {
-    _log.info(
-      'Key event: ${event.runtimeType} - ${event.logicalKey.debugName}',
-    );
-    if (event is KeyDownEvent) {
-      _pressedKeys.add(event.logicalKey);
-    } else if (event is KeyUpEvent) {
-      _pressedKeys.remove(event.logicalKey);
-    }
-    // setState(() {
-    //   if (_pressedKeys.isEmpty) {
-    //     _message = 'No key held';
-    //   } else {
-    //     _message =
-    //         'Keys held: ${_pressedKeys.map((key) => key.debugName ?? key.keyLabel).join(', ')}';
-    //   }
-    // });
   }
 
   // Store column widths
@@ -106,7 +63,6 @@ class _FlowDataGridState extends State<FlowDataGrid> {
   }
 
   Widget _buildSyncfusionDataGrid() {
-    debugPrint("Building Syncfusion DataGrid, with: ${_focusNode.hasFocus}");
     final headerCells = [
       (title: "ID", key: 'id'),
       (title: "URL", key: 'url'),
@@ -143,55 +99,30 @@ class _FlowDataGridState extends State<FlowDataGrid> {
         _log.info("Key event: ${keyEvent.logicalKey.debugName}");
         if (HardwareKeyboard.instance.isMetaPressed &&
             keyEvent.logicalKey == LogicalKeyboardKey.keyC) {
-          _log.info("Copying selected flows");
+          _log.info(
+            "Copying selected flows: ${widget.controller.selectedRow?.getCells().first.value}",
+          );
           return true; // Indicate that we handled this key event
         }
         return false; // Let the grid handle other key events
       },
-      // onSelectionChanged: (oldGrid, newGrid) {
-      //   _log.info("Selection changed from $oldGrid to $newGrid");
-      // },
-
-      // Track keyboard navigation and select row
-      onCurrentCellActivated:
-          (RowColumnIndex newRowColumnIndex, RowColumnIndex oldRowColumnIndex) {
-            // no need of rowIndex-1, it does not calls for header row
-            if (newRowColumnIndex.rowIndex < 0) return;
-            try {
-              // Get the actual row based on current display order (after sorting)
-              final actualRowIndex = newRowColumnIndex.rowIndex;
-              if (actualRowIndex < 0 ||
-                  actualRowIndex >= widget.dataSource.effectiveRows.length) {
-                return;
-              }
-
-              // Get the effective row at the current position
-              final actualRow = widget.dataSource.effectiveRows[actualRowIndex];
-
-              // Find the ID cell to identify which flow this represents
-              final idCell = actualRow.getCells().firstWhere(
-                (cell) => cell.columnName == 'id',
-                orElse: () => DataGridCell<String>(columnName: 'id', value: ''),
-              );
-
-              // Parse the ID to get the original flow index
-              final originalIndex = int.tryParse(idCell.value.toString());
-              if (originalIndex != null &&
-                  originalIndex >= 0 &&
-                  originalIndex < widget.dataSource.flows.length) {
-                final selectedFlow = widget.dataSource.flows[originalIndex];
-                widget.onFlowSelected(selectedFlow);
-              }
-            } catch (e) {
-              _log.error('Error selecting flow: $e');
-            }
-          },
       onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
         if (details.width < 44) return false;
         setState(() {
           _columnWidths[details.column.columnName] = details.width;
         });
         return true;
+      },
+      onSelectionChanged: (addedRows, removedRows) {
+        final addedRowIds = addedRows
+            .map((row) => row.getCells().first.value)
+            .toList();
+        final removedRowIds = removedRows
+            .map((row) => row.getCells().first.value)
+            .toList();
+        // Update the notifier
+        selectedIdsNotifier.addIds(addedRowIds);
+        selectedIdsNotifier.removeIds(removedRowIds);
       },
       columns: <GridColumn>[
         for (final header in headerCells)

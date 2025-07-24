@@ -2,18 +2,23 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:web_socket_channel/io.dart';
 import '../api/mitmproxy_client.dart';
-import '../models/flow_store.dart';
+import '../store/flow_store.dart';
 
 const _log = Logger("websocket_service");
+
+final websocketServiceProvider = Provider<WebSocketService>((ref) {
+  return WebSocketService(ref); // Pass the ref when creating the service
+});
 
 class WebSocketService {
   IOWebSocketChannel? _channel;
   WebSocket? _webSocket;
   StreamSubscription? _subscription;
-  final FlowStore _flowStore;
+  final Ref _ref;
 
   // Stream controller for connection status updates
   final _connectionStatusController =
@@ -24,7 +29,7 @@ class WebSocketService {
   bool _isConnected = false;
   bool get isConnected => _isConnected;
 
-  WebSocketService(this._flowStore);
+  WebSocketService(this._ref);
 
   // MitmproxyClient instance for API requests
 
@@ -33,7 +38,7 @@ class WebSocketService {
       _log.success('WebSocket already connected');
       return;
     }
-
+    await Future.delayed(const Duration(seconds: 1));
     final wsUrl =
         '${MitmproxyClient.websocketUrl}/updates?token=39d24913dbee653e3157035f5193e045';
     _log.debug('Attempting to connect to WebSocket: $wsUrl with cookies');
@@ -84,9 +89,8 @@ class WebSocketService {
           "$flowType: ${flow['request']['pretty_host']}, id: ${flow['id']}",
         );
 
-        // Update the FlowStore
-        _flowStore.handleMessage(message);
-
+        // Update the Flows
+        _ref.read(flowsProvider.notifier).handleMessage(message);
         // Notify listeners about new flow
         _connectionStatusController.add(
           ConnectionStatus(
@@ -158,7 +162,8 @@ class WebSocketService {
   /// but can also be called manually to refresh flows
   Future<void> fetchExistingFlows() async {
     try {
-      await MitmproxyClient.loadFlowsIntoStore(_flowStore);
+      final flows = await MitmproxyClient.getFlows();
+      _ref.read(flowsProvider.notifier).addAll(flows);
     } catch (e) {
       _log.error('Error fetching existing flows: $e');
     }

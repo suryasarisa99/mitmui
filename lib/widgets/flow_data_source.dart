@@ -9,6 +9,7 @@ class FlowDataSource extends DataGridSource {
   List<models.MitmFlow> _flows = [];
   List<DataGridRow> _flowRows = [];
   String? _selectedFlowId;
+  final DataGridController dataGridController;
 
   // Getter to expose the flows list
   List<models.MitmFlow> get flows => _flows;
@@ -19,7 +20,7 @@ class FlowDataSource extends DataGridSource {
     notifyListeners();
   }
 
-  FlowDataSource(this._flows) {
+  FlowDataSource(this._flows, {required this.dataGridController}) {
     _flowRows = _getFlowRows();
   }
 
@@ -208,40 +209,12 @@ class FlowDataSource extends DataGridSource {
 
   @override
   DataGridRowAdapter buildRow(DataGridRow row) {
-    // Get the flow ID from this row to check if it's selected
-    String? flowId;
-    int? rowIndex;
-
-    var idCell = row.getCells().firstWhere(
-      (cell) => cell.columnName == 'id',
-      orElse: () => DataGridCell<String>(columnName: 'id', value: ''),
-    );
-
-    rowIndex = int.tryParse(idCell.value);
-    if (rowIndex != null && rowIndex >= 0 && rowIndex < _flows.length) {
-      flowId = _flows[rowIndex].id;
-    }
-
-    // Get the actual displayed index of this row after sorting/filtering
+    // int? rowId = int.tryParse(row.getCells().first.value);
     final actualDisplayIndex = effectiveRows.indexOf(row);
     final isEvenRow = actualDisplayIndex % 2 == 0;
-
-    // Check if this row is selected by the user
-    final isSelected = flowId != null && flowId == _selectedFlowId;
-    const textStyle = TextStyle(fontSize: 15, color: Color(0xFFEEEEEE));
-
-    // Determine the row color based on selection and even/odd alternating pattern
-    Color? rowColor;
-    if (isSelected) {
-      // Selected row gets priority with a distinctive color
-      rowColor = const Color(0xffD13639);
-    } else {
-      // Use alternating colors for even/odd rows
-      rowColor = isEvenRow
-          ? const Color(0xff1E1E1E) // Even rows - darker (same as background)
-          : const Color(0xff26282A); // Odd rows - slightly lighter
-    }
-
+    final Color rowColor = isEvenRow
+        ? const Color(0xff1E1E1E) // Even rows - darker (same as background)
+        : const Color(0xff26282A); // Odd rows - slightly lighter
     return DataGridRowAdapter(
       color: rowColor,
       cells: row.getCells().map<Widget>((dataGridCell) {
@@ -261,7 +234,7 @@ class FlowDataSource extends DataGridSource {
           child: Text(
             dataGridCell.value.toString(),
             overflow: TextOverflow.ellipsis,
-            style: textStyle,
+            style: TextStyle(fontSize: 15, color: Color(0xFFEEEEEE)),
           ),
         );
       }).toList(),
