@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_resizable_container/flutter_resizable_container.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/utils/logger.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../models/flow.dart' as models;
 import '../store/flows_provider.dart';
-import '../services/websocket_service.dart';
 import '../widgets/flow_data_grid.dart';
-import '../widgets/flow_data_source.dart';
 import '../widgets/flow_detail_panels.dart';
 
 const _log = Logger("flow_list_screen");
@@ -24,7 +21,7 @@ class _FlowListScreenState extends State<FlowListScreen> {
   // Single data source for all flows
 
   // Controller for the data grid to track selection and highlighting
-  final DataGridController _dataGridController = DataGridController();
+  final _dtController = DtController();
 
   @override
   void initState() {
@@ -116,14 +113,12 @@ class _FlowListScreenState extends State<FlowListScreen> {
             // ),
           ],
         ),
-        body: _buildFlowList((store) => store.flows),
+        body: _buildBody(),
       ),
     );
   }
 
-  Widget _buildFlowList(
-    List<models.MitmFlow> Function(FlowsProvider) flowSelector,
-  ) {
+  Widget _buildBody() {
     return ResizableContainer(
       direction: Axis.vertical,
       children: [
@@ -133,16 +128,10 @@ class _FlowListScreenState extends State<FlowListScreen> {
             thickness: 0.6,
             color: Colors.grey[800]!,
           ),
-          child: _buildDataTable(),
+          child: FlowDataGrid(controller: _dtController),
         ),
-        ResizableChild(
-          child: BottomPannel(dataGridController: _dataGridController),
-        ),
+        ResizableChild(child: BottomPannel(dtController: _dtController)),
       ],
     );
-  }
-
-  Widget _buildDataTable() {
-    return FlowDataGrid(controller: _dataGridController);
   }
 }

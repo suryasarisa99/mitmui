@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mitmui/dt_table/dt_table.dart';
+import 'package:mitmui/dt_table/dt_models.dart';
 import 'package:mitmui/store/flows_provider.dart';
 import 'package:mitmui/utils/logger.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import 'flow_data_source.dart';
-import '../store/selected_ids_notifier.dart';
 
 const _log = Logger("flow_data_grid");
 
 class FlowDataGrid extends ConsumerStatefulWidget {
-  final DataGridController controller;
+  final DtController controller;
 
   const FlowDataGrid({super.key, required this.controller});
 
@@ -22,15 +22,15 @@ class FlowDataGrid extends ConsumerStatefulWidget {
 class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
   late final FlowDataSource _flowDataSource = FlowDataSource(
     initialFlows: ref.read(flowsProvider).values.toList(),
-    dataGridController: widget.controller,
+    dtController: widget.controller,
   );
   @override
   void initState() {
     super.initState();
     ref.listenManual(flowsProvider, (oldFlows, newFlows) {
       int flowsAdded = newFlows.length - (oldFlows?.length ?? 0);
+      _flowDataSource.handleFlows(newFlows.values.toList());
       if (flowsAdded > 0) {}
-      _flowDataSource.buildFlowRows(newFlows.values.toList());
     });
   }
 
@@ -68,10 +68,6 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildSyncfusionDataGrid();
-  }
-
-  Widget _buildSyncfusionDataGrid() {
     final headerCells = [
       (title: "ID", key: 'id'),
       (title: "URL", key: 'url'),
@@ -83,75 +79,34 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
       (title: "Req", key: 'reqLen'),
       (title: "Res", key: 'resLen'),
     ];
-    return SfDataGrid(
+    return DtTable(
       source: _flowDataSource,
       controller: widget.controller,
-      allowColumnsResizing: true,
-      allowSorting: true,
-      allowMultiColumnSorting: true,
-      allowTriStateSorting: true,
-      isScrollbarAlwaysShown: true,
-      columnResizeMode: ColumnResizeMode.onResize,
-      columnWidthMode: ColumnWidthMode.fill, // Fill available space
-      showColumnHeaderIconOnHover: true, // Show resize indicator on hover
-      highlightRowOnHover: true, // Better UX for desktop
-      navigationMode: GridNavigationMode.row, // Enable keyboard navigation
-      rowHeight: 36,
-      headerRowHeight: 26,
-      showHorizontalScrollbar: false,
-      allowColumnsDragging: true,
-      frozenColumnsCount: 1,
-      selectionMode: SelectionMode.multiple,
-      gridLinesVisibility: GridLinesVisibility.none,
-      headerGridLinesVisibility: GridLinesVisibility.both,
+      // tableWidth: MediaQuery.sizeOf(context).width,
+      tableWidth: double.infinity,
+      headerHeight: 30,
+      rowHeight: 32,
       onKeyEvent: (keyEvent) {
         _log.info("Key event: ${keyEvent.logicalKey.debugName}");
         if (HardwareKeyboard.instance.isMetaPressed &&
             keyEvent.logicalKey == LogicalKeyboardKey.keyC) {
           _log.info(
-            "Copying selected flows: ${widget.controller.selectedRow?.getCells().first.value}",
+            "Copying selected flows: ${widget.controller.focusedRowId}",
           );
           return true; // Indicate that we handled this key event
         }
         return false; // Let the grid handle other key events
       },
-      onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
-        if (details.width < 44) return false;
-        setState(() {
-          _columnWidths[details.column.columnName] = details.width;
-        });
-        return true;
-      },
-      onSelectionChanged: (addedRows, removedRows) {
-        final addedRowIds = addedRows
-            .map((row) => row.getCells().first.value)
-            .toList();
-        final removedRowIds = removedRows
-            .map((row) => row.getCells().first.value)
-            .toList();
-        // Update the notifier
-        selectedIdsNotifier.addIds(addedRowIds);
-        selectedIdsNotifier.removeIds(removedRowIds);
-      },
-      columns: <GridColumn>[
+      headerColumns: [
         for (final header in headerCells)
-          GridColumn(
-            columnName: header.key,
-            width: _columnWidths[header.key]!,
-            label: Container(
-              padding: EdgeInsets.only(left: header.key == 'url' ? 8.0 : 0),
-              alignment: header.key == 'url'
-                  ? Alignment.centerLeft
-                  : Alignment.center,
-              child: Text(
-                header.title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 11,
-                  color: Color(0xFFEEEEEE),
-                ),
-              ),
-            ),
+          DtColumn(
+            key: header.key,
+            title: header.title,
+            fontSize: 12,
+            initialWidth: _columnWidths[header.key]!,
+            isNumeric: header.key == 'id' || header.key == 'status',
+            isExpand: header.key == 'url',
+            // maxWidth: 1200,
           ),
       ],
     );

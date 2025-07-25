@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mitmui/dt_table/dt_table.dart';
+import 'package:mitmui/dt_table/dt_models.dart';
 import 'package:mitmui/store/flows_provider.dart';
-import 'package:mitmui/store/selected_ids_notifier.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:mitmui/widgets/flow_detail_panel_abstract.dart';
 import 'package:flutter_resizable_container/flutter_resizable_container.dart';
 import 'package:mitmui/widgets/flow_detail_url.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 const _log = Logger("flow_detail_panels");
 
 class BottomPannel extends ConsumerStatefulWidget {
-  const BottomPannel({required this.dataGridController, super.key});
-  final DataGridController dataGridController;
+  const BottomPannel({required this.dtController, super.key});
+  final DtController dtController;
 
   @override
   ConsumerState<BottomPannel> createState() => _BottomPannelState();
@@ -24,38 +24,38 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
   @override
   void initState() {
     super.initState();
-    selectedIdsNotifier.addListener(_listener);
+    widget.dtController.addSpecificListener(_listener);
   }
 
-  void _listener() {
-    int? flowRowId = int.tryParse(
-      widget.dataGridController.selectedRow?.getCells().first.value ?? '',
-    );
-    if (flowRowId == null) return;
-    String newFlowId = ref.read(flowsProvider.notifier).flows[flowRowId].id;
-    if (newFlowId != flowId) {
-      _log.info('Selected flow ID changed from $flowId to $newFlowId');
-      setState(() {
-        flowId = newFlowId;
-      });
+  void _listener(DtControllerChange change) {
+    if (change.type == ChangeType.focusedRow) {
+      print('Focused row changed: ${change}');
+      int? flowRowId = int.tryParse(widget.dtController.focusedRowId ?? '');
+      if (flowRowId != null) {
+        setState(() {
+          flowId = ref.read(flowsProvider.notifier).flows[flowRowId].id;
+        });
+        print('Selected flow ID: $flowId');
+      }
     }
   }
 
   @override
   void dispose() {
-    selectedIdsNotifier.removeListener(_listener); // ✅ cleanup
+    // widget.dataGridController.removeSpecificListener();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    print("Building BottomPannel with flowId: $flowId");
     if (flowId == null) {
       return const SizedBox.shrink();
     }
-    final selectedFlow = ref.watch(selectedFlowProvider(flowId!));
-    // final selectedFlow = ref.watch(
-    //   flowsProvider.select((flows) => flows[flowId!]),
-    // );
+    // final selectedFlow = ref.watch(selectedFlowProvider(flowId!));
+    final selectedFlow = ref.watch(
+      flowsProvider.select((flows) => flows[flowId!]),
+    );
     // final selectedFlow = ref.watch(flowsProvider)[flowId!];
     if (selectedFlow == null) {
       _log.error('Selected flow not found for ID: $flowId');
