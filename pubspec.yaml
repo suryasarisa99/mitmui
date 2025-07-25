@@ -8,6 +8,8 @@ environment:
 
 dependencies:
   collection: ^1.19.1
+  desktop_lifecycle: ^0.1.1
+  desktop_multi_window: ^0.2.1
   dio: ^5.8.0+1
   flutter:
     sdk: flutter

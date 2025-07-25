@@ -11,7 +11,7 @@ class DtController extends ChangeNotifier {
   Set<String> _selectedRowIds = {};
   String? _focusedRowId;
   String? _selectionAnchorId;
-  String? _sortColumnKey;
+  int? _sortColumnIndex;
   SortType _sortType = SortType.none;
 
   // Callback for specific change types
@@ -20,7 +20,7 @@ class DtController extends ChangeNotifier {
   Set<String> get selectedRowIds => Set.from(_selectedRowIds);
   String? get focusedRowId => _focusedRowId;
   String? get selectionAnchorId => _selectionAnchorId;
-  String? get sortColumnKey => _sortColumnKey;
+  int? get sortColumnIndex => _sortColumnIndex;
   SortType get sortType => _sortType;
 
   void addSpecificListener(void Function(DtControllerChange change) listener) {
@@ -106,19 +106,19 @@ class DtController extends ChangeNotifier {
   }
 
   // Internal methods for the widget to use
-  void _updateSelectedRows(Set<String> rowIds) {
+  void updateSelectedRows(Set<String> rowIds) {
     final oldValue = Set.from(_selectedRowIds);
     _selectedRowIds = Set.from(rowIds);
     _notifySpecificChange(ChangeType.selectedRows, oldValue, _selectedRowIds);
   }
 
-  void _updateFocusedRow(String? rowId) {
+  void updateFocusedRow(String? rowId) {
     final oldValue = _focusedRowId;
     _focusedRowId = rowId;
     _notifySpecificChange(ChangeType.focusedRow, oldValue, _focusedRowId);
   }
 
-  void _updateSelectionAnchor(String? rowId) {
+  void updateSelectionAnchor(String? rowId) {
     final oldValue = _selectionAnchorId;
     _selectionAnchorId = rowId;
     _notifySpecificChange(
@@ -128,14 +128,18 @@ class DtController extends ChangeNotifier {
     );
   }
 
-  void updateSort(String? columnKey, SortType sortType) {
-    final oldColumnKey = _sortColumnKey;
+  void updateSort(int? columnIndex, SortType sortType) {
+    final oldColumnIndex = _sortColumnIndex;
     final oldSortType = _sortType;
 
-    _sortColumnKey = columnKey;
+    _sortColumnIndex = columnIndex;
     _sortType = sortType;
 
-    _notifySpecificChange(ChangeType.sortColumn, oldColumnKey, _sortColumnKey);
+    _notifySpecificChange(
+      ChangeType.sortColumn,
+      oldColumnIndex,
+      _sortColumnIndex,
+    );
     _notifySpecificChange(ChangeType.sortType, oldSortType, _sortType);
   }
 }
@@ -279,15 +283,15 @@ class _DtTableState extends State<DtTable> {
       final allIds = widget.source.effectiveRows.map((e) => e.id).toSet();
       final selectedIds = Set<String>.from(_controller._selectedRowIds);
       selectedIds.removeWhere((id) => !allIds.contains(id));
-      _controller._updateSelectedRows(selectedIds);
+      _controller.updateSelectedRows(selectedIds);
 
       if (_controller._focusedRowId != null &&
           !allIds.contains(_controller._focusedRowId)) {
-        _controller._updateFocusedRow(null);
+        _controller.updateFocusedRow(null);
       }
       if (_controller._selectionAnchorId != null &&
           !allIds.contains(_controller._selectionAnchorId)) {
-        _controller._updateSelectionAnchor(null);
+        _controller.updateSelectionAnchor(null);
       }
     });
   }
@@ -377,7 +381,7 @@ class _DtTableState extends State<DtTable> {
 
     if (nextIndex != currentIndex && nextIndex >= 0) {
       final nextRow = widget.source.effectiveRows[nextIndex];
-      _controller._updateFocusedRow(nextRow.id);
+      _controller.updateFocusedRow(nextRow.id);
 
       if (isShiftPressed) {
         final anchorIndex = _controller._selectionAnchorId != null
@@ -392,11 +396,11 @@ class _DtTableState extends State<DtTable> {
               .sublist(start, end + 1)
               .map((r) => r.id)
               .toSet();
-          _controller._updateSelectedRows(rangeIds);
+          _controller.updateSelectedRows(rangeIds);
         }
       } else {
-        _controller._updateSelectedRows({nextRow.id});
-        _controller._updateSelectionAnchor(nextRow.id);
+        _controller.updateSelectedRows({nextRow.id});
+        _controller.updateSelectionAnchor(nextRow.id);
       }
 
       _scrollToIndex(nextIndex);
@@ -431,7 +435,7 @@ class _DtTableState extends State<DtTable> {
         HardwareKeyboard.instance.isMetaPressed;
     final isShiftPressed = HardwareKeyboard.instance.isShiftPressed;
 
-    _controller._updateFocusedRow(row.id);
+    _controller.updateFocusedRow(row.id);
 
     if (isShiftPressed && _controller._selectionAnchorId != null) {
       final anchorIndex = widget.source.effectiveRows.indexWhere(
@@ -450,9 +454,9 @@ class _DtTableState extends State<DtTable> {
         if (isCtrlPressed) {
           final selectedIds = Set<String>.from(_controller._selectedRowIds);
           selectedIds.addAll(rangeIds);
-          _controller._updateSelectedRows(selectedIds);
+          _controller.updateSelectedRows(selectedIds);
         } else {
-          _controller._updateSelectedRows(rangeIds);
+          _controller.updateSelectedRows(rangeIds);
         }
       }
     } else if (isCtrlPressed) {
@@ -462,11 +466,11 @@ class _DtTableState extends State<DtTable> {
       } else {
         selectedIds.add(row.id);
       }
-      _controller._updateSelectedRows(selectedIds);
-      _controller._updateSelectionAnchor(row.id);
+      _controller.updateSelectedRows(selectedIds);
+      _controller.updateSelectionAnchor(row.id);
     } else {
-      _controller._updateSelectedRows({row.id});
-      _controller._updateSelectionAnchor(row.id);
+      _controller.updateSelectedRows({row.id});
+      _controller.updateSelectionAnchor(row.id);
     }
   }
 
@@ -654,12 +658,8 @@ class _DtTableState extends State<DtTable> {
               children: [
                 Expanded(
                   child: GestureDetector(
-                    onTap: () => widget.source.sort(
-                      column.key,
-                      actualIndex,
-                      column.isNumeric,
-                      _controller,
-                    ),
+                    onTap: () =>
+                        widget.source.sort(actualIndex, column.isNumeric),
                     child: Padding(
                       padding: const EdgeInsets.only(left: 8.0),
                       child: Row(
@@ -675,7 +675,7 @@ class _DtTableState extends State<DtTable> {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          if (widget.source.sortColumnKey == column.key)
+                          if (widget.source.sortColumnIndex == index)
                             Icon(
                               widget.source.sortType == SortType.ascending
                                   ? Icons.arrow_upward

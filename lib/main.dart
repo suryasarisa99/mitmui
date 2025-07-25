@@ -1,18 +1,35 @@
+import 'dart:convert';
+
+import 'package:desktop_lifecycle/desktop_lifecycle.dart';
+import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/screens/status_screen.dart';
 import 'package:mitmui/utils/logger.dart';
+import 'package:mitmui/widgets/flow_detail_panels.dart';
 import 'package:provider/provider.dart';
 import 'package:window_size/window_size.dart';
 import 'screens/flow_list_screen.dart';
 import 'store/flows_provider.dart';
 import 'services/websocket_service.dart';
 
-void main() async {
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  print('args: $args');
 
+  if (args.firstOrNull == 'multi_window') {
+    final windowId = int.parse(args[1]);
+    final argument = args[2].isEmpty ? const {} : jsonDecode(args[2]);
+    runApp(
+      PannelWindow(
+        windowController: WindowController.fromWindowId(windowId),
+        args: argument,
+      ),
+    );
+    return;
+  }
   // Set minimum window size for desktop platforms
   setWindowTitle('MITMproxy UI');
   setWindowMinSize(const Size(1200, 800));
@@ -87,3 +104,69 @@ final GoRouter router = GoRouter(
     GoRoute(path: '/status', builder: (context, state) => const StatusScreen()),
   ],
 );
+
+class PannelWindow extends StatelessWidget {
+  const PannelWindow({
+    super.key,
+    required this.windowController,
+    required this.args,
+  });
+  final WindowController windowController;
+  final Map<String, dynamic> args;
+
+  @override
+  Widget build(BuildContext context) {
+    // Use a desktop-optimized theme with more neutral colors and less rounded corners
+    final baseTheme = ThemeData(
+      useMaterial3: true,
+      colorSchemeSeed: Colors.red,
+      brightness: Brightness.light,
+    );
+
+    final darkTheme = ThemeData(
+      useMaterial3: false,
+      colorSchemeSeed: const Color.fromARGB(255, 255, 55, 55),
+      brightness: Brightness.dark,
+      textTheme: const TextTheme(
+        bodyMedium: TextStyle(fontSize: 14, color: Colors.white),
+      ),
+    );
+
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: baseTheme,
+      darkTheme: darkTheme,
+      themeMode: ThemeMode.system, // Use system theme preference
+      home: Scaffold(
+        backgroundColor: Color(0xff1C1E20),
+        body: Column(
+          children: [
+            // if (args != null)
+            //   Text(
+            //     'Arguments: ${args.toString()}',
+            //     style: const TextStyle(fontSize: 20),
+            //   ),
+            // ValueListenableBuilder<bool>(
+            //   valueListenable: DesktopLifecycle.instance.isActive,
+            //   builder: (context, active, child) {
+            //     if (active) {
+            //       return const Text('Window Active');
+            //     } else {
+            //       return const Text('Window Inactive');
+            //     }
+            //   },
+            // ),
+            // TextButton(
+            //   onPressed: () async {
+            //     windowController.close();
+            //   },
+            //   child: const Text('Close this window'),
+            // ),
+            SizedBox(height: 20),
+            Expanded(child: BottomPannelAsFullScreen(args: args)),
+          ],
+        ),
+      ),
+    );
+  }
+}

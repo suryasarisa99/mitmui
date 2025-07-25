@@ -16,9 +16,6 @@ class FlowDataSource extends DtSource {
     required this.dtController,
   }) {
     handleFlows(initialFlows);
-    dtController.addListener(() {
-      notifyListeners(); // This will trigger widget rebuild
-    });
   }
 
   void handleFlows(List<models.MitmFlow> flows) {
@@ -117,6 +114,13 @@ class FlowDataSource extends DtSource {
 
   @override
   List<DtRow> get rows => _flowRows;
+  @override
+  DtController get controller => dtController;
+
+  void replaceData(List<models.MitmFlow> flows) {
+    handleFlows(flows);
+    dtController.clearSelection();
+  }
 
   @override
   DtRowAdapter buildRow(DtRow row, int index, bool isSelected, bool hasFocus) {

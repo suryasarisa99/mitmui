@@ -1,7 +1,11 @@
+import 'dart:convert';
+
+import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/dt_table/dt_models.dart';
+import 'package:mitmui/models/flow.dart';
 import 'package:mitmui/store/flows_provider.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:mitmui/widgets/flow_detail_panel_abstract.dart';
@@ -9,6 +13,60 @@ import 'package:flutter_resizable_container/flutter_resizable_container.dart';
 import 'package:mitmui/widgets/flow_detail_url.dart';
 
 const _log = Logger("flow_detail_panels");
+
+class BottomPannelAsFullScreen extends StatefulWidget {
+  final Map<String, dynamic> args;
+  const BottomPannelAsFullScreen({required this.args, super.key});
+
+  @override
+  State<BottomPannelAsFullScreen> createState() =>
+      _BottomPannelAsFullScreenState();
+}
+
+class _BottomPannelAsFullScreenState extends State<BottomPannelAsFullScreen> {
+  late final MitmFlow selectedFlow;
+  @override
+  void initState() {
+    super.initState();
+    _log.info('Selected flow: ${widget.args['args2']}');
+    selectedFlow = MitmFlow.fromJson(jsonDecode(widget.args['args2']['flow']));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FlowDetailURL(
+          scheme: selectedFlow.request.scheme,
+          host: selectedFlow.request.prettyHost ?? '',
+          path: selectedFlow.request.path,
+          statusCode: selectedFlow.response?.statusCode ?? 0,
+          method: selectedFlow.request.method,
+        ),
+        Expanded(
+          child: ResizableContainer(
+            children: [
+              // selected flow request summary
+              ResizableChild(
+                divider: ResizableDivider(
+                  thickness: 1.0,
+                  padding: 18,
+                  color: const Color.fromARGB(255, 56, 57, 63),
+                ),
+                child: RequestDetailsPanel(flow: selectedFlow),
+              ),
+              // selected flow response summary
+              ResizableChild(child: ResponseDetailsPanel(flow: selectedFlow)),
+            ],
+            direction: Axis.horizontal,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 class BottomPannel extends ConsumerStatefulWidget {
   const BottomPannel({required this.dtController, super.key});
@@ -29,13 +87,11 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
 
   void _listener(DtControllerChange change) {
     if (change.type == ChangeType.focusedRow) {
-      print('Focused row changed: ${change}');
       int? flowRowId = int.tryParse(widget.dtController.focusedRowId ?? '');
       if (flowRowId != null) {
         setState(() {
           flowId = ref.read(flowsProvider.notifier).flows[flowRowId].id;
         });
-        print('Selected flow ID: $flowId');
       }
     }
   }
@@ -72,6 +128,26 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(
+            height: 40,
+            child: TextButton(
+              onPressed: () async {
+                final window = await DesktopMultiWindow.createWindow(
+                  jsonEncode({
+                    'args1': 'Sub window',
+                    'args2': {'flow': jsonEncode(selectedFlow.toJson())},
+                  }),
+                );
+                window
+                  ..setFrame(const Offset(0, 0) & const Size(1280, 720))
+                  ..center()
+                  ..setTitle('Another window')
+                  ..show();
+              },
+              child: Text("sep"),
+            ),
+          ),
+          SizedBox(width: 8.0),
           FlowDetailURL(
             scheme: selectedFlow.request.scheme,
             host: selectedFlow.request.prettyHost ?? '',

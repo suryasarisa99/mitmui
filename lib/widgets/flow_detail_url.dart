@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:mitmui/utils/statusCode.dart';
 
@@ -67,6 +70,7 @@ class FlowDetailURL extends StatelessWidget {
           ),
 
           SizedBox(width: 8.0),
+
           Expanded(
             child: Text.rich(
               TextSpan(
