@@ -44,7 +44,7 @@ class FlowDataSource extends DtSource {
           // URL Cell with styled hostname and path
           DtCell(
             // columnName: 'url',
-            value: flow.request.prettyHost ?? '' + flow.request.path,
+            value: (flow.request.prettyHost ?? '') + flow.request.path,
           ),
 
           // Method Cell

@@ -30,7 +30,7 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
   void addOrUpdateFlow(MitmFlow flow) {
     // state[flow.id] = flow;
     state = {...state, flow.id: flow};
-    _applyFilter();
+    // _applyFilter();
   }
 
   void addAll(List<MitmFlow> flows) {
@@ -38,7 +38,7 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
     //   state[flow.id] = flow;
     // }
     state = {...state, for (final flow in flows) flow.id: flow};
-    _applyFilter();
+    // _applyFilter();
   }
 
   /// Handle a WebSocket message from mitmproxy
@@ -58,7 +58,7 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
   /// Remove a flow by ID
   void removeFlow(String id) {
     state.remove(id);
-    _applyFilter();
+    // _applyFilter();
   }
 
   /// Get a flow by ID
@@ -66,66 +66,70 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
     return state[id];
   }
 
-  /// Set a filter for the flows
-  void setFilter(String filter) {
-    _filter = filter;
-    _applyFilter();
+  List<MitmFlow> getFlowsByIds(Set<String> ids) {
+    return ids.map((id) => state[id]).whereType<MitmFlow>().toList();
   }
 
-  /// Apply the current filter to the flows
-  void _applyFilter() {
-    if (_filter.isEmpty) {
-      _filteredFlows = state.values.toList();
-      _filteredFlows.sort(
-        (a, b) => b.timestampCreated.compareTo(a.timestampCreated),
-      );
-      return;
-    }
+  // /// Set a filter for the flows
+  // void setFilter(String filter) {
+  //   _filter = filter;
+  //   _applyFilter();
+  // }
 
-    final lowercaseFilter = _filter.toLowerCase();
-    _filteredFlows = state.values.where((flow) {
-      // Search in request URL
-      if (flow.request.url.toLowerCase().contains(lowercaseFilter)) {
-        return true;
-      }
+  // /// Apply the current filter to the flows
+  // void _applyFilter() {
+  //   if (_filter.isEmpty) {
+  //     _filteredFlows = state.values.toList();
+  //     _filteredFlows.sort(
+  //       (a, b) => b.timestampCreated.compareTo(a.timestampCreated),
+  //     );
+  //     return;
+  //   }
 
-      // Search in request method
-      if (flow.request.method.toLowerCase().contains(lowercaseFilter)) {
-        return true;
-      }
+  //   final lowercaseFilter = _filter.toLowerCase();
+  //   _filteredFlows = state.values.where((flow) {
+  //     // Search in request URL
+  //     if (flow.request.url.toLowerCase().contains(lowercaseFilter)) {
+  //       return true;
+  //     }
 
-      // Search in host
-      if ((flow.request.prettyHost ?? flow.request.host).toLowerCase().contains(
-        lowercaseFilter,
-      )) {
-        return true;
-      }
+  //     // Search in request method
+  //     if (flow.request.method.toLowerCase().contains(lowercaseFilter)) {
+  //       return true;
+  //     }
 
-      // Search in response status (if available)
-      if (flow.response != null) {
-        if (flow.response!.statusCode.toString().contains(lowercaseFilter)) {
-          return true;
-        }
-      }
+  //     // Search in host
+  //     if ((flow.request.prettyHost ?? flow.request.host).toLowerCase().contains(
+  //       lowercaseFilter,
+  //     )) {
+  //       return true;
+  //     }
 
-      return false;
-    }).toList();
+  //     // Search in response status (if available)
+  //     if (flow.response != null) {
+  //       if (flow.response!.statusCode.toString().contains(lowercaseFilter)) {
+  //         return true;
+  //       }
+  //     }
 
-    // Sort by timestamp, newest first
-    _filteredFlows.sort(
-      (a, b) => b.timestampCreated.compareTo(a.timestampCreated),
-    );
-  }
+  //     return false;
+  //   }).toList();
+
+  //   // Sort by timestamp, newest first
+  //   _filteredFlows.sort(
+  //     (a, b) => b.timestampCreated.compareTo(a.timestampCreated),
+  //   );
+  // }
 
   /// Get WebSocket flows only
-  List<MitmFlow> get webSocketFlows =>
-      state.values.where((flow) => flow.isWebSocket).toList()
-        ..sort((a, b) => b.timestampCreated.compareTo(a.timestampCreated));
+  // List<MitmFlow> get webSocketFlows =>
+  //     state.values.where((flow) => flow.isWebSocket).toList()
+  //       ..sort((a, b) => b.timestampCreated.compareTo(a.timestampCreated));
 
-  /// Get HTTP flows only (non-WebSocket)
-  List<MitmFlow> get httpFlows =>
-      state.values.where((flow) => !flow.isWebSocket).toList()
-        ..sort((a, b) => b.timestampCreated.compareTo(a.timestampCreated));
+  // /// Get HTTP flows only (non-WebSocket)
+  // List<MitmFlow> get httpFlows =>
+  //     state.values.where((flow) => !flow.isWebSocket).toList()
+  //       ..sort((a, b) => b.timestampCreated.compareTo(a.timestampCreated));
 }
 
 final flowsProvider = NotifierProvider<FlowsProvider, Map<String, MitmFlow>>(

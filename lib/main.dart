@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,11 +8,8 @@ import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/screens/status_screen.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:mitmui/widgets/flow_detail_panels.dart';
-import 'package:provider/provider.dart';
 import 'package:window_size/window_size.dart';
 import 'screens/flow_list_screen.dart';
-import 'store/flows_provider.dart';
-import 'services/websocket_service.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,24 +28,24 @@ void main(List<String> args) async {
   }
   // Set minimum window size for desktop platforms
   setWindowTitle('MITMproxy UI');
-  setWindowMinSize(const Size(1200, 800));
+  setWindowMinSize(const Size(800, 600));
   setWindowMaxSize(Size.infinite);
 
   // Default window size
-  getCurrentScreen().then((screen) {
-    if (screen != null) {
-      final screenFrame = screen.visibleFrame;
-      final width = screenFrame.width * 0.8;
-      final height = screenFrame.height * 0.8;
-      setWindowFrame(
-        Rect.fromCenter(
-          center: Offset(screenFrame.center.dx, screenFrame.center.dy),
-          width: width,
-          height: height,
-        ),
-      );
-    }
-  });
+  // getCurrentScreen().then((screen) {
+  //   if (screen != null) {
+  //     final screenFrame = screen.visibleFrame;
+  //     final width = screenFrame.width * 0.8;
+  //     final height = screenFrame.height * 0.8;
+  //     setWindowFrame(
+  //       Rect.fromCenter(
+  //         center: Offset(screenFrame.center.dx, screenFrame.center.dy),
+  //         width: width,
+  //         height: height,
+  //       ),
+  //     );
+  //   }
+  // });
   Logger.logLevel = LogLevel.info;
   await MitmproxyClient.startMitm();
   // Create and initialize the FlowStore
@@ -66,6 +62,12 @@ void main(List<String> args) async {
   await Future.delayed(const Duration(milliseconds: 500));
 }
 
+final colorScheme = ColorScheme.fromSeed(
+  seedColor: Color(0xffD13639),
+  brightness: Brightness.dark,
+  surface: const Color(0xff1C1E20),
+);
+
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
@@ -80,10 +82,30 @@ class MainApp extends StatelessWidget {
 
     final darkTheme = ThemeData(
       useMaterial3: false,
-      colorSchemeSeed: const Color.fromARGB(255, 255, 55, 55),
-      brightness: Brightness.dark,
+      colorScheme: colorScheme,
       textTheme: const TextTheme(
         bodyMedium: TextStyle(fontSize: 14, color: Colors.white),
+      ),
+      scaffoldBackgroundColor: Color(0xff1C1E20),
+
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Color(0xff1C1E20),
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        toolbarHeight: 25,
+      ),
+      secondaryHeaderColor: Color(0xff1C1E20),
+      // primaryColor: Colors.green,
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(),
+        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        isDense: true,
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Color.fromARGB(255, 255, 255, 255).withValues(alpha: 0.5),
+            width: 2,
+          ),
+        ),
       ),
     );
 

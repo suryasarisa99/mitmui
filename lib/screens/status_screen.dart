@@ -191,6 +191,16 @@ class _StatusScreenState extends ConsumerState<StatusScreen> {
             SizedBox(
               width: 300,
               child: ElevatedButton(
+                onPressed: () => GoRouter.of(context).replace('/filter'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text('Filter Demo Screen'),
+              ),
+            ),
+            SizedBox(
+              width: 300,
+              child: ElevatedButton(
                 onPressed: () => GoRouter.of(context).replace('/'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),

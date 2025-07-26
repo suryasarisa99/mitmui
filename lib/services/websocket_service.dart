@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mitmui/store/filtered_flows_provider.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:web_socket_channel/io.dart';
 import '../api/mitmproxy_client.dart';
@@ -79,6 +80,21 @@ class WebSocketService {
     }
   }
 
+  void updateFilter(String filter) {
+    if (_webSocket == null || !_isConnected) {
+      _log.error('WebSocket is not connected, cannot update filter');
+      return;
+    }
+
+    final filterMessage = jsonEncode({
+      'type': 'flows/updateFilter',
+      'payload': {'name': 'search', 'expr': filter},
+    });
+    _log.info('filterMessage: $filterMessage');
+    _webSocket!.add(filterMessage);
+    _log.debug('Filter updated: $filter');
+  }
+
   void _handleMessage(dynamic message) {
     try {
       final decodedMessage = jsonDecode(message);
@@ -100,6 +116,20 @@ class WebSocketService {
             hasNewData: true,
           ),
         );
+        if (decodedMessage['payload']['matching_filters']['search'] == true) {
+          _ref.read(filteredFlowsProvider.notifier).addNew(flow['id']);
+        }
+      } else if (flowType == 'flows/filterUpdate') {
+        final result = decodedMessage['payload']['matching_flow_ids'];
+        if (result == null) {
+          // it means filter was reset
+        } else {
+          final ids = Set<String>.from(
+            decodedMessage['payload']['matching_flow_ids'],
+          );
+          _ref.read(filteredFlowsProvider.notifier).updateInitial(ids);
+          _log.success('Filter updated: ${decodedMessage['payload']}');
+        }
       }
     } catch (e) {
       _log.error('Error parsing WebSocket message: $e');

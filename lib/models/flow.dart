@@ -14,7 +14,7 @@ class MitmFlow {
   final String comment;
   final double timestampCreated;
   final ClientConnection clientConn;
-  final ServerConnection serverConn;
+  final ServerConnection? serverConn;
   final HttpRequest request;
   final HttpResponse? response; // Can be null for incomplete requests
   final WebSocketInfo? websocket; // Only present for WebSocket connections
@@ -48,7 +48,9 @@ class MitmFlow {
       comment: json['comment'] ?? '',
       timestampCreated: json['timestamp_created'],
       clientConn: ClientConnection.fromJson(json['client_conn']),
-      serverConn: ServerConnection.fromJson(json['server_conn']),
+      serverConn: json['server_conn'] != null
+          ? ServerConnection.fromJson(json['server_conn'])
+          : null,
       request: HttpRequest.fromJson(json['request']),
       response: json['response'] != null
           ? HttpResponse.fromJson(json['response'])
@@ -70,7 +72,7 @@ class MitmFlow {
       'comment': comment,
       'timestamp_created': timestampCreated,
       'client_conn': clientConn.toJson(),
-      'server_conn': serverConn.toJson(),
+      'server_conn': serverConn?.toJson(),
       'request': request.toJson(),
     };
 
@@ -188,19 +190,19 @@ class ClientConnection {
 /// Represents the server connection details
 class ServerConnection {
   final String id;
-  final List<dynamic> peername; // [ip, port, ...]
-  final List<dynamic> sockname; // [ip, port, ...]
-  final List<dynamic> address; // [ip, port]
+  final List<dynamic>? peername; // [ip, port, ...]
+  final List<dynamic>? sockname; // [ip, port, ...]
+  final List<dynamic>? address; // [ip, port]
   final bool tlsEstablished;
   final Certificate? cert;
   final String? sni;
   final String? cipher;
   final String? alpn;
   final String? tlsVersion;
-  final double timestampStart;
+  final double? timestampStart;
   final double? timestampTcpSetup;
   final double? timestampTlsSetup;
-  final dynamic timestampEnd; // Can be null
+  final dynamic timestampEnd;
 
   ServerConnection({
     required this.id,
@@ -223,9 +225,15 @@ class ServerConnection {
     try {
       return ServerConnection(
         id: json['id'],
-        peername: json['peername'],
-        sockname: json['sockname'],
-        address: json['address'],
+        peername: json['peername'] != null
+            ? List<dynamic>.from(json['peername'])
+            : null,
+        sockname: json['sockname'] != null
+            ? List<dynamic>.from(json['sockname'])
+            : null,
+        address: json['address'] != null
+            ? List<dynamic>.from(json['address'])
+            : null,
         tlsEstablished: json['tls_established'],
         cert: json['cert'] != null ? Certificate.fromJson(json['cert']) : null,
         sni: json['sni'],
@@ -239,6 +247,7 @@ class ServerConnection {
       );
     } catch (err) {
       _log.error("error parsing ServerConnection: $err");
+      _log.error("json: $json");
       throw FormatException('Invalid ServerConnection data: $err');
     }
   }
@@ -267,8 +276,8 @@ class ServerConnection {
     return data;
   }
 
-  String get serverIp => address[0].toString();
-  int get serverPort => address[1] as int;
+  String? get serverIp => address?[0].toString();
+  int? get serverPort => address?[1] as int?;
 }
 
 /// Represents a TLS certificate

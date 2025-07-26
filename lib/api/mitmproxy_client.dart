@@ -172,6 +172,46 @@ class MitmproxyClient {
   static void updateCookies(String newCookies) {
     cookies = newCookies;
     _dio.options.headers['Cookie'] = newCookies;
+    // get _xsrf from cookies
+    final xsrfCookie = newCookies
+        .split('; ')
+        .firstWhere((cookie) => cookie.startsWith('_xsrf='), orElse: () => '');
+    if (xsrfCookie.isNotEmpty) {
+      final xsrfValue = xsrfCookie.split('=')[1];
+      _dio.options.headers['X-XSRFToken'] = xsrfValue;
+    }
     _log.info('Updated cookies, newCookies: $newCookies ');
   }
+
+  /// copy curl request
+  static Future<String> getExportReq(
+    String flowId,
+    RequestExport exportType,
+  ) async {
+    try {
+      print({
+        "arguments": [exportType.name, "@$flowId"],
+      });
+      final response = await _dio.post(
+        '/commands/export',
+        data: {
+          "arguments": [exportType.name, "@$flowId"],
+        },
+      );
+
+      if (response.statusCode == 200) {
+        _log.info('Curl request fetched successfully for flow $flowId');
+        print(response.data);
+        return response.data['value'];
+      } else {
+        _log.error('Failed to fetch curl request: ${response.statusCode}');
+        throw Exception('Failed to fetch curl request: ${response.statusCode}');
+      }
+    } catch (e) {
+      _log.error('Error fetching curl request: $e');
+      throw Exception('Error fetching curl request: $e');
+    }
+  }
 }
+
+enum RequestExport { curl, httpie, raw_request, raw_response, raw }
