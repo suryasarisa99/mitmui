@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter_code_editor/flutter_code_editor.dart';
 import 'package:flutter_highlight/themes/mono-blue.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:interactive_json_preview/interactive_json_preview.dart';
 import 'package:mitmui/models/flow.dart' as models;
 
 import 'package:flutter/material.dart';

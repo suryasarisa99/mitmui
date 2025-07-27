@@ -6,10 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/dt_table/dt_models.dart';
 import 'package:mitmui/models/flow.dart';
+import 'package:mitmui/widgets/resize.dart';
 import 'package:mitmui/store/flows_provider.dart';
+import 'package:mitmui/theme.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:mitmui/widgets/flow_detail_panel_abstract.dart';
-import 'package:flutter_resizable_container/flutter_resizable_container.dart';
 import 'package:mitmui/widgets/flow_detail_url.dart';
 
 const _log = Logger("flow_detail_panels");
@@ -25,6 +26,7 @@ class BottomPannelAsFullScreen extends StatefulWidget {
 
 class _BottomPannelAsFullScreenState extends State<BottomPannelAsFullScreen> {
   late final MitmFlow selectedFlow;
+
   @override
   void initState() {
     super.initState();
@@ -44,23 +46,27 @@ class _BottomPannelAsFullScreenState extends State<BottomPannelAsFullScreen> {
           path: selectedFlow.request.path,
           statusCode: selectedFlow.response?.statusCode ?? 0,
           method: selectedFlow.request.method,
+          onOpenInNewWindow: () => {},
         ),
         Expanded(
           child: ResizableContainer(
-            children: [
-              // selected flow request summary
-              ResizableChild(
-                divider: ResizableDivider(
-                  thickness: 1.0,
-                  padding: 18,
-                  color: const Color.fromARGB(255, 56, 57, 63),
+            axis: Axis.horizontal,
+            child1: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xff161819),
+                border: Border(
+                  right: BorderSide(color: Colors.grey[700]!, width: 0.5),
                 ),
-                child: RequestDetailsPanel(flow: selectedFlow),
               ),
-              // selected flow response summary
-              ResizableChild(child: ResponseDetailsPanel(flow: selectedFlow)),
-            ],
-            direction: Axis.horizontal,
+              child: RequestDetailsPanel(
+                flow: selectedFlow,
+                resizeController: ResizableController(),
+              ),
+            ),
+            child2: ResponseDetailsPanel(
+              flow: selectedFlow,
+              resizeController: ResizableController(),
+            ),
           ),
         ),
       ],
@@ -78,6 +84,7 @@ class BottomPannel extends ConsumerStatefulWidget {
 
 class _BottomPannelState extends ConsumerState<BottomPannel> {
   String? flowId;
+  final resizeController = ResizableController();
 
   @override
   void initState() {
@@ -102,8 +109,23 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
     super.dispose();
   }
 
+  void onOpenInNewWindow(MitmFlow flow) async {
+    final window = await DesktopMultiWindow.createWindow(
+      jsonEncode({
+        'args1': 'Sub window',
+        'args2': {'flow': jsonEncode(flow.toJson())},
+      }),
+    );
+    window
+      ..setFrame(const Offset(0, 0) & const Size(1280, 720))
+      ..center()
+      ..setTitle('Another window')
+      ..show();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = AppTheme.from(Theme.brightnessOf(context));
     print("Building BottomPannel with flowId: $flowId");
     if (flowId == null) {
       return const SizedBox.shrink();
@@ -128,49 +150,70 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 40,
-            child: TextButton(
-              onPressed: () async {
-                final window = await DesktopMultiWindow.createWindow(
-                  jsonEncode({
-                    'args1': 'Sub window',
-                    'args2': {'flow': jsonEncode(selectedFlow.toJson())},
-                  }),
-                );
-                window
-                  ..setFrame(const Offset(0, 0) & const Size(1280, 720))
-                  ..center()
-                  ..setTitle('Another window')
-                  ..show();
-              },
-              child: Text("sep"),
-            ),
-          ),
-          SizedBox(width: 8.0),
           FlowDetailURL(
             scheme: selectedFlow.request.scheme,
             host: selectedFlow.request.prettyHost ?? '',
             path: selectedFlow.request.path,
             statusCode: selectedFlow.response?.statusCode ?? 0,
             method: selectedFlow.request.method,
+            onOpenInNewWindow: () => onOpenInNewWindow(selectedFlow),
           ),
+          // if (resizeController.isChild1Hidden ||
+          //     resizeController.isChild2Hidden) ...[
+          //   Container(
+          //     color: theme.surfaceDark,
+          //     padding: const EdgeInsets.symmetric(
+          //       horizontal: 16.0,
+          //       vertical: 8.0,
+          //     ),
+          //     child: Row(
+          //       children: [
+          //         ...[
+          //           (t: "Request", h: resizeController.isChild1Hidden),
+          //           (t: "Response", h: resizeController.isChild2Hidden),
+          //         ].map(
+          //           (tab) => Container(
+          //             padding: const EdgeInsets.only(bottom: 6.0),
+          //             margin: const EdgeInsets.only(right: 16.0),
+          //             decoration: BoxDecoration(
+          //               border: Border(
+          //                 bottom: !tab.h
+          //                     ? BorderSide(
+          //                         color: const Color(0xFFE44343)!,
+          //                         width: 2,
+          //                       )
+          //                     : BorderSide.none,
+          //               ),
+          //             ),
+          //             child: Text(
+          //               tab.t,
+          //               style: TextStyle(
+          //                 fontSize: 14,
+          //                 fontWeight: FontWeight.w500,
+          //                 color: Colors.grey[300],
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ],
           Expanded(
             child: ResizableContainer(
-              children: [
-                // selected flow request summary
-                ResizableChild(
-                  divider: ResizableDivider(
-                    thickness: 1.0,
-                    padding: 18,
-                    color: const Color.fromARGB(255, 56, 57, 63),
-                  ),
-                  child: RequestDetailsPanel(flow: selectedFlow),
-                ),
-                // selected flow response summary
-                ResizableChild(child: ResponseDetailsPanel(flow: selectedFlow)),
-              ],
-              direction: Axis.horizontal,
+              controller: resizeController,
+              axis: Axis.horizontal,
+              dividerColor: Colors.grey[800]!,
+              onDragDividerWidth: 2,
+              onDragDividerColor: const Color.fromARGB(255, 105, 93, 92),
+              child1: RequestDetailsPanel(
+                flow: selectedFlow,
+                resizeController: resizeController,
+              ),
+              child2: ResponseDetailsPanel(
+                flow: selectedFlow,
+                resizeController: resizeController,
+              ),
             ),
           ),
         ],
@@ -180,7 +223,11 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
 }
 
 class RequestDetailsPanel extends DetailsPanel {
-  const RequestDetailsPanel({super.flow, super.key});
+  const RequestDetailsPanel({
+    required super.resizeController,
+    super.flow,
+    super.key,
+  });
 
   @override
   DetailsPanelState createState() => _RequestDetailsPanelState();
@@ -272,7 +319,11 @@ class _RequestDetailsPanelState extends DetailsPanelState {
 }
 
 class ResponseDetailsPanel extends DetailsPanel {
-  const ResponseDetailsPanel({super.flow, super.key});
+  const ResponseDetailsPanel({
+    required super.resizeController,
+    super.flow,
+    super.key,
+  });
 
   @override
   DetailsPanelState createState() => _ResponseDetailsPanelState();

@@ -1,15 +1,23 @@
+import 'dart:convert';
+
+import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/models/flow.dart' as models;
 import 'package:mitmui/models/response_body.dart';
+import 'package:mitmui/widgets/resize.dart';
 import 'package:mitmui/utils/statusCode.dart';
 import 'package:mitmui/widgets/preview_body.dart';
 
 abstract class DetailsPanel extends StatefulWidget {
   final models.MitmFlow? flow;
-
-  const DetailsPanel({required this.flow, super.key});
+  final ResizableController resizeController;
+  const DetailsPanel({
+    required this.resizeController,
+    required this.flow,
+    super.key,
+  });
 }
 
 abstract class DetailsPanelState extends State<DetailsPanel>
@@ -18,6 +26,7 @@ abstract class DetailsPanelState extends State<DetailsPanel>
   List<String> get tabTitles;
   String get title;
   late Future<MitmBody> mitmBodyFuture;
+  // final x = ResizableController();
   // late Future<String> mitmDataFuture;
 
   late TabController tabController = TabController(
@@ -26,11 +35,13 @@ abstract class DetailsPanelState extends State<DetailsPanel>
   );
   bool get isRequest => title == 'Request';
   bool get isResponse => title == 'Response';
+  bool get isSinglePannel =>
+      widget.resizeController.isChild1Hidden ||
+      widget.resizeController.isChild2Hidden;
 
   @override
   void initState() {
     super.initState();
-
     // Initialize futures for body and data
     final type = title.toLowerCase();
     mitmBodyFuture = MitmproxyClient.getMitmBody(widget.flow!.id, type);
@@ -60,10 +71,14 @@ abstract class DetailsPanelState extends State<DetailsPanel>
         children: [
           // Request title
           SizedBox(width: 10),
-          Text(
-            title,
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-          ),
+          if (!isSinglePannel)
+            Text(
+              title,
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            )
+          else
+            _buildToggleButtons(),
+
           const SizedBox(width: 16),
           // Tab bar for different views
           Expanded(
@@ -83,7 +98,107 @@ abstract class DetailsPanelState extends State<DetailsPanel>
               ),
             ),
           ),
+          IconButton(
+            iconSize: 22,
+            splashRadius: 16,
+            padding: const EdgeInsets.all(0.0),
+            constraints: BoxConstraints(minHeight: 24, minWidth: 24),
+            onPressed: () {
+              // Toggle fullscreen mode for the current panel
+              // if (isRequest) {
+              //   if (widget.resizeController.isChild1Hidden) {
+              //     widget.resizeController.showFirstChild();
+              //   } else {
+              //     widget.resizeController.hideFirstChild();
+              //   }
+              // } else {
+              //   if (widget.resizeController.isChild2Hidden) {
+              //     widget.resizeController.showSecondChild();
+              //   } else {
+              //     widget.resizeController.hideSecondChild();
+              //   }
+              // }
+              if (isRequest) {
+                if (widget.resizeController.isChild2Hidden) {
+                  widget.resizeController.showSecondChild();
+                } else {
+                  widget.resizeController.hideSecondChild();
+                }
+              } else {
+                if (widget.resizeController.isChild1Hidden) {
+                  widget.resizeController.showFirstChild();
+                } else {
+                  widget.resizeController.hideFirstChild();
+                }
+              }
+            },
+            icon: Icon(
+              isRequest
+                  ? (widget.resizeController.isChild1Hidden
+                        ? Icons.fullscreen_exit
+                        : Icons.fullscreen)
+                  : (widget.resizeController.isChild2Hidden
+                        ? Icons.fullscreen_exit
+                        : Icons.fullscreen),
+              color: Colors.grey,
+            ),
+          ),
+          SizedBox(width: 8),
         ],
+      ),
+    );
+  }
+
+  Widget _buildToggleButtons() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min, // Make the row wrap its content
+          children: <Widget>[
+            _buildToggleButton(
+              text: 'Request',
+              isSelected: !widget.resizeController.isChild1Hidden,
+              onPressed: () {
+                widget.resizeController.showFirstChild();
+                widget.resizeController.hideSecondChild();
+              },
+            ),
+            _buildToggleButton(
+              text: 'Response',
+              isSelected: !widget.resizeController.isChild2Hidden,
+              onPressed: () {
+                widget.resizeController.showSecondChild();
+                widget.resizeController.hideFirstChild();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildToggleButton({
+    required String text,
+    required bool isSelected,
+    required VoidCallback onPressed,
+  }) {
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(0),
+      child: Container(
+        color: isSelected
+            ? const Color.fromARGB(255, 215, 61, 14)
+            : Colors.grey[800],
+        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 3.5),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ),
     );
   }

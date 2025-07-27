@@ -169,10 +169,9 @@ packages:
   flutter_resizable_container:
     dependency: "direct main"
     description:
-      name: flutter_resizable_container
-      sha256: e517efb557a949fea79145a18e0c986485b9c68af0322d1528f1ddbc0f690c9f
-      url: "https://pub.dev"
-    source: hosted
+      path: flutter_resizable_container
+      relative: true
+    source: path
     version: "4.2.0"
   flutter_riverpod:
     dependency: "direct main"
@@ -240,6 +239,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  interactive_json_preview:
+    dependency: "direct main"
+    description:
+      name: interactive_json_preview
+      sha256: "5bc97190ff3aaae9613a5cc2cc42fd6387c3c48a1d99d28bcb82e14a24486898"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   intl:
     dependency: transitive
     description:

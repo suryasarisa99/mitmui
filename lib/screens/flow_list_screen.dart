@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_resizable_container/flutter_resizable_container.dart';
 import 'package:mitmui/dt_table/dt_table.dart';
+import 'package:mitmui/widgets/resize.dart';
 import 'package:mitmui/utils/logger.dart';
 
 import '../models/flow.dart' as models;
@@ -120,18 +120,15 @@ class _FlowListScreenState extends State<FlowListScreen> {
 
   Widget _buildBody() {
     return ResizableContainer(
-      direction: Axis.vertical,
-      children: [
-        ResizableChild(
-          divider: ResizableDivider(
-            padding: 5,
-            thickness: 0.6,
-            color: Colors.grey[800]!,
-          ),
-          child: FlowDataGrid(controller: _dtController),
-        ),
-        ResizableChild(child: BottomPannel(dtController: _dtController)),
-      ],
+      axis: Axis.vertical,
+      dividerColor: Colors.grey[600]!,
+      onDragDividerColor: Colors.red,
+      onDragDividerWidth: 3,
+      dividerWidth: 1,
+      dividerHandleWidth: 18,
+      maxRatio: 1,
+      child1: FlowDataGrid(controller: _dtController),
+      child2: BottomPannel(dtController: _dtController),
     );
   }
 }

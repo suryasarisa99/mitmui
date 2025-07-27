@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:mitmui/utils/statusCode.dart';
+import 'package:mitmui/widgets/small_icon_btn.dart';
 
 class FlowDetailURL extends StatelessWidget {
   const FlowDetailURL({
@@ -11,6 +12,7 @@ class FlowDetailURL extends StatelessWidget {
     required this.statusCode,
     required this.method,
     required this.scheme,
+    required this.onOpenInNewWindow,
     super.key,
   });
   final String scheme;
@@ -18,6 +20,7 @@ class FlowDetailURL extends StatelessWidget {
   final String path;
   final int statusCode;
   final String method;
+  final Function() onOpenInNewWindow;
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +107,13 @@ class FlowDetailURL extends StatelessWidget {
               ),
             ),
           ),
+          SmIconButton(
+            btnSize: 20,
+            size: 22,
+            icon: Icons.arrow_outward,
+            onPressed: onOpenInNewWindow,
+          ),
+          SizedBox(width: 8.0),
         ],
       ),
     );
