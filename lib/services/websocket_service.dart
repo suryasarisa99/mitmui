@@ -63,6 +63,7 @@ class WebSocketService {
         _handleMessage,
         onError: _handleError,
         onDone: _handleDisconnection,
+        cancelOnError: false,
       );
 
       // Now fetch existing flows after connection is established
@@ -101,9 +102,8 @@ class WebSocketService {
       final flowType = decodedMessage['type'];
       final flow = decodedMessage['payload']['flow'];
       if (flowType == "flows/add" || flowType == "flows/update") {
-        _log.debug(
-          "$flowType: ${flow['request']['pretty_host']}, id: ${flow['id']}",
-        );
+        final url = flow['request']['url'] ?? flow['request']['host'];
+        _log.debug("$flowType: $url , id: ${flow['id']}");
 
         // Update the Flows
         _ref.read(flowsProvider.notifier).handleMessage(message);
@@ -111,8 +111,7 @@ class WebSocketService {
         _connectionStatusController.add(
           ConnectionStatus(
             isConnected: true,
-            message:
-                'Flow received: ${flow['request']['pretty_host'] ?? flow['request']['host']}',
+            message: 'Flow received: $url',
             hasNewData: true,
           ),
         );

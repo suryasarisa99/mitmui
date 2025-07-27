@@ -450,6 +450,9 @@ class HttpRequest {
     return null;
   }
 
+  String? get cookies => getHeader('cookie');
+  String? get contentTypeHeader => getHeader('content-type');
+
   /// Get the full URL of the request
   String get url => '$scheme://${prettyHost ?? host}:$port$path';
 
@@ -539,6 +542,9 @@ class HttpResponse {
     }
     return null;
   }
+
+  String? get cookies => getHeader('cookie');
+  String? get contentTypeHeader => getHeader('content-type');
 
   /// Calculate response time in milliseconds
   double? get responseTimeMs =>

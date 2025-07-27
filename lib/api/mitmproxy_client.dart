@@ -120,11 +120,13 @@ class MitmproxyClient {
     try {
       final response = await _dio.get(
         '/flows/$flowId/$type/content/Auto.json',
-        queryParameters: {'lines': 513},
+        // queryParameters: {'lines': 513},
       );
 
       if (response.statusCode == 200) {
-        _log.info('Response body fetched successfully for flow $flowId');
+        // _log.debug(
+        //   'res for ${'/flows/$flowId/$type/content/Auto.json'}: ${response.data}',
+        // );
         return MitmBody.fromJson(response.data);
       } else {
         _log.error('Failed to fetch response body: ${response.statusCode}');
@@ -146,9 +148,11 @@ class MitmproxyClient {
         _log.debug('Response body fetched successfully for flow $flowId');
         return response.data;
       } else {
-        _log.error('Failed to fetch response body: ${response.statusCode}');
+        _log.error(
+          'Failed to fetch response body content: ${response.statusCode}',
+        );
         throw Exception(
-          'Failed to fetch response body: ${response.statusCode}',
+          'Failed to fetch response body content: ${response.statusCode}',
         );
       }
     } catch (e) {

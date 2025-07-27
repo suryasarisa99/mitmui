@@ -1,6 +1,9 @@
 class MitmBody {
   final String text;
-  final String viewName;
+
+  /// viewName is null means content is missing
+  /// Query means no body to preview so it gives query params (ignore Query)
+  final String? viewName;
   final String syntaxHighlight;
   final String description;
 

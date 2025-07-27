@@ -254,10 +254,7 @@ class _RequestDetailsPanelState extends DetailsPanelState {
   }
 
   Widget buildCookies() {
-    final cookieHeader = widget.flow?.request.headers.firstWhere(
-      (header) => header[0].toLowerCase() == 'cookie',
-      orElse: () => ['cookie', ''],
-    )[1];
+    final cookieHeader = widget.flow?.request.getHeader('cookie');
     if (cookieHeader == null || cookieHeader.isEmpty) {
       return SizedBox.shrink();
     }

@@ -18,7 +18,7 @@ abstract class DetailsPanelState extends State<DetailsPanel>
   List<String> get tabTitles;
   String get title;
   late Future<MitmBody> mitmBodyFuture;
-  late Future<String> mitmDataFuture;
+  // late Future<String> mitmDataFuture;
 
   late TabController tabController = TabController(
     length: tabsLen,
@@ -34,7 +34,18 @@ abstract class DetailsPanelState extends State<DetailsPanel>
     // Initialize futures for body and data
     final type = title.toLowerCase();
     mitmBodyFuture = MitmproxyClient.getMitmBody(widget.flow!.id, type);
-    mitmDataFuture = MitmproxyClient.getMitmContent(widget.flow!.id, type);
+    // mitmDataFuture = MitmproxyClient.getMitmContent(widget.flow!.id, type);
+  }
+
+  @override
+  void didUpdateWidget(covariant DetailsPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.flow?.id != widget.flow?.id) {
+      // Reset futures when flow changes
+      final type = title.toLowerCase();
+      mitmBodyFuture = MitmproxyClient.getMitmBody(widget.flow!.id, type);
+      // mitmDataFuture = MitmproxyClient.getMitmContent(widget.flow!.id, type);
+    }
   }
 
   Widget buildHeader() {
@@ -170,8 +181,8 @@ abstract class DetailsPanelState extends State<DetailsPanel>
     widget.flow?.request.headers ?? [];
     return SingleChildScrollView(
       padding: const EdgeInsets.only(top: 8.0),
-      child: FutureBuilder<String>(
-        future: mitmDataFuture,
+      child: FutureBuilder(
+        future: mitmBodyFuture,
         builder: (context, snapshot) {
           final List<InlineSpan> headerSpans = [
             // method and path
@@ -260,7 +271,7 @@ abstract class DetailsPanelState extends State<DetailsPanel>
             // Add the actual body content
             headerSpans.add(
               TextSpan(
-                text: snapshot.data,
+                text: snapshot.data?.text,
                 style: const TextStyle(
                   fontSize: 14,
                   color: Colors.white,
@@ -281,10 +292,16 @@ abstract class DetailsPanelState extends State<DetailsPanel>
 
   Widget buildBody() {
     return PreviewBody(
-      response: widget.flow!.response!,
-      responseBodyFuture: mitmBodyFuture,
-      responseDataFuture: mitmDataFuture,
+      contentLength: isRequest
+          ? widget.flow?.request.contentLength
+          : widget.flow?.response?.contentLength,
+      contentType: isRequest
+          ? widget.flow?.request.contentTypeHeader
+          : widget.flow?.response?.contentTypeHeader,
+      bodyFuture: mitmBodyFuture,
+      // dataFuture: mitmDataFuture,
       flowId: widget.flow!.id,
+      url: widget.flow!.request.url,
     );
   }
 }
