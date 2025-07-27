@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
+import 'package:mitmui/widgets/re_editor.dart';
 import 'package:mitmui/widgets/resize.dart';
 import 'package:mitmui/screens/status_screen.dart';
 import 'package:mitmui/utils/logger.dart';
@@ -16,17 +17,17 @@ void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   print('args: $args');
 
-  if (args.firstOrNull == 'multi_window') {
-    final windowId = int.parse(args[1]);
-    final argument = args[2].isEmpty ? const {} : jsonDecode(args[2]);
-    runApp(
-      PannelWindow(
-        windowController: WindowController.fromWindowId(windowId),
-        args: argument,
-      ),
-    );
-    return;
-  }
+  // if (args.firstOrNull == 'multi_window') {
+  //   final windowId = int.parse(args[1]);
+  //   final argument = args[2].isEmpty ? const {} : jsonDecode(args[2]);
+  //   runApp(
+  //     PannelWindow(
+  //       windowController: WindowController.fromWindowId(windowId),
+  //       args: argument,
+  //     ),
+  //   );
+  //   return;
+  // }
   // Set minimum window size for desktop platforms
   setWindowTitle('MITMproxy UI');
   setWindowMinSize(const Size(800, 600));
@@ -60,7 +61,7 @@ void main(List<String> args) async {
 
   // Connect to the WebSocket server after app starts
   // This avoids potential issues with trying to update UI before it's ready
-  await Future.delayed(const Duration(milliseconds: 500));
+  // await Future.delayed(const Duration(milliseconds: 500));
 }
 
 final colorScheme = ColorScheme.fromSeed(

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/dt_table/dt_models.dart';
-import 'package:mitmui/screens/filter.dart';
+import 'package:mitmui/widgets/filter.dart';
 import 'package:mitmui/screens/filter_manager.dart';
 import 'package:mitmui/services/websocket_service.dart';
 import 'package:mitmui/store/filtered_flows_provider.dart';
