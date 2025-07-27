@@ -81,20 +81,6 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
     'resLen': 100,
   };
 
-  // Reset all column widths to their default values
-  // void _resetColumnWidths() {
-  //   setState(() {
-  //     _columnWidths['url'] = 1100;
-  //     _columnWidths['method'] = 85;
-  //     _columnWidths['status'] = 65;
-  //     _columnWidths['type'] = 150;
-  //     _columnWidths['time'] = 100;
-  //     _columnWidths['duration'] = 90;
-  //     _columnWidths['reqLen'] = 90;
-  //     _columnWidths['resLen'] = 90;
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     final headerCells = [
@@ -126,27 +112,25 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
             rowHeight: 32,
             onKeyEvent: (keyEvent) {
               final hk = HardwareKeyboard.instance;
-              final isCtrlPressed = hk.isControlPressed;
-              final isShiftPressed = hk.isShiftPressed;
-              final isMetaPressed = hk.isMetaPressed;
-              final isAltPressed = hk.isAltPressed;
+              final isCtrl = hk.isControlPressed;
+              final isShift = hk.isShiftPressed;
+              final isMeta = hk.isMetaPressed;
+              final isAlt = hk.isAltPressed;
               final k = keyEvent.logicalKey;
-              final rowId = widget.controller.focusedRowId;
+              final flowId = widget.controller.focusedRowId;
+              if (flowId == null) return false;
+              final flow = ref.read(flowsProvider)[flowId];
+              if (flow == null) return false;
               _log.info("Key event: ${keyEvent.logicalKey.debugName}");
-              if (isMetaPressed &&
-                  isAltPressed &&
-                  k == LogicalKeyboardKey.keyC) {
-                final flow = getFlowByRowId(rowId, ref);
-                if (flow == null) return true;
+              if (isMeta && isAlt && k == LogicalKeyboardKey.keyC) {
                 MitmproxyClient.getExportReq(flow.id, RequestExport.curl).then((
                   result,
                 ) {
                   Clipboard.setData(ClipboardData(text: result));
                 });
                 return true; // Indicate that we handled this key event
-              } else if (HardwareKeyboard.instance.isMetaPressed &&
-                  keyEvent.logicalKey == LogicalKeyboardKey.keyC) {
-                copyFlowUrl(widget.controller.focusedRowId);
+              } else if (isMeta && k == LogicalKeyboardKey.keyC) {
+                Clipboard.setData(ClipboardData(text: flow.request.url));
                 return true; // Indicate that we handled this key event
               }
               return false; // Let the grid handle other key events
@@ -167,16 +151,5 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
         ),
       ],
     );
-  }
-
-  void copyFlowUrl(String? flowId) {
-    final flow = getFlowByRowId(flowId, ref);
-    if (flow != null) {
-      final url =
-          '${flow.request.scheme}://' +
-          (flow.request.prettyHost ?? '') +
-          flow.request.path;
-      Clipboard.setData(ClipboardData(text: url + flow.id));
-    }
   }
 }

@@ -454,7 +454,7 @@ class HttpRequest {
   String? get contentTypeHeader => getHeader('content-type');
 
   /// Get the full URL of the request
-  String get url => '$scheme://${prettyHost ?? host}:$port$path';
+  String get url => '$scheme://${prettyHost ?? '$host:$port'}$path';
 
   /// Get just the hostname and path
   String get hostAndPath => '${prettyHost ?? host}$path';

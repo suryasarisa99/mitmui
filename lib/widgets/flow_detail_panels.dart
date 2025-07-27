@@ -94,10 +94,12 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
 
   void _listener(DtControllerChange change) {
     if (change.type == ChangeType.focusedRow) {
-      int? flowRowId = int.tryParse(widget.dtController.focusedRowId ?? '');
-      if (flowRowId != null) {
+      String? rowId = widget.dtController.focusedRowId;
+      if (rowId != null && rowId != flowId) {
+        final x = ref.read(flowsProvider)[rowId];
+        if (x == null) return;
         setState(() {
-          flowId = ref.read(flowsProvider.notifier).flows[flowRowId].id;
+          flowId = x.id;
         });
       }
     }

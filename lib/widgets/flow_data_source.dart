@@ -32,7 +32,7 @@ class FlowDataSource extends DtSource {
       );
 
       return DtRow(
-        id: i.toString(),
+        id: flow.id,
         cells: [
           // ID Cell
           DtCell(
