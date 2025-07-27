@@ -193,9 +193,6 @@ class MitmproxyClient {
     RequestExport exportType,
   ) async {
     try {
-      print({
-        "arguments": [exportType.name, "@$flowId"],
-      });
       final response = await _dio.post(
         '/commands/export',
         data: {
@@ -205,7 +202,6 @@ class MitmproxyClient {
 
       if (response.statusCode == 200) {
         _log.info('Curl request fetched successfully for flow $flowId');
-        print(response.data);
         return response.data['value'];
       } else {
         _log.error('Failed to fetch curl request: ${response.statusCode}');
@@ -214,6 +210,23 @@ class MitmproxyClient {
     } catch (e) {
       _log.error('Error fetching curl request: $e');
       throw Exception('Error fetching curl request: $e');
+    }
+  }
+
+  static Future<void> deleteFlow(String flowId) async {
+    try {
+      final response = await _dio.delete('/flows/$flowId');
+      if (response.statusCode == 200) {
+        _log.info('Flow $flowId deleted successfully');
+      } else {
+        _log.error('Failed to delete flow $flowId: ${response.statusCode}');
+        throw Exception(
+          'Failed to delete flow $flowId: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      _log.error('Error deleting flow $flowId: $e');
+      throw Exception('Error deleting flow $flowId: $e');
     }
   }
 }

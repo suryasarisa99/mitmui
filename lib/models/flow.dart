@@ -38,27 +38,33 @@ class MitmFlow {
   });
 
   factory MitmFlow.fromJson(Map<String, dynamic> json) {
-    return MitmFlow(
-      id: json['id'],
-      intercepted: json['intercepted'],
-      isReplay: json['is_replay'],
-      type: json['type'],
-      modified: json['modified'],
-      marked: json['marked'] ?? '',
-      comment: json['comment'] ?? '',
-      timestampCreated: json['timestamp_created'],
-      clientConn: ClientConnection.fromJson(json['client_conn']),
-      serverConn: json['server_conn'] != null
-          ? ServerConnection.fromJson(json['server_conn'])
-          : null,
-      request: HttpRequest.fromJson(json['request']),
-      response: json['response'] != null
-          ? HttpResponse.fromJson(json['response'])
-          : null,
-      websocket: json['websocket'] != null
-          ? WebSocketInfo.fromJson(json['websocket'])
-          : null,
-    );
+    try {
+      return MitmFlow(
+        id: json['id'],
+        intercepted: json['intercepted'],
+        isReplay: json['is_replay'],
+        type: json['type'],
+        modified: json['modified'],
+        marked: json['marked'] ?? '',
+        comment: json['comment'] ?? '',
+        timestampCreated: json['timestamp_created'],
+        clientConn: ClientConnection.fromJson(json['client_conn']),
+        serverConn: json['server_conn'] != null
+            ? ServerConnection.fromJson(json['server_conn'])
+            : null,
+        request: HttpRequest.fromJson(json['request']),
+        response: json['response'] != null
+            ? HttpResponse.fromJson(json['response'])
+            : null,
+        websocket: json['websocket'] != null
+            ? WebSocketInfo.fromJson(json['websocket'])
+            : null,
+      );
+    } catch (err) {
+      _log.error("error parsing MitmFlow: $err");
+      _log.error("json: $json");
+      throw FormatException('Invalid MitmFlow data: $err');
+    }
   }
 
   Map<String, dynamic> toJson() {

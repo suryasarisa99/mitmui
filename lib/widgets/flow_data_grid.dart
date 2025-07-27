@@ -132,6 +132,13 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
               } else if (isMeta && k == LogicalKeyboardKey.keyC) {
                 Clipboard.setData(ClipboardData(text: flow.request.url));
                 return true; // Indicate that we handled this key event
+              } else if (k == LogicalKeyboardKey.delete) {
+                final selectedIds = widget.controller.selectedRowIds;
+                ref.read(flowsProvider.notifier).removeFlows(selectedIds);
+                for (final id in selectedIds) {
+                  MitmproxyClient.deleteFlow(id);
+                }
+                return true; // Indicate that we handled this key event
               }
               return false; // Let the grid handle other key events
             },

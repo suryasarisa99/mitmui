@@ -57,7 +57,16 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
 
   /// Remove a flow by ID
   void removeFlow(String id) {
-    state.remove(id);
+    // state.remove(id);
+    state = Map.of(state)..remove(id);
+    // _applyFilter();
+  }
+
+  void removeFlows(Iterable<String> ids) {
+    // for (final id in ids) {
+    //   state.remove(id);
+    // }
+    state = Map.of(state)..removeWhere((key, value) => ids.contains(key));
     // _applyFilter();
   }
 
