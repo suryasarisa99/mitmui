@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +22,7 @@ abstract class DetailsPanel extends StatefulWidget {
 }
 
 abstract class DetailsPanelState extends State<DetailsPanel>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   int get tabsLen;
   List<String> get tabTitles;
   String get title;
@@ -29,33 +30,59 @@ abstract class DetailsPanelState extends State<DetailsPanel>
   // final x = ResizableController();
   // late Future<String> mitmDataFuture;
 
-  late TabController tabController = TabController(
-    length: tabsLen,
-    vsync: this,
-  );
+  late TabController tabController;
   bool get isRequest => title == 'Request';
   bool get isResponse => title == 'Response';
   bool get isSinglePannel =>
       widget.resizeController.isChild1Hidden ||
       widget.resizeController.isChild2Hidden;
 
+  void updateData();
+
   @override
   void initState() {
     super.initState();
-    // Initialize futures for body and data
     final type = title.toLowerCase();
     mitmBodyFuture = MitmproxyClient.getMitmBody(widget.flow!.id, type);
-    // mitmDataFuture = MitmproxyClient.getMitmContent(widget.flow!.id, type);
+    updateData();
+    tabController = TabController(
+      length: tabsLen,
+      vsync: this,
+      initialIndex: 0, // Default to the first tab
+    );
   }
 
   @override
   void didUpdateWidget(covariant DetailsPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.flow?.id != widget.flow?.id) {
-      // Reset futures when flow changes
+      String? currentTab;
+      try {
+        currentTab = tabTitles[tabController.index].split(" ")[0];
+        print('Current tab: $currentTab, ${tabController.index}');
+      } catch (e) {
+        currentTab = null;
+        print('current tab is null');
+      }
       final type = title.toLowerCase();
       mitmBodyFuture = MitmproxyClient.getMitmBody(widget.flow!.id, type);
-      // mitmDataFuture = MitmproxyClient.getMitmContent(widget.flow!.id, type);
+      updateData();
+      int newIndex = 0; // Default to the first tab
+      if (currentTab != null) {
+        final foundIndex = tabTitles.indexWhere(
+          (title) => title.startsWith(currentTab!),
+        );
+        print('Found index: $foundIndex');
+        if (foundIndex != -1) {
+          newIndex = foundIndex;
+        }
+      }
+      tabController.dispose();
+      tabController = TabController(
+        length: tabsLen,
+        vsync: this,
+        initialIndex: newIndex, // Set the preserved index
+      );
     }
   }
 

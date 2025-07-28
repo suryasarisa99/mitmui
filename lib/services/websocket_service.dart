@@ -102,8 +102,8 @@ class WebSocketService {
       final flowType = decodedMessage['type'];
       final flow = decodedMessage['payload']['flow'];
       if (flowType == "flows/add" || flowType == "flows/update") {
-        final url = flow['request']['url'] ?? flow['request']['host'];
-        _log.debug("$flowType: $url , id: ${flow['id']}");
+        final flowId = flow['id'];
+        _log.debug("$flowType: ${flow['id']}");
 
         // Update the Flows
         _ref.read(flowsProvider.notifier).handleMessage(message);
@@ -111,12 +111,12 @@ class WebSocketService {
         _connectionStatusController.add(
           ConnectionStatus(
             isConnected: true,
-            message: 'Flow received: $url',
+            message: 'Flow received: $flowId',
             hasNewData: true,
           ),
         );
         if (decodedMessage['payload']['matching_filters']['search'] == true) {
-          _ref.read(filteredFlowsProvider.notifier).addNew(flow['id']);
+          _ref.read(filteredFlowsProvider.notifier).addNew(flowId);
         }
       } else if (flowType == 'flows/filterUpdate') {
         final result = decodedMessage['payload']['matching_flow_ids'];
@@ -132,6 +132,7 @@ class WebSocketService {
       }
     } catch (e) {
       _log.error('Error parsing WebSocket message: $e');
+      _log.error("error for mesage: $message");
     }
   }
 

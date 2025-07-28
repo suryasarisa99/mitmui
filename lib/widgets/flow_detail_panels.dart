@@ -199,16 +199,22 @@ class _RequestDetailsPanelState extends DetailsPanelState {
   String title = 'Request';
   @override
   late List<String> tabTitles;
+  @override
+  late TabController tabController;
 
   @override
   late int tabsLen;
 
-  late List<List<String>> queryParams = getQueryParamsList();
-  late List<List<String>> cookies = getCookiesList();
-  late List<List<String>> headers = widget.flow?.request?.headers ?? [];
+  late List<List<String>> queryParams;
+  late List<List<String>> cookies;
+  late List<List<String>> headers;
 
   @override
-  void initState() {
+  void updateData() {
+    queryParams = getQueryParamsList();
+    cookies = getCookiesList();
+    headers = widget.flow?.request?.headers ?? [];
+
     tabTitles = [
       if (headers.isNotEmpty) 'Headers (${headers.length})',
       if (queryParams.isNotEmpty) 'Query (${queryParams.length})',
@@ -217,25 +223,6 @@ class _RequestDetailsPanelState extends DetailsPanelState {
       'Raw',
     ];
     tabsLen = tabTitles.length;
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(covariant DetailsPanel oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.flow != oldWidget.flow) {
-      queryParams = getQueryParamsList();
-      cookies = getCookiesList();
-      headers = widget.flow?.request?.headers ?? [];
-      tabTitles = [
-        if (headers.isNotEmpty) 'Headers (${headers.length})',
-        if (queryParams.isNotEmpty) 'Query (${queryParams.length})',
-        if (cookies.isNotEmpty) 'Cookies (${cookies.length})',
-        'Body',
-        'Raw',
-      ];
-      tabsLen = tabTitles.length;
-    }
   }
 
   @override
@@ -320,12 +307,14 @@ class _ResponseDetailsPanelState extends DetailsPanelState {
   @override
   late int tabsLen;
 
-  late List<List<String>> cookies = getCookiesList();
-  late List<List<String>> headers = widget.flow?.response?.headers ?? [];
+  late List<List<String>> cookies;
+  late List<List<String>> headers;
 
   @override
-  void initState() {
-    super.initState();
+  updateData() {
+    cookies = getCookiesList();
+    headers = widget.flow?.response?.headers ?? [];
+
     tabTitles = [
       if (headers.isNotEmpty) 'Headers (${headers.length})',
       if (cookies.isNotEmpty) 'Cookies (${cookies.length})',
@@ -333,22 +322,6 @@ class _ResponseDetailsPanelState extends DetailsPanelState {
       'Raw',
     ];
     tabsLen = tabTitles.length;
-  }
-
-  @override
-  void didUpdateWidget(covariant DetailsPanel oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.flow != oldWidget.flow) {
-      cookies = getCookiesList();
-      headers = widget.flow?.response?.headers ?? [];
-      tabTitles = [
-        if (headers.isNotEmpty) 'Headers (${headers.length})',
-        if (cookies.isNotEmpty) 'Cookies (${cookies.length})',
-        'Body',
-        'Raw',
-      ];
-      tabsLen = tabTitles.length;
-    }
   }
 
   @override
