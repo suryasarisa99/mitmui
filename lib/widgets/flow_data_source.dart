@@ -34,16 +34,11 @@ class FlowDataSource extends DtSource {
       return DtRow(
         id: flow.id,
         cells: [
-          // ID Cell
-          DtCell(
-            // columnName: 'id',
-            value: i,
-            textAlign: TextAlign.right,
-          ),
+          // 0: ID Cell
+          DtCell(value: i, textAlign: TextAlign.right),
 
-          // URL Cell with styled hostname and path
+          // 1: URL Cell with styled hostname and path
           DtCell(
-            // columnName: 'url',
             value: flow.request != null
                 ? (flow.request?.prettyHost ??
                           '${flow.request?.host}:${flow.request?.port}') +
@@ -51,68 +46,44 @@ class FlowDataSource extends DtSource {
                 : flow.url,
           ),
 
-          // Method Cell
-          DtCell(
-            // columnName: 'method',
-            // fontWeight: FontWeight.w500,
-            value: flow.request?.method ?? '-',
-            color: methodColor,
-          ),
+          // 2: Method Cell
+          DtCell(value: flow.request?.method, color: methodColor),
 
-          // Status Cell
+          // 3: Status Cell
+          DtCell(color: statusColor, value: flow.response?.statusCode),
+
+          // 4: Type Cell
           DtCell(
-            // columnName: 'status',
-            // fontWeight: FontWeight.bold,
-            color: statusColor,
             value: flow.request == null
                 ? 'TCP'
                 : flow.isWebSocket
-                ? 'WS'
-                : hasResponse
-                ? flow.response!.statusCode.toString()
-                : '-',
-          ),
-
-          // Type Cell
-          DtCell<String>(
-            // columnName: 'type',
-            value: flow.isWebSocket
                 ? 'WebSocket'
-                : flow.response?.contentType?.split(';').first ?? '-',
+                : flow.response?.contentType?.split(';').first,
           ),
 
-          // Time Cell
-          DtCell<String>(
-            // columnName: 'time',
+          // 5: Time Cell
+          DtCell(
             value: flow.createdDateTime.toLocal().toString().substring(11, 19),
           ),
 
-          // Duration Cell - time between request and response in ms
-          DtCell<String>(
-            // columnName: 'duration',
+          // 6: Duration Cell - time between request and response in ms
+          DtCell(
             value:
                 hasResponse &&
                     flow.response?.timestampEnd != null &&
                     flow.request?.timestampStart != null
-                ? '${((flow.response!.timestampEnd! - flow.request!.timestampStart!) * 1000).round()} ms'
-                : '-',
+                ? ((flow.response!.timestampEnd! -
+                              flow.request!.timestampStart!) *
+                          1000)
+                      .round()
+                : null,
           ),
 
-          // Request Length Cell
-          DtCell<String>(
-            // columnName: 'reqLen',
-            value: flow.request?.contentLength != null
-                ? formatBytes(flow.request?.contentLength! ?? 0)
-                : '-',
-          ),
+          // 7: Request Length Cell
+          DtCell(value: flow.request?.contentLength),
 
-          // Response Length Cell
-          DtCell<String>(
-            // columnName: 'resLen',
-            value: hasResponse && flow.response?.contentLength != null
-                ? formatBytes(flow.response!.contentLength!)
-                : '-',
-          ),
+          // 8: Response Length Cell
+          DtCell(value: flow.response?.contentLength),
         ],
       );
     }).toList();
@@ -140,8 +111,21 @@ class FlowDataSource extends DtSource {
           : const Color(0xff26282A);
     }
     final cells = row.cells.mapIndexed((cIndex, cell) {
+      late String text;
+      if (cell.value == null) {
+        text = '-';
+      } else if (cIndex == 6) {
+        // duration in ms
+        text = '${cell.value} ms';
+      } else if (cIndex == 7 || cIndex == 8) {
+        // request and response lengths
+        text = formatBytes(cell.value);
+      } else {
+        text = cell.value.toString();
+      }
+
       return Text(
-        cell.value.toString(),
+        text,
         textAlign: cell.textAlign ?? TextAlign.start,
         style: TextStyle(color: cell.color, overflow: TextOverflow.ellipsis),
       );

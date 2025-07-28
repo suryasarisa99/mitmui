@@ -56,20 +56,18 @@ abstract class DtSource extends ChangeNotifier {
   }
 
   void _applySort(int colIndex, bool isNumeric) {
-    // log('apply sort', stackTrace: StackTrace.current);
     _effectiveRows = List.from(rows);
     if (_sortColumnIndex != null && _sortType != SortType.none) {
       _effectiveRows.sort((a, b) {
-        late int compare;
-        if (isNumeric) {
-          final aValue = a.cells[colIndex].value as num;
-          final bValue = b.cells[colIndex].value as num;
-          compare = aValue.compareTo(bValue);
-        } else {
-          final aValue = a.cells[colIndex].value;
-          final bValue = b.cells[colIndex].value;
-          compare = aValue.compareTo(bValue);
+        final aValue = a.cells[colIndex].value;
+        final bValue = b.cells[colIndex].value;
+        if (aValue == null || bValue == null) {
+          final isAsc = _sortType == SortType.ascending;
+          if (aValue == null && bValue == null) return 0;
+          if (aValue == null) return isAsc ? -1 : 1;
+          return isAsc ? 1 : -1;
         }
+        int compare = aValue.compareTo(bValue);
         return _sortType == SortType.ascending ? compare : -compare;
       });
     }
