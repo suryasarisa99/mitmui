@@ -26,9 +26,7 @@ abstract class DetailsPanelState extends State<DetailsPanel>
   int get tabsLen;
   List<String> get tabTitles;
   String get title;
-  late Future<MitmBody> mitmBodyFuture;
-  // final x = ResizableController();
-  // late Future<String> mitmDataFuture;
+  Future<MitmBody>? mitmBodyFuture;
 
   late TabController tabController;
   bool get isRequest => title == 'Request';
@@ -43,6 +41,7 @@ abstract class DetailsPanelState extends State<DetailsPanel>
   void initState() {
     super.initState();
     final type = title.toLowerCase();
+
     mitmBodyFuture = MitmproxyClient.getMitmBody(widget.flow!.id, type);
     updateData();
     tabController = TabController(

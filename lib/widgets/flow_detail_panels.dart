@@ -128,7 +128,6 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
   @override
   Widget build(BuildContext context) {
     final theme = AppTheme.from(Theme.brightnessOf(context));
-    print("Building BottomPannel with flowId: $flowId");
     if (flowId == null) {
       return const SizedBox.shrink();
     }
@@ -138,12 +137,7 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
     );
     // final selectedFlow = ref.watch(flowsProvider)[flowId!];
     if (selectedFlow == null) {
-      _log.error('Selected flow not found for ID: $flowId');
-      return Container(
-        width: double.infinity,
-        height: 50,
-        child: Center(child: Text('Flow not found for ID: $flowId')),
-      );
+      return const SizedBox.shrink();
     }
     _log.success('Selected flow: ${selectedFlow.id}');
     return SizedBox(
@@ -160,23 +154,24 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
             method: selectedFlow.request?.method ?? '',
             onOpenInNewWindow: () => onOpenInNewWindow(selectedFlow),
           ),
-          Expanded(
-            child: ResizableContainer(
-              controller: resizeController,
-              axis: Axis.horizontal,
-              dividerColor: Colors.grey[800]!,
-              onDragDividerWidth: 2,
-              onDragDividerColor: const Color.fromARGB(255, 105, 93, 92),
-              child1: RequestDetailsPanel(
-                flow: selectedFlow,
-                resizeController: resizeController,
-              ),
-              child2: ResponseDetailsPanel(
-                flow: selectedFlow,
-                resizeController: resizeController,
+          if (selectedFlow.request != null)
+            Expanded(
+              child: ResizableContainer(
+                controller: resizeController,
+                axis: Axis.horizontal,
+                dividerColor: Colors.grey[800]!,
+                onDragDividerWidth: 2,
+                onDragDividerColor: const Color.fromARGB(255, 105, 93, 92),
+                child1: RequestDetailsPanel(
+                  flow: selectedFlow,
+                  resizeController: resizeController,
+                ),
+                child2: ResponseDetailsPanel(
+                  flow: selectedFlow,
+                  resizeController: resizeController,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -199,9 +194,6 @@ class _RequestDetailsPanelState extends DetailsPanelState {
   String title = 'Request';
   @override
   late List<String> tabTitles;
-  @override
-  late TabController tabController;
-
   @override
   late int tabsLen;
 
