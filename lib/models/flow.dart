@@ -50,7 +50,9 @@ class MitmFlow {
         serverConn: json['server_conn'] != null
             ? ServerConnection.fromJson(json['server_conn'])
             : null,
-        request: HttpRequest.fromJson(json['request']),
+        request: json['request'] != null
+            ? HttpRequest.fromJson(json['request'])
+            : null,
         response: json['response'] != null
             ? HttpResponse.fromJson(json['response'])
             : null,

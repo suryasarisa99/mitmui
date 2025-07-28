@@ -160,47 +160,6 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
             method: selectedFlow.request?.method ?? '',
             onOpenInNewWindow: () => onOpenInNewWindow(selectedFlow),
           ),
-          // if (resizeController.isChild1Hidden ||
-          //     resizeController.isChild2Hidden) ...[
-          //   Container(
-          //     color: theme.surfaceDark,
-          //     padding: const EdgeInsets.symmetric(
-          //       horizontal: 16.0,
-          //       vertical: 8.0,
-          //     ),
-          //     child: Row(
-          //       children: [
-          //         ...[
-          //           (t: "Request", h: resizeController.isChild1Hidden),
-          //           (t: "Response", h: resizeController.isChild2Hidden),
-          //         ].map(
-          //           (tab) => Container(
-          //             padding: const EdgeInsets.only(bottom: 6.0),
-          //             margin: const EdgeInsets.only(right: 16.0),
-          //             decoration: BoxDecoration(
-          //               border: Border(
-          //                 bottom: !tab.h
-          //                     ? BorderSide(
-          //                         color: const Color(0xFFE44343)!,
-          //                         width: 2,
-          //                       )
-          //                     : BorderSide.none,
-          //               ),
-          //             ),
-          //             child: Text(
-          //               tab.t,
-          //               style: TextStyle(
-          //                 fontSize: 14,
-          //                 fontWeight: FontWeight.w500,
-          //                 color: Colors.grey[300],
-          //               ),
-          //             ),
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ],
           Expanded(
             child: ResizableContainer(
               controller: resizeController,
@@ -239,15 +198,45 @@ class _RequestDetailsPanelState extends DetailsPanelState {
   @override
   String title = 'Request';
   @override
-  List<String> tabTitles = [
-    'Headers',
-    'Query Params',
-    'Cookies',
-    'Body',
-    'raw',
-  ];
+  late List<String> tabTitles;
+
   @override
-  late int tabsLen = tabTitles.length;
+  late int tabsLen;
+
+  late List<List<String>> queryParams = getQueryParamsList();
+  late List<List<String>> cookies = getCookiesList();
+  late List<List<String>> headers = widget.flow?.request?.headers ?? [];
+
+  @override
+  void initState() {
+    tabTitles = [
+      if (headers.isNotEmpty) 'Headers (${headers.length})',
+      if (queryParams.isNotEmpty) 'Query (${queryParams.length})',
+      if (cookies.isNotEmpty) 'Cookies (${cookies.length})',
+      'Body',
+      'Raw',
+    ];
+    tabsLen = tabTitles.length;
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant DetailsPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.flow != oldWidget.flow) {
+      queryParams = getQueryParamsList();
+      cookies = getCookiesList();
+      headers = widget.flow?.request?.headers ?? [];
+      tabTitles = [
+        if (headers.isNotEmpty) 'Headers (${headers.length})',
+        if (queryParams.isNotEmpty) 'Query (${queryParams.length})',
+        if (cookies.isNotEmpty) 'Cookies (${cookies.length})',
+        'Body',
+        'Raw',
+      ];
+      tabsLen = tabTitles.length;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -260,9 +249,27 @@ class _RequestDetailsPanelState extends DetailsPanelState {
             child: TabBarView(
               controller: tabController,
               children: [
-                buildHeaders(),
-                buildQueryParams(),
-                buildCookies(),
+                if (headers.isNotEmpty)
+                  buildItems(
+                    items: headers,
+                    title: 'Headers',
+                    keyValueJoiner: ': ',
+                    linesJoiner: '\n',
+                  ),
+                if (queryParams.isNotEmpty)
+                  buildItems(
+                    items: queryParams,
+                    title: 'Query Parameters',
+                    keyValueJoiner: '=',
+                    linesJoiner: '&',
+                  ),
+                if (cookies.isNotEmpty)
+                  buildItems(
+                    items: cookies,
+                    title: 'Cookies',
+                    keyValueJoiner: '=',
+                    linesJoiner: '; ',
+                  ),
                 buildBody(),
                 buildRaw(),
               ],
@@ -273,50 +280,24 @@ class _RequestDetailsPanelState extends DetailsPanelState {
     );
   }
 
-  Widget buildHeaders() {
-    final headers = widget.flow?.request?.headers ?? [];
-    return buildItems(
-      items: headers,
-      title: 'Headers',
-      keyValueJoiner: ': ',
-      linesJoiner: '\n',
-    );
-  }
-
-  Widget buildQueryParams() {
-    final pathList = widget.flow?.request?.path.split('?') ?? [];
-    if (pathList.length < 2) {
-      return SizedBox.shrink();
-    }
-    final queryParams = pathList[1];
-    if (queryParams.isEmpty) return SizedBox.shrink();
-    final params = queryParams.split('&').map((e) {
-      final parts = e.split('=');
-      return [parts[0], parts.length > 1 ? parts[1] : ''];
-    }).toList();
-    return buildItems(
-      items: params,
-      title: 'Query Parameters',
-      keyValueJoiner: '=',
-      linesJoiner: '&',
-    );
-  }
-
-  Widget buildCookies() {
+  List<List<String>> getCookiesList() {
     final cookieHeader = widget.flow?.request?.getHeader('cookie');
-    if (cookieHeader == null || cookieHeader.isEmpty) {
-      return SizedBox.shrink();
-    }
-    final cookies = cookieHeader.split(';').map((cookie) {
+    if (cookieHeader == null || cookieHeader.isEmpty) return [];
+    return cookieHeader.split(';').map((cookie) {
       final parts = cookie.split('=');
       return [parts[0].trim(), parts.length > 1 ? parts[1].trim() : ''];
     }).toList();
-    return buildItems(
-      items: cookies,
-      title: 'Cookies',
-      keyValueJoiner: '=',
-      linesJoiner: '; ',
-    );
+  }
+
+  List<List<String>> getQueryParamsList() {
+    final pathList = widget.flow?.request?.path.split('?') ?? [];
+    if (pathList.length < 2) return [];
+    final queryParams = pathList[1];
+    if (queryParams.isEmpty) [];
+    return queryParams.split('&').map((e) {
+      final parts = e.split('=');
+      return [parts[0], parts.length > 1 ? parts[1] : ''];
+    }).toList();
   }
 }
 
@@ -335,9 +316,40 @@ class _ResponseDetailsPanelState extends DetailsPanelState {
   @override
   String title = 'Response';
   @override
-  List<String> tabTitles = ['Headers', 'Cookies', 'Body', 'Raw'];
+  late List<String> tabTitles;
   @override
-  late int tabsLen = tabTitles.length;
+  late int tabsLen;
+
+  late List<List<String>> cookies = getCookiesList();
+  late List<List<String>> headers = widget.flow?.request?.headers ?? [];
+
+  @override
+  void initState() {
+    super.initState();
+    tabTitles = [
+      if (headers.isNotEmpty) 'Headers (${headers.length})',
+      if (cookies.isNotEmpty) 'Cookies (${cookies.length})',
+      'Body',
+      'Raw',
+    ];
+    tabsLen = tabTitles.length;
+  }
+
+  @override
+  void didUpdateWidget(covariant DetailsPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.flow != oldWidget.flow) {
+      cookies = getCookiesList();
+      headers = widget.flow?.response?.headers ?? [];
+      tabTitles = [
+        if (headers.isNotEmpty) 'Headers (${headers.length})',
+        if (cookies.isNotEmpty) 'Cookies (${cookies.length})',
+        'Body',
+        'Raw',
+      ];
+      tabsLen = tabTitles.length;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -350,8 +362,20 @@ class _ResponseDetailsPanelState extends DetailsPanelState {
             child: TabBarView(
               controller: tabController,
               children: [
-                buildHeaders(),
-                buildCookies(),
+                if (headers.isNotEmpty)
+                  buildItems(
+                    items: headers,
+                    title: 'Headers',
+                    keyValueJoiner: ': ',
+                    linesJoiner: '\n',
+                  ),
+                if (cookies.isNotEmpty)
+                  buildItems(
+                    items: cookies,
+                    title: 'Cookies',
+                    keyValueJoiner: '=',
+                    linesJoiner: '; ',
+                  ),
                 buildBody(),
                 buildRaw(),
               ],
@@ -359,16 +383,6 @@ class _ResponseDetailsPanelState extends DetailsPanelState {
           ),
         ),
       ],
-    );
-  }
-
-  Widget buildHeaders() {
-    final headers = widget.flow?.response?.headers ?? [];
-    return buildItems(
-      items: headers,
-      title: 'Headers',
-      keyValueJoiner: ': ',
-      linesJoiner: '\n',
     );
   }
 
@@ -390,5 +404,14 @@ class _ResponseDetailsPanelState extends DetailsPanelState {
       keyValueJoiner: '=',
       linesJoiner: '; ',
     );
+  }
+
+  List<List<String>> getCookiesList() {
+    final cookieHeader = widget.flow?.response?.getHeader('set-cookie');
+    if (cookieHeader == null || cookieHeader.isEmpty) return [];
+    return cookieHeader.split(';').map((cookie) {
+      final parts = cookie.split('=');
+      return [parts[0].trim(), parts.length > 1 ? parts[1].trim() : ''];
+    }).toList();
   }
 }

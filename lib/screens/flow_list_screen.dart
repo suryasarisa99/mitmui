@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/dt_table/dt_table.dart';
+import 'package:mitmui/services/websocket_service.dart';
 import 'package:mitmui/widgets/resize.dart';
 import 'package:mitmui/utils/logger.dart';
 
@@ -10,18 +12,21 @@ import '../widgets/flow_detail_panels.dart';
 
 const _log = Logger("flow_list_screen");
 
-class FlowListScreen extends StatefulWidget {
+class FlowListScreen extends ConsumerStatefulWidget {
   const FlowListScreen({super.key});
 
   @override
-  State<FlowListScreen> createState() => _FlowListScreenState();
+  ConsumerState<FlowListScreen> createState() => _FlowListScreenState();
 }
 
-class _FlowListScreenState extends State<FlowListScreen> {
+class _FlowListScreenState extends ConsumerState<FlowListScreen> {
   // Single data source for all flows
 
   // Controller for the data grid to track selection and highlighting
   final _dtController = DtController();
+  late final WebSocketService webSocketService = ref.read(
+    websocketServiceProvider,
+  );
 
   @override
   void initState() {
@@ -35,19 +40,14 @@ class _FlowListScreenState extends State<FlowListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Get the WebSocket service
-    // final webSocketService = Provider.of<WebSocketService>(
-    //   context,
-    //   listen: false,
-    // );
     final bg = Color(0xff1D1F21);
 
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) {
-        // if (didPop) {
-        //   // webSocketService.disconnect();
-        // }
+        if (didPop) {
+          webSocketService.disconnect();
+        }
       },
       child: Scaffold(
         backgroundColor: bg,
@@ -58,59 +58,29 @@ class _FlowListScreenState extends State<FlowListScreen> {
           toolbarHeight: kTextTabBarHeight - 10,
           actions: [
             // WebSocket connection status indicator
-            // StreamBuilder<ConnectionStatus>(
-            //   stream: webSocketService.connectionStatus,
-            //   builder: (context, snapshot) {
-            //     final isConnected =
-            //         snapshot.hasData && snapshot.data!.isConnected;
-            //     return IconButton(
-            //       icon: Icon(
-            //         isConnected ? Icons.cloud_done : Icons.cloud_off,
-            //         color: isConnected ? Colors.green : Colors.red,
-            //       ),
-            //       onPressed: () {
-            //         if (isConnected) {
-            //           webSocketService.disconnect();
-            //         } else {
-            //           webSocketService.connect();
-            //         }
-            //       },
-            //       tooltip: isConnected
-            //           ? 'Connected to mitmproxy'
-            //           : 'Disconnected',
-            //     );
-            //   },
-            // ),
-            // IconButton(
-            //   icon: const Icon(Icons.delete_sweep),
-            //   onPressed: () {
-            //     showDialog(
-            //       context: context,
-            //       builder: (context) => AlertDialog(
-            //         title: const Text('Clear Flows'),
-            //         content: const Text(
-            //           'Are you sure you want to clear all flows?',
-            //         ),
-            //         actions: [
-            //           TextButton(
-            //             onPressed: () => Navigator.pop(context),
-            //             child: const Text('Cancel'),
-            //           ),
-            //           TextButton(
-            //             onPressed: () {
-            //               Provider.of<FlowsProvider>(
-            //                 context,
-            //                 listen: false,
-            //               ).clear();
-            //               Navigator.pop(context);
-            //             },
-            //             child: const Text('Clear'),
-            //           ),
-            //         ],
-            //       ),
-            //     );
-            //   },
-            // ),
+            StreamBuilder<ConnectionStatus>(
+              stream: webSocketService.connectionStatus,
+              builder: (context, snapshot) {
+                final isConnected =
+                    snapshot.hasData && snapshot.data!.isConnected;
+                return IconButton(
+                  icon: Icon(
+                    isConnected ? Icons.cloud_done : Icons.cloud_off,
+                    color: isConnected ? Colors.green : Colors.red,
+                  ),
+                  onPressed: () {
+                    if (isConnected) {
+                      webSocketService.disconnect();
+                    } else {
+                      webSocketService.connect();
+                    }
+                  },
+                  tooltip: isConnected
+                      ? 'Connected to mitmproxy'
+                      : 'Disconnected',
+                );
+              },
+            ),
           ],
         ),
         body: _buildBody(),

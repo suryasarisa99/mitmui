@@ -44,10 +44,11 @@ class FlowDataSource extends DtSource {
           // URL Cell with styled hostname and path
           DtCell(
             // columnName: 'url',
-            value:
-                (flow.request?.prettyHost ??
-                    '${flow.request?.host}:${flow.request?.port}') +
-                (flow.request?.path ?? ''),
+            value: flow.request != null
+                ? (flow.request?.prettyHost ??
+                          '${flow.request?.host}:${flow.request?.port}') +
+                      (flow.request?.path ?? '')
+                : flow.url,
           ),
 
           // Method Cell
@@ -63,7 +64,9 @@ class FlowDataSource extends DtSource {
             // columnName: 'status',
             // fontWeight: FontWeight.bold,
             color: statusColor,
-            value: flow.isWebSocket
+            value: flow.request == null
+                ? 'TCP'
+                : flow.isWebSocket
                 ? 'WS'
                 : hasResponse
                 ? flow.response!.statusCode.toString()
