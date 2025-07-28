@@ -321,7 +321,7 @@ class _ResponseDetailsPanelState extends DetailsPanelState {
   late int tabsLen;
 
   late List<List<String>> cookies = getCookiesList();
-  late List<List<String>> headers = widget.flow?.request?.headers ?? [];
+  late List<List<String>> headers = widget.flow?.response?.headers ?? [];
 
   @override
   void initState() {
