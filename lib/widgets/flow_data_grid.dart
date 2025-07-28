@@ -85,6 +85,8 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
 
   @override
   Widget build(BuildContext context) {
+    // print("rebuilding FlowDataGrid");
+    MediaQuery.sizeOf(context).width;
     final headerCells = [
       (title: "ID", key: 'id'),
       (title: "URL", key: 'url'),

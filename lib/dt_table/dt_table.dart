@@ -178,7 +178,7 @@ class DtTable extends StatefulWidget {
 class _DtTableState extends State<DtTable> {
   late List<double> _columnWidths;
   late DtController _controller;
-  late double _actualTableWidth;
+  double _actualTableWidth = 0;
 
   final ScrollController _horizontalScrollController = ScrollController();
   final ScrollController _verticalScrollController = ScrollController();
@@ -196,12 +196,26 @@ class _DtTableState extends State<DtTable> {
     widget.source.addListener(_onDataSourceChanged);
     _controller.addListener(_onControllerChanged);
     // widget.source.sort('id', 0, false, _controller); // Initial sort
+    _columnWidths = widget.headerColumns.map((c) => c.initialWidth).toList();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setInitialColumnWidths();
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _setInitialColumnWidths();
+    // _setInitialColumnWidths();
+
+    // update table width,if window size changes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final size = MediaQuery.sizeOf(context).width;
+      if (widget.tableWidth == double.infinity) {
+        _actualTableWidth = size;
+      }
+      _redistributeWidth();
+      setState(() {});
+    });
   }
 
   @override
@@ -218,10 +232,10 @@ class _DtTableState extends State<DtTable> {
       _controller = widget.controller ?? DtController();
       _controller.addListener(_onControllerChanged);
     }
-    if (widget.tableWidth != oldWidget.tableWidth ||
-        widget.headerColumns != oldWidget.headerColumns) {
-      _setInitialColumnWidths();
-    }
+    // if (widget.tableWidth != oldWidget.tableWidth ||
+    //     widget.headerColumns != oldWidget.headerColumns) {
+    //   _setInitialColumnWidths();
+    // }
   }
 
   @override
@@ -270,14 +284,12 @@ class _DtTableState extends State<DtTable> {
     if (currentTotalWidth < _actualTableWidth) {
       final extraSpace = _actualTableWidth - currentTotalWidth;
       // Find the last column that can be expanded or just use the last column
-      int targetIndex = widget.headerColumns.length - 1;
-      for (int i = widget.headerColumns.length - 1; i >= 0; i--) {
-        if (widget.headerColumns[i].isExpand) {
-          targetIndex = i;
-          break;
-        }
+      int targetIndex = widget.headerColumns.indexWhere((c) => c.isExpand);
+      if (targetIndex == -1) {
+        targetIndex = widget.headerColumns.length - 1; // Use last column
+      } else {
+        _columnWidths[targetIndex] += extraSpace;
       }
-      _columnWidths[targetIndex] += extraSpace;
     }
   }
 
@@ -304,6 +316,7 @@ class _DtTableState extends State<DtTable> {
   }
 
   void _handleKeyEvent(KeyEvent event) {
+    print("handleKeyEvent: $event");
     if (event is! KeyDownEvent) return;
     if (widget.onKeyEvent != null && widget.onKeyEvent!(event)) {
       return; // Custom event handling,it returns true if it handles the event
@@ -331,7 +344,8 @@ class _DtTableState extends State<DtTable> {
     if (isCtrlPressed && event.logicalKey == LogicalKeyboardKey.arrowLeft) {
       if (_horizontalScrollController.hasClients) {
         _horizontalScrollController.animateTo(
-          max(0, _horizontalScrollController.offset - 100),
+          // max(0, _horizontalScrollController.offset - 100), // scrolls left by 100 pixels
+          0,
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
         );
@@ -342,10 +356,11 @@ class _DtTableState extends State<DtTable> {
     if (isCtrlPressed && event.logicalKey == LogicalKeyboardKey.arrowRight) {
       if (_horizontalScrollController.hasClients) {
         _horizontalScrollController.animateTo(
-          min(
-            _horizontalScrollController.position.maxScrollExtent,
-            _horizontalScrollController.offset + 100,
-          ),
+          // min(
+          //   _horizontalScrollController.position.maxScrollExtent,
+          //   _horizontalScrollController.offset + 100,
+          // ),
+          _horizontalScrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOut,
         );
@@ -511,6 +526,9 @@ class _DtTableState extends State<DtTable> {
       final column = widget.headerColumns[columnIndex];
       final newWidth = _columnWidths[columnIndex] + details.delta.dx;
 
+      final lastColumn = widget.headerColumns.last;
+      final lastColumnMaxWidth = lastColumn.maxWidth ?? lastColumn.initialWidth;
+
       // Apply min/max width constraints
       double constrainedWidth = newWidth;
       if (constrainedWidth < column.minWidth) {
@@ -523,16 +541,40 @@ class _DtTableState extends State<DtTable> {
       final oldWidth = _columnWidths[columnIndex];
       _columnWidths[columnIndex] = constrainedWidth;
 
-      // Check if this is an expanded column and we're trying to decrease it
-      // when total width <= table width
-      final currentTotalWidth = _columnWidths.reduce((a, b) => a + b);
+      // when expanded column is decreasing and table columns width is less than actual table width increase the last column width
+      //- check if this is an expanded column a (column.isExpand)
+      //- check we're trying to decrease it (constrainedWidth < oldWidth)
+      //- check when total width <= table width (totalColsWidth <= _actualTableWidth)
+      final totalColsWidth = _columnWidths.reduce((a, b) => a + b);
       if (column.isExpand &&
-          constrainedWidth < oldWidth &&
-          currentTotalWidth <= _actualTableWidth) {
+          constrainedWidth < oldWidth && // when decreasing width
+          totalColsWidth <= _actualTableWidth) {
+        // print("<<<<<<<<<<<<<<<<<< Last column is increasing >>>>>>>>>>>>>>>>>");
         // Give the extra space to the last column instead
         final lastColumnIndex = widget.headerColumns.length - 1;
         final extraSpace = oldWidth - constrainedWidth;
         _columnWidths[lastColumnIndex] += extraSpace;
+      }
+      //  else {
+      //   print(
+      //     "first cond failed: ${column.isExpand} and ($constrainedWidth < $oldWidth) and ($totalColsWidth >= $_actualTableWidth)",
+      //   );
+      // }
+
+      // when any column is expanded and last column is taken extra space deduct it from last column extra space
+      // check if we are increasing the width of expanded column (column.isExpand and constrainedWidth > oldWidth)
+      // check last column is takes extra space (because of previous step)
+      if (constrainedWidth > oldWidth && // when increasing width
+          _columnWidths.last > lastColumnMaxWidth) {
+        // print("<<<<<<<<<<<<<<<<<< Last column is decreasing >>>>>>>>>>>>>>>>>");
+        final increasedWidth = constrainedWidth - oldWidth;
+        final lastColumnIndex = widget.headerColumns.length - 1;
+
+        // extra space taken by last column
+        var extraSpace = _columnWidths.last - lastColumnMaxWidth;
+        // reduce from extra space
+        extraSpace = max(0, extraSpace - increasedWidth);
+        _columnWidths[lastColumnIndex] = lastColumnMaxWidth + extraSpace;
       }
 
       _resizeIndicatorPosition += details.delta.dx;
@@ -558,43 +600,46 @@ class _DtTableState extends State<DtTable> {
         _handleKeyEvent(event);
         _handleKeyUp(event);
       },
-      child: Stack(
-        children: [
-          Row(
-            children: [
-              // Frozen columns
-              if (widget.frozenColumnsCount > 0) _buildFrozenColumns(),
+      child: SizedBox(
+        child: Stack(
+          children: [
+            Row(
+              children: [
+                // Frozen columns
+                if (widget.frozenColumnsCount > 0) _buildFrozenColumns(),
 
-              // Scrollable content
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: _horizontalScrollController,
-                  scrollDirection: Axis.horizontal,
-                  child: SizedBox(
-                    width: _getScrollableWidth(),
-                    child: Column(
-                      children: [
-                        _buildHeader(startIndex: widget.frozenColumnsCount),
-                        Expanded(
-                          child: _buildRows(
-                            startIndex: widget.frozenColumnsCount,
+                // Scrollable content
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: _horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      // width: MediaQuery.sizeOf(context).width,
+                      width: _getScrollableWidth(),
+                      child: Column(
+                        children: [
+                          _buildHeader(startIndex: widget.frozenColumnsCount),
+                          Expanded(
+                            child: _buildRows(
+                              startIndex: widget.frozenColumnsCount,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          if (_isResizing)
-            Positioned(
-              left: _resizeIndicatorPosition,
-              top: 0,
-              bottom: 0,
-              child: Container(width: 2, color: widget.resizeIndicatorColor),
+              ],
             ),
-        ],
+            if (_isResizing)
+              Positioned(
+                left: _resizeIndicatorPosition,
+                top: 0,
+                bottom: 0,
+                child: Container(width: 2, color: widget.resizeIndicatorColor),
+              ),
+          ],
+        ),
       ),
     );
   }
