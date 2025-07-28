@@ -93,82 +93,37 @@ class MitmproxyClient {
     ).join();
   }
 
-  /// Fetches all existing flows from mitmproxy
-  static Future<List<MitmFlow>> getFlows() async {
+  static Future<T> _handleRequest<T>(
+    String operationName,
+    Future<Response> Function() requestFunction,
+    T Function(Response r) onSuccess, [
+    T Function()? handle,
+  ]) async {
     try {
-      _log.info('Fetching flows from $baseUrl/flows');
-      final response = await _dio.get('/flows');
+      _log.debug('Starting $operationName...');
+      final r = await requestFunction();
 
-      if (response.statusCode == 200) {
-        final List<dynamic> flows = response.data;
-        // _log.info('Received ${flows.length} flows from API, ${response.data}');
-        return flows.map((f) => MitmFlow.fromJson(f)).toList();
+      if (r.statusCode == 200) {
+        _log.success('$operationName completed successfully.');
+        return onSuccess(r);
       } else {
-        _log.error(
-          'Failed to fetch flows: ${response.statusCode}, ${response.data}',
-        );
-        return [];
+        final errorMessage =
+            'Failed to $operationName: ${r.statusCode}, ${r.data}';
+        _log.error(errorMessage);
+        throw Exception(errorMessage);
       }
-      // return [];
-    } catch (e) {
-      _log.error('Error fetching flows: $e');
-      return [];
-    }
-  }
-
-  static Future<MitmBody> getMitmBody(String flowId, String type) async {
-    try {
-      final response = await _dio.get(
-        '/flows/$flowId/$type/content/Auto.json',
-        // queryParameters: {'lines': 513},
-      );
-
-      if (response.statusCode == 200) {
-        // _log.debug(
-        //   'res for ${'/flows/$flowId/$type/content/Auto.json'}: ${response.data}',
-        // );
-        return MitmBody.fromJson(response.data);
-      } else {
-        _log.error('Failed to fetch response body: ${response.statusCode}');
-        throw Exception(
-          'Failed to fetch response body: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      _log.error('Error fetching response body: $e');
-      throw Exception('Error fetching response body: $e');
-    }
-  }
-
-  static Future<String> getMitmContent(String flowId, String type) async {
-    try {
-      final response = await _dio.get('/flows/$flowId/$type/content.data');
-
-      if (response.statusCode == 200) {
-        _log.debug('Response body fetched successfully for flow $flowId');
-        return response.data;
-      } else {
-        _log.error(
-          'Failed to fetch response body content: ${response.statusCode}',
-        );
-        throw Exception(
-          'Failed to fetch response body content: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      _log.error('Error fetching response body: $e');
-      throw Exception('Error fetching response body: $e');
-    }
-  }
-
-  /// Fetches all existing flows and adds them to the FlowStore
-  static Future<void> loadFlowsIntoStore(FlowsProvider flowStore) async {
-    try {
-      final flows = await getFlows();
-      flowStore.addAll(flows);
-      _log.info('Added ${flows.length} flows to FlowStore');
-    } catch (e) {
-      _log.error('Error loading flows into store: $e');
+    } on DioException catch (e) {
+      final errorMessage = 'Dio error during $operationName: ${e.message}';
+      // _log.error(errorMessage, e.error, e.stackTrace);
+      _log.error(errorMessage);
+      if (handle != null) return handle();
+      throw Exception(errorMessage);
+    } catch (e, stackTrace) {
+      final errorMessage = 'Error during $operationName: $e';
+      _log.error(errorMessage);
+      if (handle != null) return handle();
+      // _log.error(errorMessage, e, stackTrace);
+      throw Exception(errorMessage);
     }
   }
 
@@ -187,47 +142,42 @@ class MitmproxyClient {
     _log.info('Updated cookies, newCookies: $newCookies ');
   }
 
-  /// copy curl request
-  static Future<String> getExportReq(
-    String flowId,
-    RequestExport exportType,
-  ) async {
-    try {
-      final response = await _dio.post(
-        '/commands/export',
-        data: {
-          "arguments": [exportType.name, "@$flowId"],
-        },
-      );
-
-      if (response.statusCode == 200) {
-        _log.info('Curl request fetched successfully for flow $flowId');
-        return response.data['value'];
-      } else {
-        _log.error('Failed to fetch curl request: ${response.statusCode}');
-        throw Exception('Failed to fetch curl request: ${response.statusCode}');
-      }
-    } catch (e) {
-      _log.error('Error fetching curl request: $e');
-      throw Exception('Error fetching curl request: $e');
-    }
+  /// Fetches all existing flows from mitmproxy
+  static Future<List<MitmFlow>> getFlows() async {
+    return _handleRequest('fetching flows', () => _dio.get('/flows'), (r) {
+      final List<dynamic> flows = r.data;
+      return flows.map((f) => MitmFlow.fromJson(f)).toList();
+    }, () => []);
   }
 
+  /// get body for request or response
+  static Future<MitmBody> getMitmBody(String flowId, String type) async {
+    return _handleRequest(
+      'fetching mitm body',
+      () => _dio.get('/flows/$flowId/$type/content/Auto.json'),
+      (r) => MitmBody.fromJson(r.data),
+    );
+  }
+
+  /// export request string
+  static Future<String> getExportReq(String flowId, RequestExport exportType) {
+    final data = {
+      "arguments": [exportType.name, "@$flowId"],
+    };
+    return _handleRequest(
+      'fetching export request',
+      () => _dio.post('/commands/export', data: data),
+      (r) => r.data['value'] as String,
+    );
+  }
+
+  /// delete flow
   static Future<void> deleteFlow(String flowId) async {
-    try {
-      final response = await _dio.delete('/flows/$flowId');
-      if (response.statusCode == 200) {
-        _log.info('Flow $flowId deleted successfully');
-      } else {
-        _log.error('Failed to delete flow $flowId: ${response.statusCode}');
-        throw Exception(
-          'Failed to delete flow $flowId: ${response.statusCode}',
-        );
-      }
-    } catch (e) {
-      _log.error('Error deleting flow $flowId: $e');
-      throw Exception('Error deleting flow $flowId: $e');
-    }
+    _handleRequest(
+      'deleting flow',
+      () => _dio.delete('/flows/$flowId'),
+      (r) {},
+    );
   }
 }
 
