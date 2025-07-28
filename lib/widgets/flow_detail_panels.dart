@@ -51,17 +51,9 @@ class _BottomPannelAsFullScreenState extends State<BottomPannelAsFullScreen> {
         Expanded(
           child: ResizableContainer(
             axis: Axis.horizontal,
-            child1: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xff161819),
-                border: Border(
-                  right: BorderSide(color: Colors.grey[700]!, width: 0.5),
-                ),
-              ),
-              child: RequestDetailsPanel(
-                flow: selectedFlow,
-                resizeController: ResizableController(),
-              ),
+            child1: RequestDetailsPanel(
+              flow: selectedFlow,
+              resizeController: ResizableController(),
             ),
             child2: ResponseDetailsPanel(
               flow: selectedFlow,
@@ -139,7 +131,6 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
     if (selectedFlow == null) {
       return const SizedBox.shrink();
     }
-    _log.success('Selected flow: ${selectedFlow.id}');
     return SizedBox(
       width: double.infinity,
       child: Column(

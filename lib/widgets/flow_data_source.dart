@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/dt_table/dt_source.dart';
 import 'package:mitmui/dt_table/dt_models.dart';
@@ -26,13 +27,10 @@ class FlowDataSource extends DtSource {
   void buildFlowRows(List<models.MitmFlow> flows) {
     _flowRows = flows.mapIndexed((i, flow) {
       final hasResponse = flow.response != null;
-      final methodColor = getMethodColor(flow.request?.method ?? '');
-      final statusColor = getStatusCodeColor(
-        hasResponse ? flow.response!.statusCode : null,
-      );
 
       return DtRow(
         id: flow.id,
+        m: flow.marked,
         cells: [
           // 0: ID Cell
           DtCell(value: i, textAlign: TextAlign.right),
@@ -47,10 +45,10 @@ class FlowDataSource extends DtSource {
           ),
 
           // 2: Method Cell
-          DtCell(value: flow.request?.method, color: methodColor),
+          DtCell(value: flow.request?.method),
 
           // 3: Status Cell
-          DtCell(color: statusColor, value: flow.response?.statusCode),
+          DtCell(value: flow.response?.statusCode),
 
           // 4: Type Cell
           DtCell(
@@ -114,20 +112,30 @@ class FlowDataSource extends DtSource {
       late String text;
       if (cell.value == null) {
         text = '-';
-      } else if (cIndex == 6) {
-        // duration in ms
-        text = '${cell.value} ms';
-      } else if (cIndex == 7 || cIndex == 8) {
-        // request and response lengths
-        text = formatBytes(cell.value);
       } else {
-        text = cell.value.toString();
+        text = switch (cIndex) {
+          // duration in ms
+          6 => '${cell.value} ms',
+          // request and response lengths
+          7 || 8 => formatBytes(cell.value as int? ?? 0),
+          _ => cell.value.toString(),
+        };
       }
+
+      Color cellColor = switch (cIndex) {
+        1 =>
+          row.m != null && row.m!.isNotEmpty
+              ? MarkCircle.decode(row.m!).getColor(isSelected)
+              : Colors.white,
+        2 => getMethodColor(cell.value ?? ''),
+        3 => getStatusCodeColor(cell.value as int?),
+        _ => Colors.white,
+      };
 
       return Text(
         text,
         textAlign: cell.textAlign ?? TextAlign.start,
-        style: TextStyle(color: cell.color, overflow: TextOverflow.ellipsis),
+        style: TextStyle(color: cellColor, overflow: TextOverflow.ellipsis),
       );
     }).toList();
     return DtRowAdapter(color: rowColor, cells: cells);

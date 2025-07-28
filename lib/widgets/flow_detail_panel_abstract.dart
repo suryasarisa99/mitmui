@@ -58,10 +58,8 @@ abstract class DetailsPanelState extends State<DetailsPanel>
       String? currentTab;
       try {
         currentTab = tabTitles[tabController.index].split(" ")[0];
-        print('Current tab: $currentTab, ${tabController.index}');
       } catch (e) {
         currentTab = null;
-        print('current tab is null');
       }
       final type = title.toLowerCase();
       mitmBodyFuture = MitmproxyClient.getMitmBody(widget.flow!.id, type);
@@ -71,7 +69,6 @@ abstract class DetailsPanelState extends State<DetailsPanel>
         final foundIndex = tabTitles.indexWhere(
           (title) => title.startsWith(currentTab!),
         );
-        print('Found index: $foundIndex');
         if (foundIndex != -1) {
           newIndex = foundIndex;
         }
@@ -104,7 +101,7 @@ abstract class DetailsPanelState extends State<DetailsPanel>
             )
           else
             _buildToggleButtons(),
-
+          // Flexible(child: _buildToggleButtons()),
           const SizedBox(width: 16),
           // Tab bar for different views
           Expanded(

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mitmui/dt_table/dt_models.dart';
 import 'package:mitmui/dt_table/dt_source.dart';
+import 'package:super_context_menu/super_context_menu.dart';
 
 class DtController extends ChangeNotifier {
   Set<String> _selectedRowIds = {};
@@ -156,6 +157,7 @@ class DtTable extends StatefulWidget {
     super.key,
     this.tableWidth,
     this.onKeyEvent,
+    required this.menuProvider,
   });
 
   final DtSource source;
@@ -167,6 +169,7 @@ class DtTable extends StatefulWidget {
   final int frozenColumnsCount;
   final double? tableWidth;
   final bool Function(KeyEvent event)? onKeyEvent;
+  final FutureOr<Menu?> Function(MenuRequest) menuProvider;
 
   @override
   State<DtTable> createState() => _DtTableState();
@@ -731,20 +734,32 @@ class _DtTableState extends State<DtTable> {
 
         return Container(
           decoration: BoxDecoration(color: dataRowAdapter.color),
-          child: InkWell(
-            onTap: () => _handleRowTap(row),
-            child: Row(
-              children: dataRowAdapter.cells
-                  .sublist(startIndex, end)
-                  .mapIndexed((cIndex, cell) {
-                    final actualIndex = startIndex + cIndex;
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      width: _columnWidths[actualIndex],
-                      child: cell,
-                    );
-                  })
-                  .toList(),
+          child: ContextMenuWidget(
+            menuProvider: (e) {
+              if (!(widget.controller?._selectedRowIds.contains(row.id) ??
+                  false)) {
+                // if we right click on unselected row, unselect all rows and select this row
+                _controller.updateSelectedRows({row.id});
+                _controller.updateFocusedRow(row.id);
+                _controller.updateSelectionAnchor(row.id);
+              }
+              return widget.menuProvider(e);
+            },
+            child: InkWell(
+              onTap: () => _handleRowTap(row),
+              child: Row(
+                children: dataRowAdapter.cells
+                    .sublist(startIndex, end)
+                    .mapIndexed((cIndex, cell) {
+                      final actualIndex = startIndex + cIndex;
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        width: _columnWidths[actualIndex],
+                        child: cell,
+                      );
+                    })
+                    .toList(),
+              ),
             ),
           ),
         );

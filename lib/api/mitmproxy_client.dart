@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:mitmui/models/flow.dart';
 import 'package:mitmui/models/response_body.dart';
 import 'package:mitmui/utils/logger.dart';
@@ -179,6 +180,95 @@ class MitmproxyClient {
       (r) {},
     );
   }
+
+  // repeat the request
+  static Future<void> replay(String flowId) async {
+    return _handleRequest(
+      'replaying request',
+      () => _dio.post('/flows/$flowId/replay'),
+      (r) {},
+    );
+  }
+
+  // mark a flow with some color or tag
+  static Future<void> markFlow(String flowId, MarkCircle mark) {
+    return _handleRequest(
+      'marking flow',
+      () => _dio.put('/flows/$flowId', data: {'marked': mark.value}),
+      (r) {},
+    );
+  }
+
+  static Future<void> revertChanges(String flowId) {
+    return _handleRequest(
+      'revert flow',
+      () => _dio.post('/flows/$flowId/revert'),
+      (r) {},
+    );
+  }
+
+  static Future<void> duplicateFlow(String flowId) {
+    return _handleRequest(
+      'duplicate flow',
+      () => _dio.post('/flows/$flowId/duplicate'),
+      (r) {},
+    );
+  }
 }
 
 enum RequestExport { curl, httpie, raw_request, raw_response, raw }
+
+enum MarkCircle {
+  red(":red_circle:"),
+  orange(":orange_circle:"),
+  yellow(":yellow_circle:"),
+  green(":green_circle:"),
+  blue(":large_blue_circle:"),
+  purple(":purple_circle:"),
+  brown(":brown_circle:"),
+  un_mark("");
+
+  final String value;
+  const MarkCircle(this.value);
+
+  factory MarkCircle.decode(String value) {
+    return switch (value) {
+      "🔴" => MarkCircle.red,
+      "🟠" => MarkCircle.orange,
+      "🟡" => MarkCircle.yellow,
+      "🟢" => MarkCircle.green,
+      "🔵" => MarkCircle.blue,
+      "🟣" => MarkCircle.purple,
+      "🟤" => MarkCircle.brown,
+      "" => MarkCircle.un_mark,
+      _ => MarkCircle.red,
+    };
+  }
+
+  Color getColor(bool isSelected) {
+    // light variants
+    if (isSelected) {
+      return switch (this) {
+        MarkCircle.red => const Color.fromARGB(255, 255, 183, 178),
+        MarkCircle.orange => const Color.fromARGB(255, 255, 191, 94),
+        MarkCircle.yellow => const Color.fromARGB(255, 255, 246, 161),
+        MarkCircle.green => const Color.fromARGB(255, 160, 255, 163),
+        MarkCircle.blue => const Color.fromARGB(255, 175, 219, 255),
+        MarkCircle.purple => const Color.fromARGB(255, 242, 172, 255),
+        MarkCircle.brown => const Color.fromARGB(255, 182, 160, 151),
+        MarkCircle.un_mark => Colors.transparent,
+      };
+    } else {
+      return switch (this) {
+        MarkCircle.red => Colors.red,
+        MarkCircle.orange => Colors.orange,
+        MarkCircle.yellow => Colors.yellow,
+        MarkCircle.green => const Color.fromARGB(255, 98, 213, 102),
+        MarkCircle.blue => const Color.fromARGB(255, 62, 168, 255),
+        MarkCircle.purple => const Color.fromARGB(255, 223, 84, 248),
+        MarkCircle.brown => const Color.fromARGB(255, 165, 121, 106),
+        MarkCircle.un_mark => Colors.transparent,
+      };
+    }
+  }
+}

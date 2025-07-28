@@ -5,6 +5,8 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_lifecycle
   desktop_multi_window
+  irondash_engine_context
+  super_native_extensions
   window_size
 )
 

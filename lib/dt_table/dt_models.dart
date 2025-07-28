@@ -51,12 +51,16 @@ class DtColumn {
 
 class DtRow {
   /// Creates [DtRow] for the [SfDataGrid].
-  const DtRow({required List<DtCell> cells, required this.id}) : _cells = cells;
+  const DtRow({required List<DtCell> cells, required this.id, this.m})
+    : _cells = cells;
 
   /// The data for this row.
   /// There must be exactly as many cells as there are columns in the
   final List<DtCell> _cells;
   final String id;
+
+  /// marker string
+  final String? m;
 
   /// Returns the collection of [DtCell] which is created for
   /// [DtRow].
@@ -70,7 +74,6 @@ class DtCell<T> {
   const DtCell({
     // required this.columnName,
     required this.value,
-    this.color,
     this.textAlign = TextAlign.start,
   });
 
@@ -82,9 +85,6 @@ class DtCell<T> {
   /// Provide value of a cell to perform the sorting for whole data available
   /// in datagrid.
   final T? value;
-
-  // text color
-  final Color? color;
 
   /// alignment of the cell
   final TextAlign? textAlign;
