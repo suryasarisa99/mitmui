@@ -26,7 +26,7 @@ class FlowDataSource extends DtSource {
   void buildFlowRows(List<models.MitmFlow> flows) {
     _flowRows = flows.mapIndexed((i, flow) {
       final hasResponse = flow.response != null;
-      final methodColor = getMethodColor(flow.request.method);
+      final methodColor = getMethodColor(flow.request?.method ?? '');
       final statusColor = getStatusCodeColor(
         hasResponse ? flow.response!.statusCode : null,
       );
@@ -44,14 +44,17 @@ class FlowDataSource extends DtSource {
           // URL Cell with styled hostname and path
           DtCell(
             // columnName: 'url',
-            value: (flow.request.prettyHost ?? '') + flow.request.path,
+            value:
+                (flow.request?.prettyHost ??
+                    '${flow.request?.host}:${flow.request?.port}') +
+                (flow.request?.path ?? ''),
           ),
 
           // Method Cell
           DtCell(
             // columnName: 'method',
             // fontWeight: FontWeight.w500,
-            value: flow.request.method,
+            value: flow.request?.method ?? '-',
             color: methodColor,
           ),
 
@@ -87,16 +90,16 @@ class FlowDataSource extends DtSource {
             value:
                 hasResponse &&
                     flow.response?.timestampEnd != null &&
-                    flow.request.timestampStart != null
-                ? '${((flow.response!.timestampEnd! - flow.request.timestampStart!) * 1000).round()} ms'
+                    flow.request?.timestampStart != null
+                ? '${((flow.response!.timestampEnd! - flow.request!.timestampStart!) * 1000).round()} ms'
                 : '-',
           ),
 
           // Request Length Cell
           DtCell<String>(
             // columnName: 'reqLen',
-            value: flow.request.contentLength != null
-                ? formatBytes(flow.request.contentLength!)
+            value: flow.request?.contentLength != null
+                ? formatBytes(flow.request?.contentLength! ?? 0)
                 : '-',
           ),
 

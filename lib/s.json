@@ -235,5 +235,50 @@
       },
       "matching_filters": {}
     }
+  },
+  {
+    "id": "2a8e29ee-960b-49f2-aff2-a2826325ac12",
+    "intercepted": false,
+    "is_replay": null,
+    "type": "tcp",
+    "modified": false,
+    "marked": "",
+    "comment": "",
+    "timestamp_created": 1753651876.815742,
+    "client_conn": {
+      "id": "099c80fb-3c8e-4951-bc29-0b04ec205a85",
+      "peername": ["192.168.1.7", 44454],
+      "sockname": ["192.168.1.14", 8080],
+      "tls_established": false,
+      "cert": null,
+      "sni": null,
+      "cipher": null,
+      "alpn": null,
+      "tls_version": null,
+      "timestamp_start": 1753651876.725504,
+      "timestamp_tls_setup": null,
+      "timestamp_end": null
+    },
+    "server_conn": {
+      "id": "76088cb6-90b3-4798-ae69-0c358428f543",
+      "peername": ["2a03:2880:f28a:ca:face:b00c:0:7260", 5222, 0, 0],
+      "sockname": ["2401:4900:8fcf:75e2:adce:7547:5c25:6eaf", 55553, 0, 0],
+      "address": ["2a03:2880:f28a:ca:face:b00c:0:7260", 5222],
+      "tls_established": false,
+      "cert": null,
+      "sni": null,
+      "cipher": null,
+      "alpn": null,
+      "tls_version": null,
+      "timestamp_start": 1753651876.7395709,
+      "timestamp_tcp_setup": 1753651876.8044128,
+      "timestamp_tls_setup": null,
+      "timestamp_end": null
+    },
+    "messages_meta": {
+      "contentLength": 3404,
+      "count": 21,
+      "timestamp_last": 1753652047.4132218
+    }
   }
 ]

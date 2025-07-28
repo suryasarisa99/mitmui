@@ -15,11 +15,9 @@ class MitmFlow {
   final double timestampCreated;
   final ClientConnection clientConn;
   final ServerConnection? serverConn;
-  final HttpRequest request;
+  final HttpRequest? request;
   final HttpResponse? response; // Can be null for incomplete requests
   final WebSocketInfo? websocket; // Only present for WebSocket connections
-
-  String get prettyUrl => request.prettyHost ?? "" + request.path;
 
   MitmFlow({
     required this.id,
@@ -79,7 +77,7 @@ class MitmFlow {
       'timestamp_created': timestampCreated,
       'client_conn': clientConn.toJson(),
       'server_conn': serverConn?.toJson(),
-      'request': request.toJson(),
+      'request': request?.toJson(),
     };
 
     if (response != null) {
@@ -108,16 +106,24 @@ class MitmFlow {
     }
   }
 
+  /// Get the full URL of the request
+  String get url {
+    if (request != null) return request!.url;
+    final clientPeer = clientConn.peername;
+    final clientAddr = '${clientPeer[0]}:${clientPeer[1]}';
+    if (serverConn != null && serverConn!.peername != null) {
+      final serverPeer = serverConn!.peername;
+      return '$clientAddr -> ${serverPeer![0]}:${serverPeer[1]}';
+    }
+    return clientAddr;
+  }
+
   /// Returns true if this flow represents a WebSocket connection
   bool get isWebSocket => websocket != null;
 
   /// Returns a readable timestamp
   DateTime get createdDateTime =>
       DateTime.fromMillisecondsSinceEpoch((timestampCreated * 1000).round());
-
-  /// Returns a short description of the flow
-  String get summary =>
-      '${request.method} ${request.prettyHost}${request.path}';
 }
 
 /// Represents the client connection details

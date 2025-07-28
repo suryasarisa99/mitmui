@@ -291,9 +291,9 @@ abstract class DetailsPanelState extends State<DetailsPanel>
   Widget buildRaw() {
     final isReq = isRequest;
     final headers = isReq
-        ? widget.flow?.request.headers ?? []
+        ? widget.flow?.request?.headers ?? []
         : widget.flow?.response?.headers ?? [];
-    widget.flow?.request.headers ?? [];
+    widget.flow?.request?.headers ?? [];
     return SingleChildScrollView(
       padding: const EdgeInsets.only(top: 8.0),
       child: FutureBuilder(
@@ -304,19 +304,19 @@ abstract class DetailsPanelState extends State<DetailsPanel>
             if (isReq) ...[
               // method
               TextSpan(
-                text: '${widget.flow?.request.method} ',
+                text: '${widget.flow?.request?.method} ',
                 style: TextStyle(fontSize: 16, color: Colors.green),
               ),
               // Url path
               TextSpan(
-                text: '${widget.flow?.request.path}\n',
+                text: '${widget.flow?.request?.path}\n',
                 style: TextStyle(fontSize: 15, color: Color(0xffA89CF7)),
               ),
             ],
 
             // http version
             TextSpan(
-              text: '${widget.flow?.request.httpVersion}${isReq ? '\n' : ' '}',
+              text: '${widget.flow?.request?.httpVersion}${isReq ? '\n' : ' '}',
               style: TextStyle(fontSize: 16, color: Colors.grey[200]),
             ),
 
@@ -408,15 +408,15 @@ abstract class DetailsPanelState extends State<DetailsPanel>
   Widget buildBody() {
     return PreviewBody(
       contentLength: isRequest
-          ? widget.flow?.request.contentLength
+          ? widget.flow?.request?.contentLength
           : widget.flow?.response?.contentLength,
       contentType: isRequest
-          ? widget.flow?.request.contentTypeHeader
+          ? widget.flow?.request?.contentTypeHeader
           : widget.flow?.response?.contentTypeHeader,
       bodyFuture: mitmBodyFuture,
       // dataFuture: mitmDataFuture,
       flowId: widget.flow!.id,
-      url: widget.flow!.request.url,
+      url: widget.flow!.request?.url ?? '',
     );
   }
 }

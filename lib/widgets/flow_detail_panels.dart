@@ -41,11 +41,11 @@ class _BottomPannelAsFullScreenState extends State<BottomPannelAsFullScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FlowDetailURL(
-          scheme: selectedFlow.request.scheme,
-          host: selectedFlow.request.prettyHost ?? '',
-          path: selectedFlow.request.path,
+          scheme: selectedFlow.request?.scheme ?? '',
+          host: selectedFlow.request?.prettyHost ?? '',
+          path: selectedFlow.request?.path ?? '',
           statusCode: selectedFlow.response?.statusCode ?? 0,
-          method: selectedFlow.request.method,
+          method: selectedFlow.request?.method ?? '',
           onOpenInNewWindow: () => {},
         ),
         Expanded(
@@ -153,11 +153,11 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           FlowDetailURL(
-            scheme: selectedFlow.request.scheme,
-            host: selectedFlow.request.prettyHost ?? '',
-            path: selectedFlow.request.path,
+            scheme: selectedFlow.request?.scheme ?? '',
+            host: selectedFlow.request?.prettyHost ?? '',
+            path: selectedFlow.request?.path ?? '',
             statusCode: selectedFlow.response?.statusCode ?? 0,
-            method: selectedFlow.request.method,
+            method: selectedFlow.request?.method ?? '',
             onOpenInNewWindow: () => onOpenInNewWindow(selectedFlow),
           ),
           // if (resizeController.isChild1Hidden ||
@@ -274,7 +274,7 @@ class _RequestDetailsPanelState extends DetailsPanelState {
   }
 
   Widget buildHeaders() {
-    final headers = widget.flow?.request.headers ?? [];
+    final headers = widget.flow?.request?.headers ?? [];
     return buildItems(
       items: headers,
       title: 'Headers',
@@ -284,7 +284,7 @@ class _RequestDetailsPanelState extends DetailsPanelState {
   }
 
   Widget buildQueryParams() {
-    final pathList = widget.flow?.request.path.split('?') ?? [];
+    final pathList = widget.flow?.request?.path.split('?') ?? [];
     if (pathList.length < 2) {
       return SizedBox.shrink();
     }
@@ -303,7 +303,7 @@ class _RequestDetailsPanelState extends DetailsPanelState {
   }
 
   Widget buildCookies() {
-    final cookieHeader = widget.flow?.request.getHeader('cookie');
+    final cookieHeader = widget.flow?.request?.getHeader('cookie');
     if (cookieHeader == null || cookieHeader.isEmpty) {
       return SizedBox.shrink();
     }

@@ -130,7 +130,7 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
                 });
                 return true; // Indicate that we handled this key event
               } else if (isMeta && k == LogicalKeyboardKey.keyC) {
-                Clipboard.setData(ClipboardData(text: flow.request.url));
+                Clipboard.setData(ClipboardData(text: flow.url));
                 return true; // Indicate that we handled this key event
               } else if (k == LogicalKeyboardKey.delete) {
                 final selectedIds = widget.controller.selectedRowIds;
