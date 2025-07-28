@@ -270,10 +270,15 @@ class _RequestDetailsPanelState extends DetailsPanelState {
   List<List<String>> getCookiesList() {
     final cookieHeader = widget.flow?.request?.getHeader('cookie');
     if (cookieHeader == null || cookieHeader.isEmpty) return [];
-    return cookieHeader.split(';').map((cookie) {
-      final parts = cookie.split('=');
-      return [parts[0].trim(), parts.length > 1 ? parts[1].trim() : ''];
-    }).toList();
+    return (cookieHeader.endsWith(';')
+            ? cookieHeader.substring(0, cookieHeader.length - 1)
+            : cookieHeader)
+        .split(';')
+        .map((cookie) {
+          final parts = cookie.split('=');
+          return [parts[0].trim(), parts.length > 1 ? parts[1].trim() : ''];
+        })
+        .toList();
   }
 
   List<List<String>> getQueryParamsList() {
@@ -356,26 +361,6 @@ class _ResponseDetailsPanelState extends DetailsPanelState {
           ),
         ),
       ],
-    );
-  }
-
-  Widget buildCookies() {
-    final cookieHeader = widget.flow?.response?.headers.firstWhere(
-      (header) => header[0].toLowerCase() == 'set-cookie',
-      orElse: () => ['set-cookie', ''],
-    )[1];
-    if (cookieHeader == null || cookieHeader.isEmpty) {
-      return SizedBox.shrink();
-    }
-    final cookies = cookieHeader.split(';').map((cookie) {
-      final parts = cookie.split('=');
-      return [parts[0].trim(), parts.length > 1 ? parts[1].trim() : ''];
-    }).toList();
-    return buildItems(
-      items: cookies,
-      title: 'Cookies',
-      keyValueJoiner: '=',
-      linesJoiner: '; ',
     );
   }
 
