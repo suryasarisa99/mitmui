@@ -141,9 +141,12 @@ class FlowDataSource extends DtSource {
           children: [
             SmIconButton(
               icon: Icons.play_arrow,
-              color: row.state == "server_block" ? Colors.red : Colors.green,
+              color: row.state == "server_block"
+                  ? const Color(0xFF9399FF)
+                  : const Color(0xFF8BEF8E),
               onPressed: () => resumeIntercept(row.id, row.state),
             ),
+            SizedBox(width: 4),
             Text(
               text,
               textAlign: cell.textAlign ?? TextAlign.start,

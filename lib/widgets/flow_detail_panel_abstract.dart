@@ -61,14 +61,16 @@ abstract class DetailsPanelState extends State<DetailsPanel>
   @override
   void didUpdateWidget(covariant DetailsPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.flow?.id != widget.flow?.id) {
+    if (oldWidget.flow != widget.flow) {
       String? currentTab;
       try {
         currentTab = tabTitles[tabController.index].split(" ")[0];
       } catch (e) {
         currentTab = null;
       }
-      fetchBody();
+      if (mitmBodyFuture == null) {
+        fetchBody();
+      }
       updateData();
       int newIndex = 0; // Default to the first tab
       if (currentTab != null) {
@@ -85,11 +87,6 @@ abstract class DetailsPanelState extends State<DetailsPanel>
         vsync: this,
         initialIndex: newIndex, // Set the preserved index
       );
-    } else if (oldWidget.flow != widget.flow) {
-      // flow id is same, but flow data is updated
-      if (mitmBodyFuture == null) {
-        fetchBody();
-      }
     }
   }
 

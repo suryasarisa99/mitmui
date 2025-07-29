@@ -252,17 +252,21 @@ class _RequestDetailsPanelState extends DetailsPanelState {
   }
 
   List<List<String>> getCookiesList() {
-    final cookieHeader = widget.flow?.request?.getHeader('cookie');
-    if (cookieHeader == null || cookieHeader.isEmpty) return [];
-    return (cookieHeader.endsWith(';')
-            ? cookieHeader.substring(0, cookieHeader.length - 1)
-            : cookieHeader)
-        .split(';')
-        .map((cookie) {
-          final parts = cookie.split('=');
-          return [parts[0].trim(), parts.length > 1 ? parts[1].trim() : ''];
-        })
-        .toList();
+    final cookiesList = getHeadersByName(
+      widget.flow?.request?.headers ?? [],
+      'cookie',
+    );
+    if (cookiesList.isEmpty) return [];
+    return cookiesList.expand((cookies) {
+      final trimmedCookies = cookies.endsWith(';')
+          ? cookies.substring(0, cookies.length - 1)
+          : cookies;
+      final splited = trimmedCookies.split(';').map((cookie) {
+        final parts = cookie.split('=');
+        return [parts[0].trim(), parts.length > 1 ? parts[1].trim() : ''];
+      });
+      return splited;
+    }).toList();
   }
 
   List<List<String>> getQueryParamsList() {
@@ -352,10 +356,13 @@ class _ResponseDetailsPanelState extends DetailsPanelState {
   }
 
   List<List<String>> getCookiesList() {
-    final cookieHeader = widget.flow?.response?.getHeader('set-cookie');
-    if (cookieHeader == null || cookieHeader.isEmpty) return [];
-    return cookieHeader.split(';').map((cookie) {
-      final parts = cookie.split('=');
+    final cookieHeader = getHeadersByName(
+      widget.flow?.response?.headers ?? [],
+      'set-cookie',
+    );
+    if (cookieHeader.isEmpty) return [];
+    return cookieHeader.map((cookie) {
+      final parts = cookie.split(';').first.split('=');
       return [parts[0].trim(), parts.length > 1 ? parts[1].trim() : ''];
     }).toList();
   }

@@ -644,3 +644,16 @@ class WebSocketInfo {
   double? get lastMessageTimestamp => messagesMeta['timestamp_last'] as double?;
   bool get isClosed => timestampEnd != null;
 }
+
+/// Get a header value by name (case-insensitive)
+/// some old frameworks use duplicate header names so we handle all that name
+List<String> getHeadersByName(List<List<String>> headers, String name) {
+  final List<String> values = [];
+  final normalizedName = name.toLowerCase();
+  for (var header in headers) {
+    if (header[0].toLowerCase() == normalizedName) {
+      values.add(header[1]);
+    }
+  }
+  return values;
+}
