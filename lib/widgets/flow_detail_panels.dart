@@ -131,6 +131,7 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
     if (selectedFlow == null) {
       return const SizedBox.shrink();
     }
+    _log.success("rebuilding flow details for ${selectedFlow.id}");
     return SizedBox(
       width: double.infinity,
       child: Column(
@@ -317,32 +318,35 @@ class _ResponseDetailsPanelState extends DetailsPanelState {
     return Column(
       children: [
         buildHeader(),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-            child: TabBarView(
-              controller: tabController,
-              children: [
-                if (headers.isNotEmpty)
-                  buildItems(
-                    items: headers,
-                    title: 'Headers',
-                    keyValueJoiner: ': ',
-                    linesJoiner: '\n',
-                  ),
-                if (cookies.isNotEmpty)
-                  buildItems(
-                    items: cookies,
-                    title: 'Cookies',
-                    keyValueJoiner: '=',
-                    linesJoiner: '; ',
-                  ),
-                buildBody(),
-                buildRaw(),
-              ],
+        if (widget.flow?.response == null)
+          Expanded(child: const Center(child: CircularProgressIndicator()))
+        else
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+              child: TabBarView(
+                controller: tabController,
+                children: [
+                  if (headers.isNotEmpty)
+                    buildItems(
+                      items: headers,
+                      title: 'Headers',
+                      keyValueJoiner: ': ',
+                      linesJoiner: '\n',
+                    ),
+                  if (cookies.isNotEmpty)
+                    buildItems(
+                      items: cookies,
+                      title: 'Cookies',
+                      keyValueJoiner: '=',
+                      linesJoiner: '; ',
+                    ),
+                  buildBody(),
+                  buildRaw(),
+                ],
+              ),
             ),
           ),
-        ),
       ],
     );
   }

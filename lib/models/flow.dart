@@ -7,6 +7,8 @@ const _log = Logger("flow");
 class MitmFlow {
   final String id;
   final bool intercepted;
+  // the intercepted state is add my me, not comes with mitm flow
+  final String interceptedState;
   final dynamic isReplay; // Can be null
   final String type; // typically "http"
   final bool modified;
@@ -22,6 +24,7 @@ class MitmFlow {
   MitmFlow({
     required this.id,
     required this.intercepted,
+    this.interceptedState = 'none',
     this.isReplay,
     required this.type,
     required this.modified,
@@ -35,13 +38,17 @@ class MitmFlow {
     this.websocket,
   });
 
-  factory MitmFlow.fromJson(Map<String, dynamic> json) {
+  factory MitmFlow.fromJson(
+    Map<String, dynamic> json, [
+    String interceptedState = 'none',
+  ]) {
     try {
       return MitmFlow(
         id: json['id'],
         intercepted: json['intercepted'],
         isReplay: json['is_replay'],
         type: json['type'],
+        interceptedState: interceptedState,
         modified: json['modified'],
         marked: json['marked'] ?? '',
         comment: json['comment'] ?? '',
@@ -91,6 +98,26 @@ class MitmFlow {
     }
 
     return data;
+  }
+
+  // copyWith serverState
+  MitmFlow copyWith(String serverState) {
+    return MitmFlow(
+      id: id,
+      intercepted: intercepted,
+      interceptedState: serverState,
+      isReplay: isReplay,
+      type: type,
+      modified: modified,
+      marked: marked,
+      comment: comment,
+      timestampCreated: timestampCreated,
+      clientConn: clientConn,
+      serverConn: serverConn,
+      request: request,
+      response: response,
+      websocket: websocket,
+    );
   }
 
   /// Parse a flow update message from the WebSocket connection

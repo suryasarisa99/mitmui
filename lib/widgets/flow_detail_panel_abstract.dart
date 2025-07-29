@@ -40,15 +40,22 @@ abstract class DetailsPanelState extends State<DetailsPanel>
   @override
   void initState() {
     super.initState();
-    final type = title.toLowerCase();
-
-    mitmBodyFuture = MitmproxyClient.getMitmBody(widget.flow!.id, type);
+    fetchBody();
     updateData();
     tabController = TabController(
       length: tabsLen,
       vsync: this,
       initialIndex: 0, // Default to the first tab
     );
+  }
+
+  void fetchBody() {
+    final type = title.toLowerCase();
+    if (isResponse && widget.flow?.response == null) {
+      mitmBodyFuture = null;
+    } else {
+      mitmBodyFuture = MitmproxyClient.getMitmBody(widget.flow!.id, type);
+    }
   }
 
   @override
@@ -61,8 +68,7 @@ abstract class DetailsPanelState extends State<DetailsPanel>
       } catch (e) {
         currentTab = null;
       }
-      final type = title.toLowerCase();
-      mitmBodyFuture = MitmproxyClient.getMitmBody(widget.flow!.id, type);
+      fetchBody();
       updateData();
       int newIndex = 0; // Default to the first tab
       if (currentTab != null) {
@@ -79,6 +85,11 @@ abstract class DetailsPanelState extends State<DetailsPanel>
         vsync: this,
         initialIndex: newIndex, // Set the preserved index
       );
+    } else if (oldWidget.flow != widget.flow) {
+      // flow id is same, but flow data is updated
+      if (mitmBodyFuture == null) {
+        fetchBody();
+      }
     }
   }
 

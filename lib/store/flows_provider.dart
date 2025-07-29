@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:mitmui/models/flow.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -41,11 +42,32 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
     // _applyFilter();
   }
 
-  /// Handle a WebSocket message from mitmproxy
-  void handleMessage(String message) {
-    final flow = MitmFlow.parseFlowMessage(message);
+  void handleMessage(Map<String, dynamic> message) {
+    final MitmFlow? prvFlow = state[message['id']];
+    final bool isIntercepted = message['intercepted'] ?? false;
+    final interceptedState = prvFlow?.interceptedState;
+    if (interceptedState == 'none' && isIntercepted) {
+      addOrUpdateFlow(MitmFlow.fromJson(message, "server_block"));
+    } else if (prvFlow == null) {
+      addOrUpdateFlow(MitmFlow.fromJson(message));
+    } else {
+      print(
+        "Updating flow with prv state ${prvFlow.id} with new data ${prvFlow.interceptedState}",
+      );
+      addOrUpdateFlow(MitmFlow.fromJson(message, prvFlow.interceptedState));
+    }
+  }
+
+  void updateFlowState(String flowId, String oldState) {
+    final flow = state[flowId];
     if (flow != null) {
-      addOrUpdateFlow(flow);
+      final newState = switch (oldState) {
+        'server_block' => 'client_block',
+        'client_block' => 'none',
+        _ => 'none',
+      };
+      print("Updating flow $flowId state from $oldState to $newState");
+      state = {...state, flowId: flow.copyWith(newState)};
     }
   }
 

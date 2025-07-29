@@ -100,13 +100,13 @@ class WebSocketService {
     try {
       final decodedMessage = jsonDecode(message);
       final flowType = decodedMessage['type'];
-      final flow = decodedMessage['payload']['flow'];
       if (flowType == "flows/add" || flowType == "flows/update") {
+        final Map<String, dynamic> flow = decodedMessage['payload']['flow'];
         final flowId = flow['id'];
         _log.debug("$flowType: ${flow['id']}");
 
         // Update the Flows
-        _ref.read(flowsProvider.notifier).handleMessage(message);
+        _ref.read(flowsProvider.notifier).handleMessage(flow);
         // Notify listeners about new flow
         _connectionStatusController.add(
           ConnectionStatus(

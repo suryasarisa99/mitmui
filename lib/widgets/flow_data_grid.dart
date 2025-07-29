@@ -31,8 +31,10 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
   late final FlowDataSource _flowDataSource = FlowDataSource(
     initialFlows: ref.read(flowsProvider).values.toList(),
     dtController: widget.controller,
+    resumeIntercept: resumeIntercept,
   );
   late final _filterManager = FilterManager();
+  late final _interceptFilterManager = FilterManager();
   String mitmFilter = '';
   @override
   void initState() {
@@ -62,6 +64,9 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
           .read(flowsProvider.notifier)
           .getFlowsByIds(newIds);
       _flowDataSource.handleFlows(filterdFlows);
+    });
+    _interceptFilterManager.addListener(() {
+      MitmproxyClient.interceptFlow(_interceptFilterManager.mitmproxyString);
     });
   }
 
@@ -106,9 +111,13 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
           manager: _filterManager,
           isRoot: true,
         ),
+        FilterGroupWidget(
+          group: _interceptFilterManager.rootFilter,
+          manager: _interceptFilterManager,
+          isRoot: true,
+        ),
         Expanded(
           child: DtTable(
-            frozenColumnsCount: 1,
             source: _flowDataSource,
             controller: widget.controller,
             // tableWidth: MediaQuery.sizeOf(context).width,
@@ -139,6 +148,14 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
     final currSelId = widget.controller.focusedRowId;
     final selectedIds = widget.controller.selectedRowIds;
     final multiple = selectedIds.length > 1;
+    final flow = ref.read(flowsProvider)[currSelId];
+    if (flow == null) {
+      _log.error("No flows available for context menu");
+      return Menu(children: []);
+    }
+    final interceptedState = flow.interceptedState;
+    final isIntercepted = flow.intercepted;
+    final cantResume = multiple || !isIntercepted || interceptedState == 'none';
 
     return Menu(
       children: [
@@ -176,6 +193,12 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
           title: "Copy As",
         ),
         MenuSeparator(),
+        MenuAction(
+          attributes: MenuActionAttributes(disabled: cantResume),
+          // activator: SingleActivator(LogicalKeyboardKey.enter, meta: true),
+          callback: () => resumeIntercept(currSelId!, interceptedState),
+          title: "Resume Intercept",
+        ),
         MenuAction(
           activator: SingleActivator(LogicalKeyboardKey.enter, meta: true),
           callback: () => repeatRequests(selectedIds),
@@ -341,5 +364,10 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
     for (final id in selectedIds) {
       MitmproxyClient.duplicateFlow(id);
     }
+  }
+
+  void resumeIntercept(String flowId, String oldState) {
+    ref.read(flowsProvider.notifier).updateFlowState(flowId, oldState);
+    MitmproxyClient.resumeIntercept(flowId);
   }
 }

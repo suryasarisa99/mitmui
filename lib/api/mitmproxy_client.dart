@@ -214,6 +214,22 @@ class MitmproxyClient {
       (r) {},
     );
   }
+
+  static Future<void> interceptFlow(String filter) {
+    return _handleRequest(
+      'intercept flow',
+      () => _dio.put('/options', data: {'intercept': filter}),
+      (r) {},
+    );
+  }
+
+  static Future<void> resumeIntercept(String flowId) {
+    return _handleRequest(
+      'resume intercept',
+      () => _dio.post('/flows/$flowId/resume'),
+      (r) {},
+    );
+  }
 }
 
 enum RequestExport { curl, httpie, raw_request, raw_response, raw }

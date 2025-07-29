@@ -4,6 +4,7 @@ import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/dt_table/dt_source.dart';
 import 'package:mitmui/dt_table/dt_models.dart';
 import 'package:mitmui/utils/statusCode.dart';
+import 'package:mitmui/widgets/small_icon_btn.dart';
 
 import '../models/flow.dart' as models;
 import '../utils/extensions.dart';
@@ -11,10 +12,12 @@ import '../utils/extensions.dart';
 class FlowDataSource extends DtSource {
   List<DtRow> _flowRows = [];
   final DtController dtController;
+  void Function(String flowId, String oldState) resumeIntercept;
 
   FlowDataSource({
     required List<models.MitmFlow> initialFlows,
     required this.dtController,
+    required this.resumeIntercept,
   }) {
     handleFlows(initialFlows);
   }
@@ -31,6 +34,7 @@ class FlowDataSource extends DtSource {
       return DtRow(
         id: flow.id,
         m: flow.marked,
+        state: flow.interceptedState,
         cells: [
           // 0: ID Cell
           DtCell(value: i, textAlign: TextAlign.right),
@@ -132,11 +136,31 @@ class FlowDataSource extends DtSource {
         _ => Colors.white,
       };
 
-      return Text(
-        text,
-        textAlign: cell.textAlign ?? TextAlign.start,
-        style: TextStyle(color: cellColor, overflow: TextOverflow.ellipsis),
-      );
+      if (cIndex == 1 && row.state != 'none') {
+        return Row(
+          children: [
+            SmIconButton(
+              icon: Icons.play_arrow,
+              color: row.state == "server_block" ? Colors.red : Colors.green,
+              onPressed: () => resumeIntercept(row.id, row.state),
+            ),
+            Text(
+              text,
+              textAlign: cell.textAlign ?? TextAlign.start,
+              style: TextStyle(
+                color: cellColor,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        );
+      } else {
+        return Text(
+          text,
+          textAlign: cell.textAlign ?? TextAlign.start,
+          style: TextStyle(color: cellColor, overflow: TextOverflow.ellipsis),
+        );
+      }
     }).toList();
     return DtRowAdapter(color: rowColor, cells: cells);
   }

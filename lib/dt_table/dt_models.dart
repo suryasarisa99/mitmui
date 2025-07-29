@@ -51,13 +51,18 @@ class DtColumn {
 
 class DtRow {
   /// Creates [DtRow] for the [SfDataGrid].
-  const DtRow({required List<DtCell> cells, required this.id, this.m})
-    : _cells = cells;
+  const DtRow({
+    required List<DtCell> cells,
+    required this.id,
+    this.m,
+    required this.state,
+  }) : _cells = cells;
 
   /// The data for this row.
   /// There must be exactly as many cells as there are columns in the
   final List<DtCell> _cells;
   final String id;
+  final String state;
 
   /// marker string
   final String? m;
