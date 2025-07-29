@@ -108,6 +108,7 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
         ),
         Expanded(
           child: DtTable(
+            frozenColumnsCount: 1,
             source: _flowDataSource,
             controller: widget.controller,
             // tableWidth: MediaQuery.sizeOf(context).width,

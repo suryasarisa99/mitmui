@@ -187,7 +187,9 @@ class _DtTableState extends State<DtTable> {
   bool _isResizing = false;
   double _resizeIndicatorPosition = 0;
 
-  Timer? _longPressTimer;
+  // ## ADDED: For long press navigation ##
+  Timer? _scrollTimer;
+  LogicalKeyboardKey? _heldKey;
 
   @override
   void initState() {
@@ -195,7 +197,6 @@ class _DtTableState extends State<DtTable> {
     _controller = widget.controller ?? DtController();
     widget.source.addListener(_onDataSourceChanged);
     _controller.addListener(_onControllerChanged);
-    // widget.source.sort('id', 0, false, _controller); // Initial sort
     _columnWidths = widget.headerColumns.map((c) => c.initialWidth).toList();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setInitialColumnWidths();
@@ -205,7 +206,6 @@ class _DtTableState extends State<DtTable> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // _setInitialColumnWidths();
 
     // update table width,if window size changes
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -232,15 +232,11 @@ class _DtTableState extends State<DtTable> {
       _controller = widget.controller ?? DtController();
       _controller.addListener(_onControllerChanged);
     }
-    // if (widget.tableWidth != oldWidget.tableWidth ||
-    //     widget.headerColumns != oldWidget.headerColumns) {
-    //   _setInitialColumnWidths();
-    // }
   }
 
   @override
   void dispose() {
-    _longPressTimer?.cancel();
+    _scrollTimer?.cancel();
     widget.source.removeListener(_onDataSourceChanged);
     _controller.removeListener(_onControllerChanged);
     if (widget.controller == null) {
@@ -315,84 +311,30 @@ class _DtTableState extends State<DtTable> {
     setState(() {});
   }
 
-  void _handleKeyEvent(KeyEvent event) {
-    print("handleKeyEvent: $event");
-    if (event is! KeyDownEvent) return;
-    if (widget.onKeyEvent != null && widget.onKeyEvent!(event)) {
-      return; // Custom event handling,it returns true if it handles the event
-    }
+  // ## ADDED: Helper function for navigation ##
+  void _navigateByOneStep({required bool isDown}) {
+    if (widget.source.rowCount == 0) return;
 
     final isShiftPressed = HardwareKeyboard.instance.isShiftPressed;
-    final isCtrlPressed =
-        HardwareKeyboard.instance.isControlPressed ||
-        HardwareKeyboard.instance.isMetaPressed;
-
-    // Handle Cmd+A (Select All)
-    if (isCtrlPressed && event.logicalKey == LogicalKeyboardKey.keyA) {
-      final allIds = widget.source.effectiveRows.map((r) => r.id).toList();
-      _controller.selectAll(allIds);
-      return;
-    }
-
-    // Handle Escape (Clear Selection)
-    if (event.logicalKey == LogicalKeyboardKey.escape) {
-      _controller.clearSelection();
-      return;
-    }
-
-    // Handle horizontal scrolling
-    if (isCtrlPressed && event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-      if (_horizontalScrollController.hasClients) {
-        _horizontalScrollController.animateTo(
-          // max(0, _horizontalScrollController.offset - 100), // scrolls left by 100 pixels
-          0,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-        );
-      }
-      return;
-    }
-
-    if (isCtrlPressed && event.logicalKey == LogicalKeyboardKey.arrowRight) {
-      if (_horizontalScrollController.hasClients) {
-        _horizontalScrollController.animateTo(
-          // min(
-          //   _horizontalScrollController.position.maxScrollExtent,
-          //   _horizontalScrollController.offset + 100,
-          // ),
-          _horizontalScrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-        );
-      }
-      return;
-    }
-
     int currentIndex = -1;
-    if (_controller._focusedRowId != null) {
+    if (_controller.focusedRowId != null) {
       currentIndex = widget.source.effectiveRows.indexWhere(
-        (r) => r.id == _controller._focusedRowId,
+        (r) => r.id == _controller.focusedRowId,
       );
     }
 
     int nextIndex = currentIndex;
-
-    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      if (isCtrlPressed) {
-        // Jump to last item
-        nextIndex = widget.source.rowCount - 1;
-      } else if (currentIndex < widget.source.rowCount - 1) {
+    if (isDown) {
+      if (currentIndex < widget.source.rowCount - 1) {
         nextIndex = currentIndex + 1;
-      } else if (currentIndex == -1 && widget.source.rowCount > 0) {
+      } else if (currentIndex == -1) {
         nextIndex = 0;
       }
-    } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      if (isCtrlPressed) {
-        // Jump to first item
-        nextIndex = 0;
-      } else if (currentIndex > 0) {
+    } else {
+      // isUp
+      if (currentIndex > 0) {
         nextIndex = currentIndex - 1;
-      } else if (currentIndex == -1 && widget.source.rowCount > 0) {
+      } else if (currentIndex == -1) {
         nextIndex = 0;
       }
     }
@@ -402,9 +344,9 @@ class _DtTableState extends State<DtTable> {
       _controller.updateFocusedRow(nextRow.id);
 
       if (isShiftPressed) {
-        final anchorIndex = _controller._selectionAnchorId != null
+        final anchorIndex = _controller.selectionAnchorId != null
             ? widget.source.effectiveRows.indexWhere(
-                (r) => r.id == _controller._selectionAnchorId,
+                (r) => r.id == _controller.selectionAnchorId,
               )
             : -1;
         if (anchorIndex != -1) {
@@ -420,15 +362,129 @@ class _DtTableState extends State<DtTable> {
         _controller.updateSelectedRows({nextRow.id});
         _controller.updateSelectionAnchor(nextRow.id);
       }
-
       _scrollToIndex(nextIndex);
     }
   }
 
-  void _handleKeyUp(KeyEvent event) {
-    if (event is KeyUpEvent) {
-      _longPressTimer?.cancel();
+  // ## MODIFIED: The final, robust key handler ##
+  // ## MODIFIED: Re-introducing Cmd/Ctrl + Arrow functionality ##
+  KeyEventResult _handleKeyEvent(KeyEvent event) {
+    final isArrowDown = event.logicalKey == LogicalKeyboardKey.arrowDown;
+    final isArrowUp = event.logicalKey == LogicalKeyboardKey.arrowUp;
+    final isCtrlPressed =
+        HardwareKeyboard.instance.isControlPressed ||
+        HardwareKeyboard.instance.isMetaPressed;
+
+    // --- Single-Step and Long-Press Navigation (No Ctrl) ---
+    if ((isArrowDown || isArrowUp) && !isCtrlPressed) {
+      if (event is KeyDownEvent) {
+        if (_heldKey != event.logicalKey) {
+          _heldKey = event.logicalKey;
+          _navigateByOneStep(isDown: isArrowDown);
+          _scrollTimer?.cancel();
+          // 2. Start a one-shot timer for the initial 1-second delay.
+          // 4. Now, start the fast periodic timer for all subsequent steps.
+          _scrollTimer = Timer.periodic(const Duration(milliseconds: 220), (
+            timer,
+          ) {
+            _navigateByOneStep(isDown: isArrowDown);
+          });
+          // Timer(const Duration(milliseconds: 350), () {
+          //   // After 1 second, if the key is still held down...
+          //   if (_heldKey == null) return;
+
+          //   // 3. Perform the second navigation step.
+          //   _navigateByOneStep(isDown: isArrowDown);
+
+          // });
+        }
+      } else if (event is KeyUpEvent) {
+        if (_heldKey == event.logicalKey) {
+          _scrollTimer?.cancel();
+          _heldKey = null;
+        }
+      }
+      return KeyEventResult.handled;
     }
+    // --- End Single-Step Logic ---
+
+    // --- All other KeyDown shortcuts (Select All, Esc, Jumps) ---
+    if (event is KeyDownEvent) {
+      // --- JUMP TO START/END (With Ctrl) ---
+      if ((isArrowDown || isArrowUp) && isCtrlPressed) {
+        if (widget.source.rowCount > 0) {
+          final isShiftPressed = HardwareKeyboard.instance.isShiftPressed;
+          final targetIndex = isArrowDown ? widget.source.rowCount - 1 : 0;
+          final targetRow = widget.source.effectiveRows[targetIndex];
+
+          _controller.updateFocusedRow(targetRow.id);
+
+          if (isShiftPressed) {
+            final anchorIndex = _controller.selectionAnchorId != null
+                ? widget.source.effectiveRows.indexWhere(
+                    (r) => r.id == _controller.selectionAnchorId,
+                  )
+                : -1;
+
+            if (anchorIndex != -1) {
+              final start = min(anchorIndex, targetIndex);
+              final end = max(anchorIndex, targetIndex);
+              final rangeIds = widget.source.effectiveRows
+                  .sublist(start, end + 1)
+                  .map((r) => r.id)
+                  .toSet();
+              _controller.updateSelectedRows(rangeIds);
+            }
+          } else {
+            _controller.updateSelectedRows({targetRow.id});
+            _controller.updateSelectionAnchor(targetRow.id);
+          }
+          _scrollToIndex(targetIndex);
+        }
+        return KeyEventResult.handled;
+      }
+      // --- End Jump Logic ---
+
+      // --- Other Shortcuts ---
+      if (widget.onKeyEvent != null && widget.onKeyEvent!(event)) {
+        return KeyEventResult.handled;
+      }
+
+      if (isCtrlPressed && event.logicalKey == LogicalKeyboardKey.keyA) {
+        final allIds = widget.source.effectiveRows.map((r) => r.id).toList();
+        _controller.selectAll(allIds);
+        return KeyEventResult.handled;
+      }
+
+      if (event.logicalKey == LogicalKeyboardKey.escape) {
+        _controller.clearSelection();
+        return KeyEventResult.handled;
+      }
+
+      if (isCtrlPressed && event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+        if (_horizontalScrollController.hasClients) {
+          _horizontalScrollController.animateTo(
+            0,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+          );
+        }
+        return KeyEventResult.handled;
+      }
+
+      if (isCtrlPressed && event.logicalKey == LogicalKeyboardKey.arrowRight) {
+        if (_horizontalScrollController.hasClients) {
+          _horizontalScrollController.animateTo(
+            _horizontalScrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+          );
+        }
+        return KeyEventResult.handled;
+      }
+    }
+
+    return KeyEventResult.ignored;
   }
 
   void _scrollToIndex(int index) {
@@ -593,13 +649,10 @@ class _DtTableState extends State<DtTable> {
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardListener(
+    return Focus(
       focusNode: _focusNode,
       autofocus: true,
-      onKeyEvent: (event) {
-        _handleKeyEvent(event);
-        _handleKeyUp(event);
-      },
+      onKeyEvent: (node, event) => _handleKeyEvent(event),
       child: SizedBox(
         child: Stack(
           children: [
@@ -723,7 +776,7 @@ class _DtTableState extends State<DtTable> {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          if (widget.source.sortColumnIndex == index)
+                          if (widget.source.sortColumnIndex == actualIndex)
                             Icon(
                               widget.source.sortType == SortType.ascending
                                   ? Icons.arrow_upward
