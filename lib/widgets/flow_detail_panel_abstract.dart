@@ -5,11 +5,13 @@ import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
+import 'package:mitmui/http_docs.dart';
 import 'package:mitmui/models/flow.dart' as models;
 import 'package:mitmui/models/response_body.dart';
 import 'package:mitmui/widgets/resize.dart';
 import 'package:mitmui/utils/statusCode.dart';
 import 'package:mitmui/widgets/preview_body.dart';
+import 'package:mitmui/widgets/small_icon_btn.dart';
 
 abstract class DetailsPanel extends StatefulWidget {
   final models.MitmFlow? flow;
@@ -68,7 +70,7 @@ abstract class DetailsPanelState extends State<DetailsPanel>
       } catch (e) {
         currentTab = null;
       }
-      if (mitmBodyFuture == null) {
+      if (mitmBodyFuture == null || oldWidget.flow?.id != widget.flow?.id) {
         fetchBody();
       }
       updateData();
@@ -241,81 +243,118 @@ abstract class DetailsPanelState extends State<DetailsPanel>
     required String keyValueJoiner,
     required String linesJoiner,
   }) {
-    return ListView.builder(
-      itemCount: items.length + 1,
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.copy, size: 16),
-                  tooltip: 'Copy all headers',
-                  onPressed: () {
-                    final headerText = items
-                        .map((h) => '${h[0]}$keyValueJoiner${h[1]}')
-                        .join(linesJoiner);
-                    Clipboard.setData(ClipboardData(text: headerText));
-                  },
-                ),
-              ],
-            ),
-          );
-        } else {
-          final item = items[index - 1];
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 2),
-            color: const Color(0xFF23242A),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 4.0,
-                horizontal: 8.0,
-              ),
+    return SelectableRegion(
+      selectionControls: MaterialTextSelectionControls(),
+      contextMenuBuilder: (context, editableTextState) {
+        return AdaptiveTextSelectionToolbar.buttonItems(
+          buttonItems: editableTextState.contextMenuButtonItems,
+          anchors: editableTextState.contextMenuAnchors,
+        );
+      },
+      child: ListView.builder(
+        itemCount: items.length + 1,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: SelectableText.rich(
-                      TextSpan(
-                        style: const TextStyle(fontSize: 14),
-                        children: [
-                          TextSpan(
-                            text: '${item[0]}: ',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFFAEB9FC),
-                            ),
-                          ),
-                          TextSpan(
-                            text: item[1],
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ),
+                  Text(
+                    title,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.content_copy, size: 14),
-                    tooltip: 'Copy header',
+                    icon: Icon(Icons.copy, size: 16, color: Colors.grey[400]),
+                    tooltip: 'Copy all headers',
                     onPressed: () {
-                      Clipboard.setData(
-                        ClipboardData(
-                          text: '${item[0]}$keyValueJoiner${item[1]}',
-                        ),
-                      );
+                      final headerText = items
+                          .map((h) => '${h[0]}$keyValueJoiner${h[1]}')
+                          .join(linesJoiner);
+                      Clipboard.setData(ClipboardData(text: headerText));
                     },
                   ),
                 ],
               ),
-            ),
-          );
-        }
-      },
+            );
+          } else {
+            final item = items[index - 1];
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 2),
+              color: const Color(0xFF23242A),
+
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 0.0,
+                  horizontal: 8.0,
+                ),
+                child: Row(
+                  children: [
+                    if (title.startsWith("Headers")) ...[
+                      Tooltip(
+                        message: getHeaderDocs(item[0])?.summary ?? '',
+                        child: Icon(
+                          Icons.info_outline,
+                          color: Colors.grey,
+                          size: 16,
+                        ),
+                      ),
+                      SizedBox(width: 6),
+                    ],
+                    SizedBox(
+                      width: 200,
+                      child: Text(
+                        item[0],
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFFAEB9FC),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    Expanded(child: Text(item[1])),
+                    // Expanded(
+                    //   child: SelectableText.rich(
+                    //     TextSpan(
+                    //       style: const TextStyle(fontSize: 14),
+                    //       children: [
+                    //         TextSpan(
+                    //           text: '${item[0]}: ',
+                    //           style: const TextStyle(
+                    //             fontWeight: FontWeight.w600,
+                    //             color: Color(0xFFAEB9FC),
+                    //           ),
+                    //         ),
+                    //         TextSpan(
+                    //           text: item[1],
+                    //           style: const TextStyle(color: Colors.white),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    // ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.content_copy,
+                        size: 14,
+                        color: Colors.grey,
+                      ),
+                      tooltip: 'Copy header',
+                      onPressed: () {
+                        Clipboard.setData(
+                          ClipboardData(
+                            text: '${item[0]}$keyValueJoiner${item[1]}',
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 
@@ -406,7 +445,8 @@ abstract class DetailsPanelState extends State<DetailsPanel>
             // Add a separator between headers and body
             headerSpans.add(
               const TextSpan(
-                text: "\n\n--- Body Content ---\n\n",
+                // text: "\n\n--- Body Content ---\n\n",
+                text: "\n\n",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Color(0xFFAEB9FC),

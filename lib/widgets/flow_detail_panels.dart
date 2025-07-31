@@ -310,7 +310,7 @@ class _ResponseDetailsPanelState extends DetailsPanelState {
 
     tabTitles = [
       if (headers.isNotEmpty) 'Headers (${headers.length})',
-      if (cookies.isNotEmpty) 'Cookies (${cookies.length})',
+      if (cookies.isNotEmpty) 'Set-Cookies (${cookies.length})',
       'Body',
       'Raw',
     ];
@@ -319,6 +319,7 @@ class _ResponseDetailsPanelState extends DetailsPanelState {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.flow?.response?.headers.first ?? "no-headers");
     return Column(
       children: [
         buildHeader(),
@@ -341,7 +342,7 @@ class _ResponseDetailsPanelState extends DetailsPanelState {
                   if (cookies.isNotEmpty)
                     buildItems(
                       items: cookies,
-                      title: 'Cookies',
+                      title: 'Set-Cookies',
                       keyValueJoiner: '=',
                       linesJoiner: '; ',
                     ),

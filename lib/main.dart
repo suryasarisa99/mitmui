@@ -1,12 +1,8 @@
-import 'dart:convert';
-
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
-import 'package:mitmui/widgets/re_editor.dart';
-import 'package:mitmui/widgets/resize.dart';
 import 'package:mitmui/screens/status_screen.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:mitmui/widgets/flow_detail_panels.dart';

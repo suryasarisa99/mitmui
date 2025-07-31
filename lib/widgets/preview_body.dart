@@ -52,10 +52,13 @@ class PreviewBody extends StatelessWidget {
               style: const TextStyle(color: Colors.red),
             ),
           );
-        } else if (!snapshot.hasData ||
-            (snapshot.data?.text.isEmpty ?? false)) {
-          return const Center(child: Text('No content to Preview 2'));
-        } else {
+        }
+        /// commented causes image not shows
+        // else if (!snapshot.hasData ||
+        //     (snapshot.data?.text.isEmpty ?? false)) {
+        //   return const Center(child: Text('No content to Preview 2'));
+        // }
+        else {
           final mitmBody = snapshot.data!;
           if (mitmBody.viewName == "Query") {
             return const Center(child: Text("No content to Preview 3"));
@@ -73,11 +76,11 @@ class PreviewBody extends StatelessWidget {
                 '${MitmproxyClient.baseUrl}/flows/$flowId/response/content.data';
             return Image.network(
               imageUrl,
-              fit: BoxFit.contain,
               headers: {
                 'Cookie': MitmproxyClient.cookies,
                 'Referer': MitmproxyClient.baseUrl,
               },
+              fit: BoxFit.contain,
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
                 return Center(
@@ -114,10 +117,14 @@ class PreviewBody extends StatelessWidget {
           } else if (mitmBody.viewName == "JSON" ||
               contentType.contains('json') ||
               contentType.contains('x-sentry-envelope')) {
-            final formattedJson = JsonEncoder.withIndent(
-              '  ',
-            ).convert(jsonDecode(mitmBody.text));
-            return ReEditor(text: formattedJson, lang: 'json');
+            try {
+              final formattedJson = JsonEncoder.withIndent(
+                '  ',
+              ).convert(jsonDecode(mitmBody.text));
+              return ReEditor(text: formattedJson, lang: 'json');
+            } catch (e) {
+              return ReEditor(text: mitmBody.text, lang: 'json');
+            }
           } else if (mitmBody.viewName == 'HTML' ||
               contentType.contains('html') ||
               mitmBody.viewName == 'XML' ||

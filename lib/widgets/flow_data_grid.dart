@@ -122,7 +122,7 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
             controller: widget.controller,
             // tableWidth: MediaQuery.sizeOf(context).width,
             tableWidth: double.infinity,
-            headerHeight: 30,
+            headerHeight: 24,
             rowHeight: 32,
             menuProvider: buildContextMenu,
             onKeyEvent: handleKeyEvent,
@@ -156,7 +156,9 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
     final interceptedState = flow.interceptedState;
     final isIntercepted = flow.intercepted;
     final cantResume = multiple || !isIntercepted || interceptedState == 'none';
-
+    final modifiedIds = selectedIds.where(
+      (id) => ref.read(flowsProvider)[id]?.modified == true,
+    );
     return Menu(
       children: [
         MenuAction(
@@ -209,8 +211,9 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
           title: "Duplicate",
         ),
         MenuAction(
-          activator: SingleActivator(LogicalKeyboardKey.backspace),
-          callback: () => revertChanges(selectedIds),
+          attributes: MenuActionAttributes(disabled: modifiedIds.isEmpty),
+          activator: SingleActivator(LogicalKeyboardKey.enter, meta: true),
+          callback: () => revertChanges(modifiedIds),
           title: "Revert Changes",
         ),
         Menu(
@@ -354,7 +357,7 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
     Clipboard.setData(ClipboardData(text: str));
   }
 
-  void revertChanges(Set<String> selectedIds) {
+  void revertChanges(Iterable<String> selectedIds) {
     for (final id in selectedIds) {
       MitmproxyClient.revertChanges(id);
     }
