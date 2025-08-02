@@ -47,14 +47,28 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
     final bool isIntercepted = message['intercepted'] ?? false;
     final interceptedState = prvFlow?.interceptedState;
     if (interceptedState == 'none' && isIntercepted) {
-      addOrUpdateFlow(MitmFlow.fromJson(message, "server_block"));
+      addOrUpdateFlow(
+        MitmFlow.fromJson(
+          message,
+          interceptedState: "server_block",
+          headers: prvFlow?.request?.headers,
+          enabledHeaders: prvFlow?.request?.enabledHeaders,
+        ),
+      );
     } else if (prvFlow == null) {
       addOrUpdateFlow(MitmFlow.fromJson(message));
     } else {
       print(
         "Updating flow with prv state ${prvFlow.id} with new data ${prvFlow.interceptedState}",
       );
-      addOrUpdateFlow(MitmFlow.fromJson(message, prvFlow.interceptedState));
+      addOrUpdateFlow(
+        MitmFlow.fromJson(
+          message,
+          interceptedState: prvFlow.interceptedState,
+          headers: prvFlow.request?.headers,
+          enabledHeaders: prvFlow.request?.enabledHeaders,
+        ),
+      );
     }
   }
 
@@ -67,7 +81,16 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
         _ => 'none',
       };
       print("Updating flow $flowId state from $oldState to $newState");
-      state = {...state, flowId: flow.copyWith(newState)};
+      state = {...state, flowId: flow.copyWith(interceptedState: newState)};
+    }
+  }
+
+  void addHeader(String flowId, List<String> header, bool status) {
+    final flow = state[flowId];
+    if (flow != null) {
+      flow.request?.headers.add(header);
+      flow.request?.enabledHeaders?.add(status);
+      state = {...state, flowId: flow};
     }
   }
 

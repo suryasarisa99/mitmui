@@ -6,12 +6,14 @@ import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/screens/status_screen.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:mitmui/widgets/flow_detail_panels.dart';
-import 'package:window_size/window_size.dart';
+import 'package:window_manager/window_manager.dart';
 import 'screens/flow_list_screen.dart';
 
-void main(List<String> args) async {
+void main(
+  // List<String> args
+) async {
   WidgetsFlutterBinding.ensureInitialized();
-  print('args: $args');
+  // print('args: $args');
 
   // if (args.firstOrNull == 'multi_window') {
   //   final windowId = int.parse(args[1]);
@@ -24,10 +26,24 @@ void main(List<String> args) async {
   //   );
   //   return;
   // }
+
+  await windowManager.ensureInitialized();
+  const WindowOptions windowOptions = WindowOptions(
+    size: Size(400, 720),
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.hidden,
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
+
   // Set minimum window size for desktop platforms
-  setWindowTitle('MITMproxy UI');
-  setWindowMinSize(const Size(800, 600));
-  setWindowMaxSize(Size.infinite);
+  // setWindowTitle('MITMproxy UI');
+  // setWindowMinSize(const Size(800, 600));
+  // setWindowMaxSize(Size.infinite);
 
   // Default window size
   // getCurrentScreen().then((screen) {
@@ -45,7 +61,7 @@ void main(List<String> args) async {
   //   }
   // });
   Logger.logLevel = LogLevel.debug;
-  await MitmproxyClient.startMitm();
+  // await MitmproxyClient.startMitm();
   // Create and initialize the FlowStore
 
   // Create the WebSocket service and pass the FlowStore
@@ -118,7 +134,7 @@ class MainApp extends StatelessWidget {
 }
 
 final GoRouter router = GoRouter(
-  initialLocation: '/status',
+  initialLocation: '/',
   routes: [
     GoRoute(path: '/', builder: (context, state) => const FlowListScreen()),
     GoRoute(path: '/status', builder: (context, state) => const StatusScreen()),

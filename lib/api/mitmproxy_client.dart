@@ -71,17 +71,23 @@ class MitmproxyClient {
     ]);
     // get cookie, by sending password as token
     await Future.delayed(const Duration(seconds: 2));
-    _dio
-        .get('/?token=$password')
+    getCookieFromToken(password);
+    _log.success('MITM Proxy started');
+  }
+
+  static Future<bool> getCookieFromToken(String token) async {
+    return _dio
+        .get('/?token=$token')
         .then((response) {
           final newCookies = response.headers['set-cookie']?.join('; ') ?? '';
           updateCookies(newCookies);
           _log.info('Cookies set: $cookies');
+          return true;
         })
         .catchError((error) {
           _log.error('Error setting cookies: $error');
+          return false;
         });
-    _log.success('MITM Proxy started');
   }
 
   static String generateRandomString(int length) {
@@ -227,6 +233,19 @@ class MitmproxyClient {
     return _handleRequest(
       'resume intercept',
       () => _dio.post('/flows/$flowId/resume'),
+      (r) {},
+    );
+  }
+
+  static Future<void> updateHeaders(String flowId, List<List<String>> headers) {
+    return _handleRequest(
+      'updating headers',
+      () => _dio.put(
+        '/flows/$flowId',
+        data: {
+          'request': {'headers': headers},
+        },
+      ),
       (r) {},
     );
   }

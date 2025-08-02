@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mitmui/dialog/token_input_dialog.dart';
 import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/services/websocket_service.dart';
+import 'package:mitmui/theme.dart';
 import 'package:mitmui/widgets/resize.dart';
 import 'package:mitmui/utils/logger.dart';
-
-import '../models/flow.dart' as models;
-import '../store/flows_provider.dart';
 import '../widgets/flow_data_grid.dart';
 import '../widgets/flow_detail_panels.dart';
 
@@ -30,7 +29,12 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
 
   @override
   void initState() {
+    // webSocketService.connect();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Subscribe to WebSocket service after the first frame
+      showInputPopup();
+    });
   }
 
   @override
@@ -38,9 +42,20 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
     super.dispose();
   }
 
+  void showInputPopup() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return TokenInputDialog();
+      },
+    ).then((_) {
+      webSocketService.connect();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bg = Color(0xff1D1F21);
+    final theme = AppTheme.from(Theme.brightnessOf(context));
 
     return PopScope(
       canPop: true,
@@ -50,12 +65,12 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: bg,
+        backgroundColor: theme.surfaceDark,
         appBar: AppBar(
-          backgroundColor: bg,
+          backgroundColor: theme.surfaceDark,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
-          toolbarHeight: kTextTabBarHeight - 10,
+          toolbarHeight: kTextTabBarHeight - 20,
           actions: [
             // WebSocket connection status indicator
             StreamBuilder<ConnectionStatus>(
@@ -64,6 +79,7 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
                 final isConnected =
                     snapshot.hasData && snapshot.data!.isConnected;
                 return IconButton(
+                  iconSize: 18,
                   icon: Icon(
                     isConnected ? Icons.cloud_done : Icons.cloud_off,
                     color: isConnected ? Colors.green : Colors.red,
@@ -89,16 +105,20 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
   }
 
   Widget _buildBody() {
-    return ResizableContainer(
-      axis: Axis.vertical,
-      dividerColor: Colors.grey[600]!,
-      onDragDividerColor: Colors.red,
-      onDragDividerWidth: 3,
-      dividerWidth: 1,
-      dividerHandleWidth: 18,
-      maxRatio: 1,
-      child1: FlowDataGrid(controller: _dtController),
-      child2: BottomPannel(dtController: _dtController),
+    final theme = AppTheme.from(Theme.brightnessOf(context));
+    return Container(
+      color: theme.surfaceDark,
+      child: ResizableContainer(
+        axis: Axis.vertical,
+        dividerColor: Colors.grey[600]!,
+        onDragDividerColor: Colors.red,
+        onDragDividerWidth: 3,
+        dividerWidth: 1,
+        dividerHandleWidth: 18,
+        maxRatio: 1,
+        child1: FlowDataGrid(controller: _dtController),
+        child2: BottomPannel(dtController: _dtController),
+      ),
     );
   }
 }

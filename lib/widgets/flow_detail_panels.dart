@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/dt_table/dt_models.dart';
 import 'package:mitmui/models/flow.dart';
@@ -132,7 +133,9 @@ class _BottomPannelState extends ConsumerState<BottomPannel> {
       return const SizedBox.shrink();
     }
     _log.success("rebuilding flow details for ${selectedFlow.id}");
-    return SizedBox(
+    return Container(
+      color: theme.surface,
+      // color: Colors.red,
       width: double.infinity,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -195,9 +198,12 @@ class _RequestDetailsPanelState extends DetailsPanelState {
 
   @override
   void updateData() {
+    print("=====update data=======");
+
     queryParams = getQueryParamsList();
     cookies = getCookiesList();
     headers = widget.flow?.request?.headers ?? [];
+    print("Headers: ${headers.first}");
 
     tabTitles = [
       if (headers.isNotEmpty) 'Headers (${headers.length})',
@@ -220,13 +226,7 @@ class _RequestDetailsPanelState extends DetailsPanelState {
             child: TabBarView(
               controller: tabController,
               children: [
-                if (headers.isNotEmpty)
-                  buildItems(
-                    items: headers,
-                    title: 'Headers',
-                    keyValueJoiner: ': ',
-                    linesJoiner: '\n',
-                  ),
+                if (headers.isNotEmpty) buildHeaders(),
                 if (queryParams.isNotEmpty)
                   buildItems(
                     items: queryParams,
@@ -248,6 +248,78 @@ class _RequestDetailsPanelState extends DetailsPanelState {
           ),
         ),
       ],
+    );
+  }
+
+  // void addHeader() {
+  //   final flowsNotifier = ref.read(flowsProvider.notifier);
+  //   final newHeader = ['New-Header', ''];
+  //   headers.add(newHeader);
+  //   flowsNotifier.addHeader(widget.flow!.id, newHeader[0], newHeader[1]);
+  //   MitmproxyClient.updateHeaders(widget.flow!.id, headers);
+  // }
+
+  Widget buildHeaders() {
+    print("======build headers=======, first: ${headers.first}");
+    return buildInputItems(
+      items: headers,
+      title: 'Headers',
+      keyValueJoiner: ': ',
+      linesJoiner: '\n',
+      onItemAdded: (item, index) {
+        print("Header added: $item at index $index");
+        ref.read(flowsProvider.notifier).addHeader(widget.flow!.id, item, true);
+        // headers.add(item);
+      },
+      onItemChanged: (index, key, value) {
+        print("onItemChanged : $key: $value");
+        if (index < headers.length) {
+          headers[index] = [key, value];
+        }
+        List<List<String>> filteredItems = headers;
+        if (widget.flow?.request?.enabledHeaders != null) {
+          filteredItems = headers
+              .asMap()
+              .entries
+              .where(
+                (entry) => widget.flow!.request!.enabledHeaders![entry.key],
+              )
+              .map((e) => e.value)
+              .toList();
+        }
+        MitmproxyClient.updateHeaders(widget.flow!.id, filteredItems);
+      },
+      onItemToggled: (index, v) {
+        var enabledHeaders = widget.flow!.request!.enabledHeaders;
+        enabledHeaders ??= List.filled(headers.length, true);
+        enabledHeaders[index] = v;
+        ref
+            .read(flowsProvider.notifier)
+            .addOrUpdateFlow(
+              widget.flow!.copyWith(enabledHeaders: enabledHeaders),
+            );
+        List<List<String>> filteredItems = headers;
+        filteredItems = headers
+            .asMap()
+            .entries
+            .where((entry) => enabledHeaders![entry.key])
+            .map((e) => e.value)
+            .toList();
+        MitmproxyClient.updateHeaders(widget.flow!.id, filteredItems);
+      },
+      onItemReordered: (oldIndex, newIndex) {
+        if (oldIndex < newIndex) {
+          newIndex -= 1;
+        }
+        final item = headers.removeAt(oldIndex);
+        headers.insert(newIndex, item);
+        MitmproxyClient.updateHeaders(widget.flow!.id, headers);
+        ref
+            .read(flowsProvider.notifier)
+            .addOrUpdateFlow(widget.flow!.copyWith(headers: headers));
+      },
+
+      enabledStates: headers.map((e) => true).toList(),
     );
   }
 

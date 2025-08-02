@@ -4,16 +4,18 @@ import 'package:collection/collection.dart';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/http_docs.dart';
 import 'package:mitmui/models/flow.dart' as models;
 import 'package:mitmui/models/response_body.dart';
+import 'package:mitmui/widgets/input_items.dart';
 import 'package:mitmui/widgets/resize.dart';
 import 'package:mitmui/utils/statusCode.dart';
 import 'package:mitmui/widgets/preview_body.dart';
 import 'package:mitmui/widgets/small_icon_btn.dart';
 
-abstract class DetailsPanel extends StatefulWidget {
+abstract class DetailsPanel extends ConsumerStatefulWidget {
   final models.MitmFlow? flow;
   final ResizableController resizeController;
   const DetailsPanel({
@@ -23,7 +25,7 @@ abstract class DetailsPanel extends StatefulWidget {
   });
 }
 
-abstract class DetailsPanelState extends State<DetailsPanel>
+abstract class DetailsPanelState extends ConsumerState<DetailsPanel>
     with TickerProviderStateMixin {
   int get tabsLen;
   List<String> get tabTitles;
@@ -64,16 +66,17 @@ abstract class DetailsPanelState extends State<DetailsPanel>
   void didUpdateWidget(covariant DetailsPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.flow != widget.flow) {
+      print(">>> flow updated: didUpdateWidget called");
       String? currentTab;
       try {
         currentTab = tabTitles[tabController.index].split(" ")[0];
       } catch (e) {
         currentTab = null;
       }
+      updateData();
       if (mitmBodyFuture == null || oldWidget.flow?.id != widget.flow?.id) {
         fetchBody();
       }
-      updateData();
       int newIndex = 0; // Default to the first tab
       if (currentTab != null) {
         final foundIndex = tabTitles.indexWhere(
@@ -191,7 +194,7 @@ abstract class DetailsPanelState extends State<DetailsPanel>
           mainAxisSize: MainAxisSize.min, // Make the row wrap its content
           children: <Widget>[
             _buildToggleButton(
-              text: 'Request',
+              text: 'Req',
               isSelected: !widget.resizeController.isChild1Hidden,
               onPressed: () {
                 widget.resizeController.showFirstChild();
@@ -199,7 +202,7 @@ abstract class DetailsPanelState extends State<DetailsPanel>
               },
             ),
             _buildToggleButton(
-              text: 'Response',
+              text: 'Res',
               isSelected: !widget.resizeController.isChild2Hidden,
               onPressed: () {
                 widget.resizeController.showSecondChild();
@@ -222,12 +225,13 @@ abstract class DetailsPanelState extends State<DetailsPanel>
       borderRadius: BorderRadius.circular(0),
       child: Container(
         color: isSelected
-            ? const Color.fromARGB(255, 215, 61, 14)
-            : Colors.grey[800],
-        padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 3.5),
+            ? const Color.fromARGB(205, 238, 76, 26)
+            : const Color.fromARGB(197, 66, 66, 66),
+        padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 3.5),
         child: Text(
           text,
           style: TextStyle(
+            fontSize: 13,
             color: isSelected ? Colors.white : Colors.white,
             fontWeight: FontWeight.w500,
           ),
@@ -355,6 +359,73 @@ abstract class DetailsPanelState extends State<DetailsPanel>
           }
         },
       ),
+    );
+  }
+
+  Widget buildInputItems({
+    required List<List<String>> items,
+    required String title,
+    required String keyValueJoiner,
+    required String linesJoiner,
+    required Function(int, String, String) onItemChanged,
+    required Function(int, bool) onItemToggled,
+    required Function(int, int) onItemReordered,
+    required Function(List<String>, int) onItemAdded,
+    List<bool>? enabledStates,
+  }) {
+    // Ensure there's always an empty row at the end for new items
+
+    // // Add empty row if the last item is not empty or if list is empty
+    // if (displayItems.isEmpty ||
+    //     (displayItems.last[0].isNotEmpty || displayItems.last[1].isNotEmpty)) {
+    //   displayItems.add(['', '']);
+    //   displayStates.add(false);
+    // }
+
+    return Column(
+      children: [
+        // Header
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              IconButton(
+                icon: Icon(Icons.copy, size: 16, color: Colors.grey[400]),
+                tooltip: 'Copy all items',
+                onPressed: () {
+                  final itemText = items
+                      .asMap()
+                      .entries
+                      .where((entry) => enabledStates?[entry.key] ?? true)
+                      .map(
+                        (entry) =>
+                            '${entry.value[0]}$keyValueJoiner${entry.value[1]}',
+                      )
+                      .join(linesJoiner);
+                  Clipboard.setData(ClipboardData(text: itemText));
+                },
+              ),
+            ],
+          ),
+        ),
+        // Items List
+        Expanded(
+          child: InputItems(
+            title: title,
+            items: items,
+            states: widget.flow?.request?.enabledHeaders,
+            onItemToggled: onItemToggled,
+            onItemReordered: onItemReordered,
+            onItemChanged: onItemChanged,
+            onItemAdded: onItemAdded,
+          ),
+        ),
+      ],
     );
   }
 

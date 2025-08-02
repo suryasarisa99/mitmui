@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/dt_table/dt_models.dart';
+import 'package:mitmui/theme.dart';
 import 'package:mitmui/utils/extensions.dart';
 import 'package:mitmui/widgets/filter.dart';
 import 'package:mitmui/screens/filter_manager.dart';
@@ -91,7 +92,8 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
   @override
   Widget build(BuildContext context) {
     // print("rebuilding FlowDataGrid");
-    MediaQuery.sizeOf(context).width;
+    // MediaQuery.sizeOf(context).width;
+    final theme = AppTheme.from(Theme.brightnessOf(context));
     final headerCells = [
       (title: "ID", key: 'id'),
       (title: "URL", key: 'url'),
@@ -103,44 +105,47 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
       (title: "Req", key: 'reqLen'),
       (title: "Res", key: 'resLen'),
     ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FilterGroupWidget(
-          group: _filterManager.rootFilter,
-          manager: _filterManager,
-          isRoot: true,
-        ),
-        FilterGroupWidget(
-          group: _interceptFilterManager.rootFilter,
-          manager: _interceptFilterManager,
-          isRoot: true,
-        ),
-        Expanded(
-          child: DtTable(
-            source: _flowDataSource,
-            controller: widget.controller,
-            // tableWidth: MediaQuery.sizeOf(context).width,
-            tableWidth: double.infinity,
-            headerHeight: 24,
-            rowHeight: 32,
-            menuProvider: buildContextMenu,
-            onKeyEvent: handleKeyEvent,
-            headerColumns: [
-              for (final header in headerCells)
-                DtColumn(
-                  key: header.key,
-                  title: header.title,
-                  fontSize: 12,
-                  initialWidth: _columnWidths[header.key]!,
-                  isNumeric: header.key == 'id' || header.key == 'status',
-                  isExpand: header.key == 'url',
-                  // maxWidth: 1200,
-                ),
-            ],
+    return Container(
+      color: theme.surface,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FilterGroupWidget(
+            group: _filterManager.rootFilter,
+            manager: _filterManager,
+            isRoot: true,
           ),
-        ),
-      ],
+          FilterGroupWidget(
+            group: _interceptFilterManager.rootFilter,
+            manager: _interceptFilterManager,
+            isRoot: true,
+          ),
+          Expanded(
+            child: DtTable(
+              source: _flowDataSource,
+              controller: widget.controller,
+              // tableWidth: MediaQuery.sizeOf(context).width,
+              tableWidth: double.infinity,
+              headerHeight: 24,
+              rowHeight: 32,
+              menuProvider: buildContextMenu,
+              onKeyEvent: handleKeyEvent,
+              headerColumns: [
+                for (final header in headerCells)
+                  DtColumn(
+                    key: header.key,
+                    title: header.title,
+                    fontSize: 12,
+                    initialWidth: _columnWidths[header.key]!,
+                    isNumeric: header.key == 'id' || header.key == 'status',
+                    isExpand: header.key == 'url',
+                    // maxWidth: 1200,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -39,9 +39,11 @@ class MitmFlow {
   });
 
   factory MitmFlow.fromJson(
-    Map<String, dynamic> json, [
+    Map<String, dynamic> json, {
     String interceptedState = 'none',
-  ]) {
+    List<bool>? enabledHeaders,
+    List<List<String>>? headers,
+  }) {
     try {
       return MitmFlow(
         id: json['id'],
@@ -58,7 +60,11 @@ class MitmFlow {
             ? ServerConnection.fromJson(json['server_conn'])
             : null,
         request: json['request'] != null
-            ? HttpRequest.fromJson(json['request'])
+            ? HttpRequest.fromJson(
+                json['request'],
+                enabledHeaders: enabledHeaders,
+                headers: headers,
+              )
             : null,
         response: json['response'] != null
             ? HttpResponse.fromJson(json['response'])
@@ -101,11 +107,15 @@ class MitmFlow {
   }
 
   // copyWith serverState
-  MitmFlow copyWith(String serverState) {
+  MitmFlow copyWith({
+    String? interceptedState,
+    List<List<String>>? headers,
+    List<bool>? enabledHeaders,
+  }) {
     return MitmFlow(
       id: id,
       intercepted: intercepted,
-      interceptedState: serverState,
+      interceptedState: interceptedState ?? this.interceptedState,
       isReplay: isReplay,
       type: type,
       modified: modified,
@@ -114,7 +124,10 @@ class MitmFlow {
       timestampCreated: timestampCreated,
       clientConn: clientConn,
       serverConn: serverConn,
-      request: request,
+      request: request?.copyWith(
+        headers: headers ?? request?.headers ?? [],
+        enabledHeaders: enabledHeaders ?? request?.enabledHeaders ?? [],
+      ),
       response: response,
       websocket: websocket,
     );
@@ -416,6 +429,7 @@ class HttpRequest {
   final double? timestampStart; // Can be null for reconstructed flows
   final double? timestampEnd; // Can be null for incomplete flows
   final String? prettyHost; // Can be null
+  final List<bool>? enabledHeaders;
 
   HttpRequest({
     required this.method,
@@ -425,6 +439,7 @@ class HttpRequest {
     required this.path,
     required this.httpVersion,
     required this.headers,
+    this.enabledHeaders,
     this.contentLength,
     this.contentHash,
     this.timestampStart,
@@ -432,7 +447,11 @@ class HttpRequest {
     this.prettyHost,
   });
 
-  factory HttpRequest.fromJson(Map<String, dynamic> json) {
+  factory HttpRequest.fromJson(
+    Map<String, dynamic> json, {
+    List<List<String>>? headers,
+    List<bool>? enabledHeaders,
+  }) {
     try {
       List<List<String>> parseHeaders(dynamic jsonHeaders) {
         return (jsonHeaders as List<dynamic>)
@@ -446,8 +465,9 @@ class HttpRequest {
         host: json['host'],
         port: json['port'],
         path: json['path'],
+        enabledHeaders: enabledHeaders,
         httpVersion: json['http_version'],
-        headers: parseHeaders(json['headers']),
+        headers: headers ?? parseHeaders(json['headers']),
         contentLength: json['contentLength'],
         contentHash: json['contentHash'],
         timestampStart: json['timestamp_start'],
@@ -499,6 +519,39 @@ class HttpRequest {
 
   /// Get just the hostname and path
   String get hostAndPath => '${prettyHost ?? host}$path';
+
+  /// copy with
+  HttpRequest copyWith({
+    String? method,
+    String? scheme,
+    String? host,
+    int? port,
+    String? path,
+    String? httpVersion,
+    List<List<String>>? headers,
+    List<bool>? enabledHeaders,
+    int? contentLength,
+    String? contentHash,
+    double? timestampStart,
+    double? timestampEnd,
+    String? prettyHost,
+  }) {
+    return HttpRequest(
+      method: method ?? this.method,
+      scheme: scheme ?? this.scheme,
+      host: host ?? this.host,
+      port: port ?? this.port,
+      path: path ?? this.path,
+      httpVersion: httpVersion ?? this.httpVersion,
+      headers: headers ?? this.headers,
+      enabledHeaders: enabledHeaders ?? this.enabledHeaders,
+      contentLength: contentLength ?? this.contentLength,
+      contentHash: contentHash ?? this.contentHash,
+      timestampStart: timestampStart ?? this.timestampStart,
+      timestampEnd: timestampEnd ?? this.timestampEnd,
+      prettyHost: prettyHost ?? this.prettyHost,
+    );
+  }
 }
 
 /// Represents an HTTP response

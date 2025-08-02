@@ -60,18 +60,18 @@ class _ReEditorState extends State<ReEditor> {
       readOnly: true,
       showCursorWhenReadOnly: true,
       autofocus: false,
+
       // findController: findController,
       controller: codeController,
-
       style: CodeEditorStyle(
         fontSize: 16,
         backgroundColor: Colors.transparent,
         codeTheme: CodeHighlightTheme(
           languages: {
-            'json': CodeHighlightThemeMode(mode: langJson),
-            'javascript': CodeHighlightThemeMode(mode: langJavascript),
+            // 'json': CodeHighlightThemeMode(mode: langJson),
+            // 'javascript': CodeHighlightThemeMode(mode: langJavascript),
             'css': CodeHighlightThemeMode(mode: langCss),
-            'xml': CodeHighlightThemeMode(mode: langXml),
+            // 'xml': CodeHighlightThemeMode(mode: langXml),
           },
           theme: tomorrowNightTheme,
         ),

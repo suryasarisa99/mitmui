@@ -39,7 +39,8 @@ class WebSocketService {
       _log.success('WebSocket already connected');
       return;
     }
-    await Future.delayed(const Duration(seconds: 1));
+    fetchExistingFlows();
+
     final wsUrl =
         '${MitmproxyClient.websocketUrl}/updates?token=39d24913dbee653e3157035f5193e045';
     _log.debug('Attempting to connect to WebSocket: $wsUrl with cookies');
@@ -67,7 +68,6 @@ class WebSocketService {
       );
 
       // Now fetch existing flows after connection is established
-      await fetchExistingFlows();
     } catch (e) {
       _isConnected = false;
       _connectionStatusController.add(
