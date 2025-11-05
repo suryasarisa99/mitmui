@@ -28,7 +28,6 @@ void main(
 
   await windowManager.ensureInitialized();
   const WindowOptions windowOptions = WindowOptions(
-    size: Size(400, 720),
     center: true,
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
@@ -140,8 +139,8 @@ final GoRouter router = GoRouter(
   ],
 );
 
-class PannelWindow extends StatelessWidget {
-  const PannelWindow({
+class PanelWindow extends StatelessWidget {
+  const PanelWindow({
     super.key,
     required this.windowController,
     required this.args,
