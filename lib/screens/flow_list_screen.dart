@@ -41,6 +41,7 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
 
   void showInputPopup() {
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (context) {
         return TokenInputDialog();
