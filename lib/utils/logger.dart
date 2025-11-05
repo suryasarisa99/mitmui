@@ -1,6 +1,5 @@
 import 'dart:developer' as dev;
 
-import 'package:collection/collection.dart';
 
 enum LogLevel { debug, info, success, warning, error }
 

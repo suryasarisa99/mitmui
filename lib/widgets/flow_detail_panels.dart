@@ -67,15 +67,15 @@ class _BottomPannelAsFullScreenState extends State<BottomPannelAsFullScreen> {
   }
 }
 
-class BottomPannel extends ConsumerStatefulWidget {
-  const BottomPannel({required this.dtController, super.key});
+class BottomPanel extends ConsumerStatefulWidget {
+  const BottomPanel({required this.dtController, super.key});
   final DtController dtController;
 
   @override
-  ConsumerState<BottomPannel> createState() => _BottomPannelState();
+  ConsumerState<BottomPanel> createState() => _BottomPannelState();
 }
 
-class _BottomPannelState extends ConsumerState<BottomPannel> {
+class _BottomPannelState extends ConsumerState<BottomPanel> {
   String? flowId;
   final resizeController = ResizableController();
 

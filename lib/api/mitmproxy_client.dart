@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:mitmui/models/flow.dart';
 import 'package:mitmui/models/response_body.dart';
 import 'package:mitmui/utils/logger.dart';
-import '../store/flows_provider.dart';
 
 const _log = Logger("mitmproxy_client");
 
@@ -62,7 +61,7 @@ class MitmproxyClient {
     // for testing purposes, use a fixed password
     final password = '12345678';
     _log.debug("password: $password");
-    final res = await Process.start('mitmweb', [
+    await Process.start('mitmweb', [
       '--web-port',
       port.toString(),
       // '--no-web-open-browser',
@@ -125,7 +124,7 @@ class MitmproxyClient {
       _log.error(errorMessage);
       if (handle != null) return handle();
       throw Exception(errorMessage);
-    } catch (e, stackTrace) {
+    } catch (e) {
       final errorMessage = 'Error during $operationName: $e';
       _log.error(errorMessage);
       if (handle != null) return handle();
@@ -251,7 +250,7 @@ class MitmproxyClient {
   }
 }
 
-enum RequestExport { curl, httpie, raw_request, raw_response, raw }
+enum RequestExport { curl, httpie, rawRequest, rawResponse, raw }
 
 enum MarkCircle {
   red(":red_circle:"),

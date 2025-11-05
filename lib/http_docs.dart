@@ -13,6 +13,7 @@
 /// This doesn't match the rest of this repository (licensed under AGPLv3), but
 /// the AGPLv3 license has a specific clause that makes it compatible with
 /// GPLv3 content, allowing us to combine both in a single project.
+library;
 
 // #############################################################################
 // DATA CLASSES

@@ -1,7 +1,3 @@
-import 'dart:convert';
-
-import 'package:collection/collection.dart';
-import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +9,6 @@ import 'package:mitmui/widgets/input_items.dart';
 import 'package:mitmui/widgets/resize.dart';
 import 'package:mitmui/utils/statusCode.dart';
 import 'package:mitmui/widgets/preview_body.dart';
-import 'package:mitmui/widgets/small_icon_btn.dart';
 
 abstract class DetailsPanel extends ConsumerStatefulWidget {
   final models.MitmFlow? flow;

@@ -1,4 +1,3 @@
-// lib/filter_models.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:mitmui/models/filter_models.dart';
@@ -6,14 +5,8 @@ import 'package:mitmui/screens/filter_manager.dart';
 import 'package:mitmui/theme.dart';
 import 'package:mitmui/widgets/resizable_text_field.dart';
 
-// lib/filter_ui.dart
-// lib/filter_ui.dart
 const _kBorderClr = Color.fromARGB(255, 138, 138, 138);
 const _kBorderRadius = Radius.circular(4);
-const _kInputBorder = OutlineInputBorder(
-  borderRadius: BorderRadius.all(_kBorderRadius),
-  borderSide: BorderSide(color: Colors.grey),
-);
 
 // #############################################################################
 // ## Filter Condition Widget (Leaf Node)
@@ -494,7 +487,7 @@ class _FilterGroupWidgetState extends State<FilterGroupWidget> {
         border: Border.all(
           color: widget.isRoot
               ? Colors.transparent
-              : const Color.fromARGB(255, 128, 116, 113).withOpacity(0.5),
+              : const Color.fromARGB(255, 128, 116, 113).withValues(alpha: 0.5),
         ),
       ),
       child: Wrap(
@@ -701,43 +694,43 @@ class _GroupMenuPicker extends StatelessWidget {
   }
 }
 
-class _GroupHeader extends StatelessWidget {
-  const _GroupHeader({
-    required this.group,
-    required this.manager,
-    required this.onRemove,
-  });
+// class _GroupHeader extends StatelessWidget {
+//   const _GroupHeader({
+//     required this.group,
+//     required this.manager,
+//     required this.onRemove,
+//   });
 
-  final FilterGroup group;
-  final FilterManager manager;
-  final VoidCallback onRemove;
+//   final FilterGroup group;
+//   final FilterManager manager;
+//   final VoidCallback onRemove;
 
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      // height: 28,
-      child: Row(
-        children: [
-          SizedBox(
-            // width: 24,
-            // height: 22,
-            child: Checkbox(
-              value: group.isNegated,
-              visualDensity: VisualDensity.compact,
-              onChanged: (val) {
-                group.isNegated = val ?? false;
-                manager.update();
-              },
-            ),
-          ),
-          const Text('Negate Group'),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-            onPressed: onRemove,
-          ),
-        ],
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return SizedBox(
+//       // height: 28,
+//       child: Row(
+//         children: [
+//           SizedBox(
+//             // width: 24,
+//             // height: 22,
+//             child: Checkbox(
+//               value: group.isNegated,
+//               visualDensity: VisualDensity.compact,
+//               onChanged: (val) {
+//                 group.isNegated = val ?? false;
+//                 manager.update();
+//               },
+//             ),
+//           ),
+//           const Text('Negate Group'),
+//           const Spacer(),
+//           IconButton(
+//             icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+//             onPressed: onRemove,
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }

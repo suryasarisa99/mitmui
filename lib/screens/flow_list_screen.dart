@@ -5,11 +5,8 @@ import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/services/websocket_service.dart';
 import 'package:mitmui/theme.dart';
 import 'package:mitmui/widgets/resize.dart';
-import 'package:mitmui/utils/logger.dart';
 import '../widgets/flow_data_grid.dart';
 import '../widgets/flow_detail_panels.dart';
-
-const _log = Logger("flow_list_screen");
 
 class FlowListScreen extends ConsumerStatefulWidget {
   const FlowListScreen({super.key});
@@ -117,7 +114,7 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
         dividerHandleWidth: 18,
         maxRatio: 1,
         child1: FlowDataGrid(controller: _dtController),
-        child2: BottomPannel(dtController: _dtController),
+        child2: BottomPanel(dtController: _dtController),
       ),
     );
   }

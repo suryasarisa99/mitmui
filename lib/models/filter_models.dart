@@ -93,10 +93,10 @@ class FilterGroup extends FilterNode {
   List<FilterNode> children;
 
   FilterGroup({required this.children, List<LogicalOperator>? operators})
-    : this.operators =
+    : operators =
           operators ??
           List.filled(
-            children.length > 0 ? children.length - 1 : 0,
+            children.isNotEmpty ? children.length - 1 : 0,
             LogicalOperator.and,
             growable: true,
           );

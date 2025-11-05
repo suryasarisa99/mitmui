@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_highlight/themes/tomorrow-night.dart';
@@ -6,18 +5,9 @@ import 'package:mitmui/widgets/small_icon_btn.dart';
 import 'package:re_editor/re_editor.dart';
 
 // languages
-import 'package:re_highlight/languages/json.dart';
-import 'package:re_highlight/languages/javascript.dart';
 import 'package:re_highlight/languages/css.dart';
-import 'package:re_highlight/languages/xml.dart';
 
 // themes
-import 'package:flutter_highlight/themes/monokai-sublime.dart';
-import 'package:flutter_highlight/themes/tomorrow-night.dart';
-import 'package:flutter_highlight/themes/atom-one-dark.dart';
-import 'package:flutter_highlight/themes/a11y-dark.dart';
-import 'package:flutter_highlight/themes/night-owl.dart';
-import 'package:flutter_highlight/themes/nord.dart';
 
 // 1. tommorrow-night
 // 2. atom-one-dark

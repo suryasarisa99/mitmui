@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter_svg/svg.dart';
-import 'package:mitmui/models/flow.dart' as models;
 
 import 'package:flutter/material.dart';
 import 'package:mitmui/models/response_body.dart';

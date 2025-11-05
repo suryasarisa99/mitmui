@@ -1,9 +1,7 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
-import 'package:mitmui/services/websocket_service.dart';
 import 'package:mitmui/theme.dart';
 
 class TokenInputDialog extends StatefulWidget {

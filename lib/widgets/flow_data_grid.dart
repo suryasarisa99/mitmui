@@ -11,7 +11,6 @@ import 'package:mitmui/screens/filter_manager.dart';
 import 'package:mitmui/services/websocket_service.dart';
 import 'package:mitmui/store/filtered_flows_provider.dart';
 import 'package:mitmui/store/flows_provider.dart';
-import 'package:mitmui/utils/flowUtils.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
@@ -61,10 +60,10 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
       }
     });
     ref.listenManual(filteredFlowsProvider, (_, newIds) {
-      final filterdFlows = ref
+      final filteredFlows = ref
           .read(flowsProvider.notifier)
           .getFlowsByIds(newIds);
-      _flowDataSource.handleFlows(filterdFlows);
+      _flowDataSource.handleFlows(filteredFlows);
     });
     _interceptFilterManager.addListener(() {
       MitmproxyClient.interceptFlow(_interceptFilterManager.mitmproxyString);
@@ -186,8 +185,8 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
             ...[
               (label: "Httpie", exportType: RequestExport.httpie),
               (label: "Raw", exportType: RequestExport.raw),
-              (label: "Raw Request", exportType: RequestExport.raw_request),
-              (label: "Raw Response", exportType: RequestExport.raw_response),
+              (label: "Raw Request", exportType: RequestExport.rawRequest),
+              (label: "Raw Response", exportType: RequestExport.rawResponse),
             ].map((item) {
               return MenuAction(
                 // attributes: MenuActionAttributes(disabled: multiple),
@@ -195,7 +194,7 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
                 callback: () => copyExports(selectedIds, item.exportType),
                 title: 'Copy ${item.label}',
               );
-            }).toList(),
+            }),
           ],
           title: "Copy As",
         ),
@@ -258,7 +257,6 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
 
   bool handleKeyEvent(KeyEvent keyEvent) {
     final hk = HardwareKeyboard.instance;
-    final isCtrl = hk.isControlPressed;
     final isMeta = hk.isMetaPressed;
     final isAlt = hk.isAltPressed;
     final k = keyEvent.logicalKey;

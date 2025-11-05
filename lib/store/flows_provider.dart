@@ -1,11 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:mitmui/models/flow.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Manages a collection of flows with notification capabilities
 class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
   List<MitmFlow> _filteredFlows = [];
-  String _filter = '';
+  final String _filter = '';
   FlowsProvider() : super();
   @override
   Map<String, MitmFlow> build() {

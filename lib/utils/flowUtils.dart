@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/models/flow.dart';
 import 'package:mitmui/store/flows_provider.dart';

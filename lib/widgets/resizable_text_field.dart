@@ -44,9 +44,6 @@ class _ResizableTextFieldState extends State<ResizableTextField> {
   bool _isFocused = false;
   double _currentWidth = 0;
 
-  // Padding inside the text field, plus a little extra for the cursor.
-  static const double _textPadding = 8.0;
-
   @override
   void initState() {
     super.initState();
