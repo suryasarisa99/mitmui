@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/dt_table/dt_models.dart';
@@ -70,5 +69,10 @@ abstract class DtSource extends ChangeNotifier {
         return _sortType == SortType.ascending ? compare : -compare;
       });
     }
+  }
+
+  // helpers
+  int getIndexByRowId(String rowId) {
+    return _effectiveRows.indexWhere((row) => row.id == rowId);
   }
 }

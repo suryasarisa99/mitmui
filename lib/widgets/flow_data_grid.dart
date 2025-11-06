@@ -296,11 +296,31 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
   }
 
   void deleteSelected(Set<String> selectedIds) {
+    final firstSelectedIndex = _flowDataSource.getIndexByRowId(
+      selectedIds.first,
+    );
+
+    // remove from state and mitm backend
     ref.read(flowsProvider.notifier).removeFlows(selectedIds);
     for (final id in selectedIds) {
       MitmproxyClient.deleteFlow(id);
     }
-    //Todo reset selection and setFocusId to next
+
+    if (_flowDataSource.effectiveRows.isEmpty) {
+      widget.controller.clearSelection();
+      widget.controller.updateFocusedRow(null);
+      return;
+    }
+
+    // set selected to same index after deletion, or last if index out of range(if not items after deletion)
+    final newFirstFlowId =
+        _flowDataSource.effectiveRows.length > firstSelectedIndex
+        ? _flowDataSource.effectiveRows[firstSelectedIndex].id
+        : _flowDataSource
+              .effectiveRows[_flowDataSource.effectiveRows.length - 1]
+              .id;
+    widget.controller.updateFocusedRow(newFirstFlowId);
+    widget.controller.setSelectedRows({newFirstFlowId});
   }
 
   void repeatRequests(Set<String> selectedIds) {
