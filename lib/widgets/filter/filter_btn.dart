@@ -1,8 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:mitmui/global.dart';
+import 'package:flutter/services.dart';
 import 'package:mitmui/screens/filter_manager.dart';
-import 'package:mitmui/theme.dart';
-import 'package:mitmui/widgets/filter/filter_group.dart';
 import 'package:mitmui/widgets/filter/filter_popup.dart';
 
 class FilterBtn extends StatefulWidget {
@@ -24,6 +24,24 @@ class _FilterBtnState extends State<FilterBtn> {
     super.initState();
     widget.filterManager.addListener(() {
       setState(() {});
+    });
+    final hk = HardwareKeyboard.instance;
+
+    final shortCutKey = widget.title == "filter"
+        ? LogicalKeyboardKey.keyF
+        : LogicalKeyboardKey.keyI;
+
+    hk.addHandler((event) {
+      final isCtrlPressed = Platform.isMacOS
+          ? hk.isMetaPressed
+          : hk.isControlPressed;
+      if (event is KeyDownEvent &&
+          event.logicalKey == shortCutKey &&
+          isCtrlPressed) {
+        _showFilterManager();
+        return true;
+      }
+      return false;
     });
   }
 
