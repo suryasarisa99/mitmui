@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class AppColors {
@@ -63,14 +62,15 @@ final clr1 = Color(0xff1C1E20); // surface
 final clr5 = Color(0xff232628); // headers (more lighter)
 final clr2 = Color(0xff1C1C1C); // Even rows - darker (same as background)
 final clr3 = Color(0xff26282A); // odd rows - little lighter
-final clr4 = Color(0xff161819); // more dark (pannel header)
+final clr4 = Color(0xff161819); // more dark (panel header)
+
 const darkColors = AppColors(
   primary: Color(0xFF269DFF),
   secondary: Color(0xFF1976D2),
   surface: Color(0xff1C1E20), // background
   surfaceLight: Color(0xff232628), //header
   surfaceMoreLight: Color(0xff26282A), // odd rows
-  surfaceDark: Color(0xff161819), // pannel header
+  surfaceDark: Color(0xff161819), // panel header
   surfaceTint: Color(0xff1C1E20), // even rows
   surfaceBright: Color(0xff2E3031), // background
   iconColor: Color(0xFF8895B1),

@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:mitmui/models/filter_models.dart';
 
 class FilterManager extends ChangeNotifier {
-  FilterManager({this.debounce = 250}) {
+  FilterManager({this.debounce = 250, this.auto = true}) {
     // Initialize with a root group containing one default condition
     _rootFilter = FilterGroup(children: [FilterCondition()]);
   }
   final int debounce;
+  final bool auto;
   late final FilterGroup _rootFilter;
   late String _cachedMitmproxyString = '';
   FilterGroup get rootFilter => _rootFilter;
@@ -22,20 +23,55 @@ class FilterManager extends ChangeNotifier {
   /// Call this method after any part of the filter model has been changed
   /// to notify listeners and regenerate the filter string.
   void update() {
+    if (!auto) return;
+
+    // if debounce turned off
     if (debounce == 0) {
-      _update();
-    } else {
+      apply();
+    }
+    // if debounce turned on
+    else {
       _debounce?.cancel();
-      _debounce = Timer(Duration(milliseconds: debounce), _update);
+      _debounce = Timer(Duration(milliseconds: debounce), apply);
     }
   }
 
-  void _update() {
+  void apply() {
     final newString = _toMitmproxyString(_rootFilter, true).trim();
     if (newString != _cachedMitmproxyString) {
       _cachedMitmproxyString = newString;
       notifyListeners();
     }
+  }
+
+  /// operations
+
+  // add condition to group
+  void addConditionTo(FilterGroup group) {
+    if (group.children.isNotEmpty) {
+      group.operators.add(LogicalOperator.and);
+    }
+    group.children.add(FilterCondition());
+    update();
+  }
+
+  // add sub-group to group
+  void addSubgroupTo(FilterGroup group) {
+    if (group.children.isNotEmpty) {
+      group.operators.add(LogicalOperator.and);
+    }
+    group.children.add(FilterGroup(children: [FilterCondition()]));
+    update();
+  }
+
+  // add condition to root
+  void addConditionToRoot() {
+    addConditionTo(_rootFilter);
+  }
+
+  // add group to root
+  void addSubgroupToRoot() {
+    addSubgroupTo(_rootFilter);
   }
 
   // --- Conversion Logic ---

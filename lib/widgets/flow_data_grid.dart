@@ -4,10 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/dt_table/dt_models.dart';
+import 'package:mitmui/global.dart';
 import 'package:mitmui/theme.dart';
 import 'package:mitmui/utils/extensions.dart';
-import 'package:mitmui/widgets/filter.dart';
-import 'package:mitmui/screens/filter_manager.dart';
+// import 'package:mitmui/widgets/filter.dart';
 import 'package:mitmui/services/websocket_service.dart';
 import 'package:mitmui/store/filtered_flows_provider.dart';
 import 'package:mitmui/store/flows_provider.dart';
@@ -33,8 +33,7 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
     dtController: widget.controller,
     resumeIntercept: resumeIntercept,
   );
-  late final _filterManager = FilterManager();
-  late final _interceptFilterManager = FilterManager();
+
   String mitmFilter = '';
   @override
   void initState() {
@@ -47,10 +46,11 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
       if (flowsAdded > 0) {}
     });
 
-    _filterManager.addListener(() {
+    filterManager.addListener(() {
       // trigger set filter in websocket service
       final webSocketService = ref.read(websocketServiceProvider);
-      mitmFilter = _filterManager.mitmproxyString;
+      mitmFilter = filterManager.mitmproxyString;
+      debugPrint("filter: $mitmFilter");
       if (mitmFilter.isNotEmpty) {
         webSocketService.updateFilter(mitmFilter);
       } else {
@@ -65,8 +65,8 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
           .getFlowsByIds(newIds);
       _flowDataSource.handleFlows(filteredFlows);
     });
-    _interceptFilterManager.addListener(() {
-      MitmproxyClient.interceptFlow(_interceptFilterManager.mitmproxyString);
+    interceptManager.addListener(() {
+      MitmproxyClient.interceptFlow(interceptManager.mitmproxyString);
     });
   }
 
@@ -106,43 +106,26 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
     ];
     return Container(
       color: theme.surface,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          FilterGroupWidget(
-            group: _filterManager.rootFilter,
-            manager: _filterManager,
-            isRoot: true,
-          ),
-          FilterGroupWidget(
-            group: _interceptFilterManager.rootFilter,
-            manager: _interceptFilterManager,
-            isRoot: true,
-          ),
-          Expanded(
-            child: DtTable(
-              source: _flowDataSource,
-              controller: widget.controller,
-              // tableWidth: MediaQuery.sizeOf(context).width,
-              tableWidth: double.infinity,
-              headerHeight: 24,
-              rowHeight: 32,
-              menuProvider: buildContextMenu,
-              onKeyEvent: handleKeyEvent,
-              headerColumns: [
-                for (final header in headerCells)
-                  DtColumn(
-                    key: header.key,
-                    title: header.title,
-                    fontSize: 12,
-                    initialWidth: _columnWidths[header.key]!,
-                    isNumeric: header.key == 'id' || header.key == 'status',
-                    isExpand: header.key == 'url',
-                    // maxWidth: 1200,
-                  ),
-              ],
+      child: DtTable(
+        source: _flowDataSource,
+        controller: widget.controller,
+        // tableWidth: MediaQuery.sizeOf(context).width,
+        tableWidth: double.infinity,
+        headerHeight: 24,
+        rowHeight: 32,
+        menuProvider: buildContextMenu,
+        onKeyEvent: handleKeyEvent,
+        headerColumns: [
+          for (final header in headerCells)
+            DtColumn(
+              key: header.key,
+              title: header.title,
+              fontSize: 12,
+              initialWidth: _columnWidths[header.key]!,
+              isNumeric: header.key == 'id' || header.key == 'status',
+              isExpand: header.key == 'url',
+              // maxWidth: 1200,
             ),
-          ),
         ],
       ),
     );

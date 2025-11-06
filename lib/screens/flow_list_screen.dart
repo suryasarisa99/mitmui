@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/dialog/token_input_dialog.dart';
 import 'package:mitmui/dt_table/dt_table.dart';
+import 'package:mitmui/global.dart';
 import 'package:mitmui/services/websocket_service.dart';
 import 'package:mitmui/theme.dart';
+import 'package:mitmui/widgets/filter/filter_btn.dart';
 import 'package:mitmui/widgets/resize.dart';
 import '../widgets/flow_data_grid.dart';
 import '../widgets/flow_detail_panels.dart';
@@ -64,12 +66,27 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
       },
       child: Scaffold(
         backgroundColor: theme.surfaceDark,
+
         appBar: AppBar(
           backgroundColor: theme.surfaceDark,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
-          toolbarHeight: kTextTabBarHeight - 20,
+          centerTitle: true,
+          title: const Text(
+            'MitmUI',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          toolbarHeight: kTextTabBarHeight - 16,
+          actionsPadding: const EdgeInsets.only(right: 8, top: 6, bottom: 5),
           actions: [
+            FilterBtn(filterManager: filterManager, title: "filter"),
+            SizedBox(width: 8),
+            FilterBtn(filterManager: interceptManager, title: "intercept"),
+            SizedBox(width: 8),
             // WebSocket connection status indicator
             StreamBuilder<ConnectionStatus>(
               stream: webSocketService.connectionStatus,
@@ -78,6 +95,8 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
                     snapshot.hasData && snapshot.data!.isConnected;
                 return IconButton(
                   iconSize: 18,
+                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                  constraints: BoxConstraints(minWidth: 32, minHeight: 32),
                   icon: Icon(
                     isConnected ? Icons.cloud_done : Icons.cloud_off,
                     color: isConnected ? Colors.green : Colors.red,

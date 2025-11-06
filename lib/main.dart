@@ -2,6 +2,8 @@ import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mitmui/global.dart';
+import 'package:mitmui/screens/filter_manager.dart';
 import 'package:mitmui/screens/status_screen.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:mitmui/widgets/flow_detail_panels.dart';
@@ -59,6 +61,8 @@ void main(
   //   }
   // });
   Logger.logLevel = LogLevel.debug;
+  filterManager = FilterManager(auto: false);
+  interceptManager = FilterManager(auto: false);
   // await MitmproxyClient.startMitm();
   // Create and initialize the FlowStore
 
