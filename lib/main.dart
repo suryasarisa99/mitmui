@@ -6,7 +6,8 @@ import 'package:mitmui/global.dart';
 import 'package:mitmui/screens/filter_manager.dart';
 import 'package:mitmui/screens/status_screen.dart';
 import 'package:mitmui/utils/logger.dart';
-import 'package:mitmui/widgets/flow_detail_panels.dart';
+import 'package:mitmui/widgets/flow-detail/flow_detail_panels.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 import 'screens/flow_list_screen.dart';
 
@@ -20,7 +21,7 @@ void main(
   //   final windowId = int.parse(args[1]);
   //   final argument = args[2].isEmpty ? const {} : jsonDecode(args[2]);
   //   runApp(
-  //     PannelWindow(
+  //     PanelWindow(
   //       windowController: WindowController.fromWindowId(windowId),
   //       args: argument,
   //     ),
@@ -60,9 +61,12 @@ void main(
   //     );
   //   }
   // });
+
   Logger.logLevel = LogLevel.debug;
   filterManager = FilterManager(auto: false);
   interceptManager = FilterManager(auto: false);
+  prefs = await SharedPreferences.getInstance();
+
   // await MitmproxyClient.startMitm();
   // Create and initialize the FlowStore
 
@@ -201,7 +205,7 @@ class PanelWindow extends StatelessWidget {
             //   child: const Text('Close this window'),
             // ),
             SizedBox(height: 20),
-            Expanded(child: BottomPannelAsFullScreen(args: args)),
+            Expanded(child: BottomPanelAsFullScreen(args: args)),
           ],
         ),
       ),

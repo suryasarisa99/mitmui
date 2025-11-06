@@ -21,6 +21,7 @@ dependencies:
   provider: ^6.1.2
   re_editor: ^0.7.0
   re_highlight: ^0.0.3
+  shared_preferences: ^2.5.3
   super_context_menu: ^0.9.1
   web_socket_channel: ^3.0.3
   window_manager: ^0.5.1

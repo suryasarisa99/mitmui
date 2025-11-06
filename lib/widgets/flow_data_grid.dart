@@ -223,7 +223,7 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
             MenuSeparator(),
             MenuAction(
               activator: SingleActivator(LogicalKeyboardKey.digit0, meta: true),
-              callback: () => markSelected(selectedIds, MarkCircle.un_mark),
+              callback: () => markSelected(selectedIds, MarkCircle.unMark),
               title: "Un Mark",
             ),
           ],
@@ -289,7 +289,7 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
       markSelected(selectedIds, MarkCircle.brown);
       return true;
     } else if (isMeta && k == LogicalKeyboardKey.digit0) {
-      markSelected(selectedIds, MarkCircle.un_mark);
+      markSelected(selectedIds, MarkCircle.unMark);
       return true;
     }
     return false; // Let the grid handle other key events

@@ -11,21 +11,21 @@ import 'package:mitmui/widgets/resize.dart';
 import 'package:mitmui/store/flows_provider.dart';
 import 'package:mitmui/theme.dart';
 import 'package:mitmui/utils/logger.dart';
-import 'package:mitmui/widgets/flow_detail_panel_abstract.dart';
-import 'package:mitmui/widgets/flow_detail_url.dart';
+import 'package:mitmui/widgets/flow-detail/flow_detail_panel_abstract.dart';
+import 'package:mitmui/widgets/flow-detail/flow_detail_url.dart';
 
 const _log = Logger("flow_detail_panels");
 
-class BottomPannelAsFullScreen extends StatefulWidget {
+class BottomPanelAsFullScreen extends StatefulWidget {
   final Map<String, dynamic> args;
-  const BottomPannelAsFullScreen({required this.args, super.key});
+  const BottomPanelAsFullScreen({required this.args, super.key});
 
   @override
-  State<BottomPannelAsFullScreen> createState() =>
-      _BottomPannelAsFullScreenState();
+  State<BottomPanelAsFullScreen> createState() =>
+      _BottomPanelAsFullScreenState();
 }
 
-class _BottomPannelAsFullScreenState extends State<BottomPannelAsFullScreen> {
+class _BottomPanelAsFullScreenState extends State<BottomPanelAsFullScreen> {
   late final MitmFlow selectedFlow;
 
   @override
@@ -72,10 +72,10 @@ class BottomPanel extends ConsumerStatefulWidget {
   final DtController dtController;
 
   @override
-  ConsumerState<BottomPanel> createState() => _BottomPannelState();
+  ConsumerState<BottomPanel> createState() => _BottomPanelState();
 }
 
-class _BottomPannelState extends ConsumerState<BottomPanel> {
+class _BottomPanelState extends ConsumerState<BottomPanel> {
   String? flowId;
   final resizeController = ResizableController();
 
@@ -260,19 +260,16 @@ class _RequestDetailsPanelState extends DetailsPanelState {
   // }
 
   Widget buildHeaders() {
-    print("======build headers=======, first: ${headers.first}");
     return buildInputItems(
       items: headers,
       title: 'Headers',
       keyValueJoiner: ': ',
       linesJoiner: '\n',
       onItemAdded: (item, index) {
-        print("Header added: $item at index $index");
         ref.read(flowsProvider.notifier).addHeader(widget.flow!.id, item, true);
         // headers.add(item);
       },
       onItemChanged: (index, key, value) {
-        print("onItemChanged : $key: $value");
         if (index < headers.length) {
           headers[index] = [key, value];
         }
@@ -391,7 +388,6 @@ class _ResponseDetailsPanelState extends DetailsPanelState {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.flow?.response?.headers.first ?? "no-headers");
     return Column(
       children: [
         buildHeader(),

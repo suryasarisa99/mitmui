@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:mitmui/global.dart';
 import 'package:mitmui/models/flow.dart';
 import 'package:mitmui/models/response_body.dart';
 import 'package:mitmui/utils/logger.dart';
@@ -57,21 +58,111 @@ class MitmproxyClient {
 
   static Future<void> startMitm() async {
     // start mitmproxy with a random password
-    // final password = generateRandomString(32);
+    final password = generateRandomString(32);
     // for testing purposes, use a fixed password
-    final password = '12345678';
+    // final password = '12345678';
     _log.debug("password: $password");
     await Process.start('mitmweb', [
       '--web-port',
       port.toString(),
-      // '--no-web-open-browser',
+      '--no-web-open-browser',
       '--set',
       'web_password=$password',
     ]);
     // get cookie, by sending password as token
-    await Future.delayed(const Duration(seconds: 2));
-    getCookieFromToken(password);
+    await Future.delayed(const Duration(milliseconds: 1000));
+    await getCookieFromToken(password);
+    prefs.setString('password', password);
     _log.success('MITM Proxy started');
+  }
+
+  /*
+  1 - mitm is running (no password)
+  2 - mitm is running (with password)
+  -1 - mitm is not running
+  -2 - port is used by other process
+  3 - error
+  */
+
+  /* notes
+  to get details about port: lsof -iTCP:9090 -sTCP:LISTEN
+  to get only pid from port: lsof -tiTCP:9090 -sTCP:LISTEN
+  to kill: kill <pid>
+  to get complete command: ps -p <pid> -o command
+  */
+
+  static Future<int> isRunning() async {
+    try {
+      final lsof = await Process.run('lsof', ['-iTCP:9090', '-sTCP:LISTEN']);
+      final out = (lsof.stdout as String).trim();
+
+      // no LISTEN entries on the port
+      if (out.isEmpty) return -1;
+
+      final lines = out
+          .split('\n')
+          .map((l) => l.trim())
+          .where((l) => l.isNotEmpty)
+          .toList();
+      if (lines.length <= 1) {
+        debugPrint('No LISTEN entries on TCP:9090.');
+        return -1;
+      }
+
+      // parse entries (skip header)
+      final entries = lines.sublist(1);
+      final mitmPids = <int>{};
+      final otherEntries = <String>[];
+
+      for (var line in entries) {
+        // lsof columns: COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME
+        final cols = line.split(RegExp(r'\s+'));
+        if (cols.isEmpty) continue;
+        final command = cols[0];
+        int? pid;
+        if (cols.length >= 2) {
+          pid = int.tryParse(cols[1]);
+        }
+        if (command == 'mitmweb' && pid != null) {
+          mitmPids.add(pid);
+        } else {
+          otherEntries.add(line);
+        }
+      }
+
+      // port used by other process(es)
+      if (mitmPids.isEmpty) return -2;
+
+      // For each mitmweb PID, check full command (args) for "web_password"
+      var foundWithPassword = false;
+      for (var pid in mitmPids) {
+        final ps = await Process.run('ps', [
+          '-p',
+          pid.toString(),
+          '-o',
+          'args=',
+        ]);
+        final args = (ps.stdout as String).trim();
+        if (args.isNotEmpty) {
+          debugPrint('PID $pid args: $args');
+          if (args.contains('web_password')) {
+            foundWithPassword = true;
+            break;
+          }
+        }
+      }
+
+      if (foundWithPassword) {
+        debugPrint('mitmweb running and web_password found in command.');
+        return 2;
+      } else {
+        debugPrint('mitmweb running but web_password not found in command.');
+        return 1;
+      }
+    } catch (e) {
+      stderr.writeln('Error: $e');
+      return 3;
+    }
   }
 
   static Future<bool> getCookieFromToken(String token) async {
@@ -260,7 +351,7 @@ enum MarkCircle {
   blue(":large_blue_circle:"),
   purple(":purple_circle:"),
   brown(":brown_circle:"),
-  un_mark("");
+  unMark("");
 
   final String value;
   const MarkCircle(this.value);
@@ -274,7 +365,7 @@ enum MarkCircle {
       "🔵" => MarkCircle.blue,
       "🟣" => MarkCircle.purple,
       "🟤" => MarkCircle.brown,
-      "" => MarkCircle.un_mark,
+      "" => MarkCircle.unMark,
       _ => MarkCircle.red,
     };
   }
@@ -290,7 +381,7 @@ enum MarkCircle {
         MarkCircle.blue => const Color.fromARGB(255, 175, 219, 255),
         MarkCircle.purple => const Color.fromARGB(255, 242, 172, 255),
         MarkCircle.brown => const Color.fromARGB(255, 182, 160, 151),
-        MarkCircle.un_mark => Colors.transparent,
+        MarkCircle.unMark => Colors.transparent,
       };
     } else {
       return switch (this) {
@@ -301,7 +392,7 @@ enum MarkCircle {
         MarkCircle.blue => const Color.fromARGB(255, 62, 168, 255),
         MarkCircle.purple => const Color.fromARGB(255, 223, 84, 248),
         MarkCircle.brown => const Color.fromARGB(255, 165, 121, 106),
-        MarkCircle.un_mark => Colors.transparent,
+        MarkCircle.unMark => Colors.transparent,
       };
     }
   }

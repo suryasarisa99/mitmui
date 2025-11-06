@@ -30,7 +30,7 @@ abstract class DetailsPanelState extends ConsumerState<DetailsPanel>
   late TabController tabController;
   bool get isRequest => title == 'Request';
   bool get isResponse => title == 'Response';
-  bool get isSinglePannel =>
+  bool get isSinglePanel =>
       widget.resizeController.isChild1Hidden ||
       widget.resizeController.isChild2Hidden;
 
@@ -61,7 +61,6 @@ abstract class DetailsPanelState extends ConsumerState<DetailsPanel>
   void didUpdateWidget(covariant DetailsPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.flow != widget.flow) {
-      print(">>> flow updated: didUpdateWidget called");
       String? currentTab;
       try {
         currentTab = tabTitles[tabController.index].split(" ")[0];
@@ -102,7 +101,7 @@ abstract class DetailsPanelState extends ConsumerState<DetailsPanel>
         children: [
           // Request title
           SizedBox(width: 10),
-          if (!isSinglePannel)
+          if (!isSinglePanel)
             Text(
               title,
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),

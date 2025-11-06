@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/dialog/token_input_dialog.dart';
 import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/global.dart';
@@ -8,7 +9,7 @@ import 'package:mitmui/theme.dart';
 import 'package:mitmui/widgets/filter/filter_btn.dart';
 import 'package:mitmui/widgets/resize.dart';
 import '../widgets/flow_data_grid.dart';
-import '../widgets/flow_detail_panels.dart';
+import '../widgets/flow-detail/flow_detail_panels.dart';
 
 class FlowListScreen extends ConsumerStatefulWidget {
   const FlowListScreen({super.key});
@@ -32,8 +33,32 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Subscribe to WebSocket service after the first frame
-      showInputPopup();
+      check();
     });
+  }
+
+  void check() async {
+    final status = await MitmproxyClient.isRunning();
+    debugPrint('mitm status: $status');
+    if (status == 1 || status == 2) {
+      // 1 - mitm is running (no password)
+      // 2 - mitm is running (with password)
+      final token = prefs.getString(status == 1 ? 'token' : 'password')!;
+      handleToken(token);
+    } else if (status == -1) {
+      // mitm is not running
+      showInputPopup();
+    } else if (status == 3) {
+      // port is used by other process
+    }
+  }
+
+  void handleToken(token) async {
+    final result = await MitmproxyClient.getCookieFromToken(token);
+    if (result) {
+      return webSocketService.connect();
+    }
+    showInputPopup();
   }
 
   @override
