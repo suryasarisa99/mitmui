@@ -375,38 +375,14 @@ class _DtTableState extends State<DtTable> {
         HardwareKeyboard.instance.isControlPressed ||
         HardwareKeyboard.instance.isMetaPressed;
 
-    // --- Single-Step and Long-Press Navigation (No Ctrl) ---
+    // --- Single-Step and Long-Press Navigation (also handles shift key) ---
     if ((isArrowDown || isArrowUp) && !isCtrlPressed) {
-      if (event is KeyDownEvent) {
-        if (_heldKey != event.logicalKey) {
-          _heldKey = event.logicalKey;
-          _navigateByOneStep(isDown: isArrowDown);
-          _scrollTimer?.cancel();
-          // 2. Start a one-shot timer for the initial 1-second delay.
-          // 4. Now, start the fast periodic timer for all subsequent steps.
-          _scrollTimer = Timer.periodic(const Duration(milliseconds: 220), (
-            timer,
-          ) {
-            _navigateByOneStep(isDown: isArrowDown);
-          });
-          // Timer(const Duration(milliseconds: 350), () {
-          //   // After 1 second, if the key is still held down...
-          //   if (_heldKey == null) return;
-
-          //   // 3. Perform the second navigation step.
-          //   _navigateByOneStep(isDown: isArrowDown);
-
-          // });
-        }
-      } else if (event is KeyUpEvent) {
-        if (_heldKey == event.logicalKey) {
-          _scrollTimer?.cancel();
-          _heldKey = null;
-        }
+      if (event is KeyDownEvent || event is KeyRepeatEvent) {
+        _navigateByOneStep(isDown: isArrowDown);
+        return KeyEventResult.handled;
       }
-      return KeyEventResult.handled;
+      return KeyEventResult.ignored;
     }
-    // --- End Single-Step Logic ---
 
     // --- All other KeyDown shortcuts (Select All, Esc, Jumps) ---
     if (event is KeyDownEvent) {
