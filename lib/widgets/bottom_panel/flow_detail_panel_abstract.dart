@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,9 +70,14 @@ abstract class DetailsPanelState extends ConsumerState<DetailsPanel>
         currentTab = null;
       }
       updateData();
-      // if (mitmBodyFuture == null || oldWidget.flow?.id != widget.flow?.id) {
-      // }
-      fetchBody();
+      if (mitmBodyFuture == null ||
+          oldWidget.flow?.id != widget.flow?.id ||
+          oldWidget.flow?.request?.timestampStart !=
+              widget.flow?.request?.timestampStart) {
+        // check timestamps because even flow is same, the request is repeated
+        // for more strict require,then check timestampEnd for both request and response as well.
+        fetchBody();
+      }
       int newIndex = 0; // Default to the first tab
       if (currentTab != null) {
         final foundIndex = tabTitles.indexWhere(
