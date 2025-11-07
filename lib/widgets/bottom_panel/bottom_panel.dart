@@ -52,19 +52,7 @@ class _BottomPanelState extends ConsumerState<BottomPanel> {
     super.dispose();
   }
 
-  void onOpenInNewWindow(MitmFlow flow) async {
-    final window = await DesktopMultiWindow.createWindow(
-      jsonEncode({
-        'args1': 'Sub window',
-        'args2': {'flow': jsonEncode(flow.toJson())},
-      }),
-    );
-    window
-      ..setFrame(const Offset(0, 0) & const Size(1280, 720))
-      ..center()
-      ..setTitle('Another window')
-      ..show();
-  }
+  void onOpenInNewWindow(MitmFlow flow) async {}
 
   @override
   Widget build(BuildContext context) {

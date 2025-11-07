@@ -66,7 +66,8 @@ class _RequestDetailsPanelState extends DetailsPanelState {
             child: TabBarView(
               controller: tabController,
               children: [
-                if (headers.isNotEmpty) buildEditableHeaders(),
+                // if (headers.isNotEmpty)
+                buildEditableHeaders(),
                 // buildItems(
                 //   items: queryParams,
                 //   title: 'Query Parameters',
