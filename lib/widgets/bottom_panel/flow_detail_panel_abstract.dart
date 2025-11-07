@@ -68,9 +68,9 @@ abstract class DetailsPanelState extends ConsumerState<DetailsPanel>
         currentTab = null;
       }
       updateData();
-      if (mitmBodyFuture == null || oldWidget.flow?.id != widget.flow?.id) {
-        fetchBody();
-      }
+      // if (mitmBodyFuture == null || oldWidget.flow?.id != widget.flow?.id) {
+      // }
+      fetchBody();
       int newIndex = 0; // Default to the first tab
       if (currentTab != null) {
         final foundIndex = tabTitles.indexWhere(
