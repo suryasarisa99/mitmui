@@ -5,6 +5,7 @@ import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/models/flow.dart';
 import 'package:mitmui/store/flows_provider.dart';
 import 'package:mitmui/utils/logger.dart';
+import 'package:mitmui/utils/query_params_utils.dart';
 import 'package:mitmui/widgets/bottom_panel/flow_detail_panel_abstract.dart';
 
 const _log = Logger("flow_detail_panels");
@@ -41,9 +42,12 @@ class _RequestDetailsPanelState extends DetailsPanelState {
     headers = widget.flow?.request?.headers ?? [];
 
     tabTitles = [
-      if (headers.isNotEmpty) 'Headers (${headers.length})',
-      if (queryParams.isNotEmpty) 'Query (${queryParams.length})',
-      if (cookies.isNotEmpty) 'Cookies (${cookies.length})',
+      // if (headers.isNotEmpty) 'Headers (${headers.length})',
+      // if (queryParams.isNotEmpty) 'Query (${queryParams.length})',
+      // if (cookies.isNotEmpty) 'Cookies (${cookies.length})',
+      'Headers (${headers.length})',
+      'Query (${queryParams.length})',
+      'Cookies (${cookies.length})',
       'Body',
       'Raw',
     ];
@@ -63,20 +67,20 @@ class _RequestDetailsPanelState extends DetailsPanelState {
               controller: tabController,
               children: [
                 if (headers.isNotEmpty) buildEditableHeaders(),
-                if (queryParams.isNotEmpty)
-                  buildItems(
-                    items: queryParams,
-                    title: 'Query Parameters',
-                    keyValueJoiner: '=',
-                    linesJoiner: '&',
-                  ),
-                if (cookies.isNotEmpty)
-                  buildItems(
-                    items: cookies,
-                    title: 'Cookies',
-                    keyValueJoiner: '=',
-                    linesJoiner: '; ',
-                  ),
+                // buildItems(
+                //   items: queryParams,
+                //   title: 'Query Parameters',
+                //   keyValueJoiner: '=',
+                //   linesJoiner: '&',
+                // ),
+                buildEditableQueryParams(),
+                // if (cookies.isNotEmpty)
+                buildItems(
+                  items: cookies,
+                  title: 'Cookies',
+                  keyValueJoiner: '=',
+                  linesJoiner: '; ',
+                ),
                 buildBody(),
                 buildRaw(),
               ],
@@ -95,14 +99,84 @@ class _RequestDetailsPanelState extends DetailsPanelState {
   //   MitmproxyClient.updateHeaders(widget.flow!.id, headers);
   // }
 
-  List<List<String>> getFilteredHeaders(List<bool> enabled) {
-    // if (enabledHeaders == null) return headers;
+  List<List<String>> getFilteredHeaders([List<bool>? e]) {
+    final enabled = e ?? widget.flow?.request?.enabledHeaders;
     // only keep checked and header with non empty key
-    List<List<String>> filteredItems = [
-      for (final (i, header) in headers.indexed)
-        if (enabled[i] && header[0].isNotEmpty) header,
+    if (enabled == null) {
+      return headers.where((header) => header[0].isNotEmpty).toList();
+    } else {
+      return [
+        for (final (i, header) in headers.indexed)
+          if (enabled[i] && header[0].isNotEmpty) header,
+      ];
+    }
+  }
+
+  List<List<String>> getFilteredQueryParams([List<bool>? e]) {
+    // final enabled =
+    //     widget.flow?.request?.enabledQueryParams ??
+    //     List.filled(queryParams.length, true);
+    final enabled = e ?? widget.flow?.request?.enabledQueryParams;
+    // if (enabledQueryParams == null) return queryParams;
+    // only keep checked and query param with non empty key
+    if (enabled == null) {
+      return queryParams.where((param) => param[0].isNotEmpty).toList();
+    }
+    return [
+      for (final (i, param) in queryParams.indexed)
+        if (enabled[i] && param[0].isNotEmpty) param,
     ];
-    return filteredItems;
+  }
+
+  void updateReq(HttpRequest Function(HttpRequest req) update) {
+    ref
+        .watch(flowsProvider.notifier)
+        .addOrUpdateFlow(widget.flow!.copyWithRequest(update));
+  }
+
+  Widget buildEditableQueryParams() {
+    debugPrint(
+      "rebuilding editable query params: ${widget.flow?.request?.enabledQueryParams}",
+    );
+    final enabled =
+        widget.flow?.request?.enabledQueryParams ??
+        List.filled(queryParams.length, true, growable: true);
+    return buildInputItems(
+      title: 'Query Parameters',
+      items: queryParams,
+      enabledStates: enabled,
+      keyValueJoiner: '=',
+      linesJoiner: '&',
+      onItemAdded: (item, index) {},
+      onItemChanged: (index, key, value) {
+        if (index < queryParams.length) {
+          queryParams[index] = [key, value];
+        }
+        final params = QueryParamsUtils.buildQueryParamsString(
+          getFilteredQueryParams(),
+        );
+        final path =
+            widget.flow!.request!.path.split('?')[0] +
+            (params.isNotEmpty ? '?$params' : '');
+        debugPrint("updated path: $path");
+        updateReq((r) => r.copyWith(path: path));
+        MitmproxyClient.updatePath(widget.flow!.id, path);
+      },
+      onItemToggled: (index, v) {
+        var enabled = widget.flow!.request!.enabledQueryParams;
+        enabled ??= List.filled(queryParams.length, true, growable: true);
+        enabled[index] = v;
+        updateReq((r) => r.copyWith(enabledQueryParams: enabled));
+        MitmproxyClient.updatePath(
+          widget.flow!.id,
+          QueryParamsUtils.buildPath(
+            widget.flow!.request!.path.split('?')[0],
+            getFilteredQueryParams(enabled),
+          ),
+        );
+      },
+      onItemReordered: (oldIndex, newIndex) {},
+    );
   }
 
   Widget buildEditableHeaders() {
@@ -113,36 +187,32 @@ class _RequestDetailsPanelState extends DetailsPanelState {
     return buildInputItems(
       title: 'Headers',
       items: headers,
-      enabledStates: null,
+      enabledStates: enabledHeaders,
       keyValueJoiner: ': ',
       linesJoiner: '\n',
       onItemAdded: (item, index) {
-        ref.read(flowsProvider.notifier).addHeader(widget.flow!.id, item, true);
+        debugPrint("header added: $item at index $index");
+        // ref.read(flowsProvider.notifier).addHeader(widget.flow!.id, item, true);
       },
       onItemChanged: (index, key, value) {
+        debugPrint(
+          "header changed at index $index: $key: $value | len ${headers.length} ${enabledHeaders.length}",
+        );
         if (index < headers.length) {
           headers[index] = [key, value];
-          ref
-              .read(flowsProvider.notifier)
-              .updateHeader(widget.flow!.id, index, key, value);
-
-          MitmproxyClient.updateHeaders(
-            widget.flow!.id,
-            getFilteredHeaders(enabledHeaders),
-          );
-        } else {
-          headers.add([key, value]);
         }
-      },
-      onItemToggled: (index, v) {
-        // var enabledHeaders = widget.flow!.request!.enabledHeaders;
-        enabledHeaders[index] = v;
-        debugPrint("enabledHeaders: $enabledHeaders");
         ref
             .read(flowsProvider.notifier)
-            .addOrUpdateFlow(
-              widget.flow!.copyWith(enabledHeaders: enabledHeaders),
-            );
+            .updateHeader(widget.flow!.id, index, key, value);
+
+        MitmproxyClient.updateHeaders(widget.flow!.id, getFilteredHeaders());
+      },
+      onItemToggled: (index, v) {
+        var enabledHeaders = widget.flow!.request!.enabledHeaders;
+        enabledHeaders ??= List.filled(headers.length, true, growable: true);
+        enabledHeaders[index] = v;
+        debugPrint("enabledHeaders: $enabledHeaders");
+        updateReq((r) => r.copyWith(enabledHeaders: enabledHeaders));
         MitmproxyClient.updateHeaders(
           widget.flow!.id,
           getFilteredHeaders(enabledHeaders),
@@ -154,13 +224,8 @@ class _RequestDetailsPanelState extends DetailsPanelState {
         }
         final item = headers.removeAt(oldIndex);
         headers.insert(newIndex, item);
-        MitmproxyClient.updateHeaders(
-          widget.flow!.id,
-          getFilteredHeaders(enabledHeaders),
-        );
-        ref
-            .read(flowsProvider.notifier)
-            .addOrUpdateFlow(widget.flow!.copyWith(headers: headers));
+        MitmproxyClient.updateHeaders(widget.flow!.id, getFilteredHeaders());
+        updateReq((r) => r.copyWith(headers: headers));
       },
     );
   }
@@ -184,14 +249,7 @@ class _RequestDetailsPanelState extends DetailsPanelState {
   }
 
   List<List<String>> getQueryParamsList() {
-    final pathList = widget.flow?.request?.path.split('?') ?? [];
-    if (pathList.length < 2) return [];
-    final queryParams = pathList[1];
-    if (queryParams.isEmpty) [];
-    return queryParams.split('&').map((e) {
-      final parts = e.split('=');
-      return [parts[0], parts.length > 1 ? parts[1] : ''];
-    }).toList();
+    return QueryParamsUtils.getQueryParamsList(widget.flow);
   }
 }
 

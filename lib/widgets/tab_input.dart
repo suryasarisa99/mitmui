@@ -8,7 +8,7 @@ class CustomInput extends StatefulWidget {
   final Function(String)? onUpdate;
   final Function(String)? onChanged;
   final Function(String)? onTapOutside;
-  final Function()? onFocusExtraInput;
+  final Function()? onExtraInputChange;
   final String value;
   final bool isEnabled;
   final bool isExtra;
@@ -26,7 +26,7 @@ class CustomInput extends StatefulWidget {
     this.focusNode,
     this.isEnabled = true,
     this.isExtra = false,
-    this.onFocusExtraInput,
+    this.onExtraInputChange,
     super.key,
   });
 
@@ -56,7 +56,7 @@ class _CustomInputState extends State<CustomInput> {
       onFocusChange: (hasFocus) {
         if (hasFocus) {
           if (widget.isExtra) {
-            widget.onFocusExtraInput?.call();
+            // widget.onExtraInputChange?.call();
           } else {
             // widget.onUpdate?.call(_controller.text);
           }
@@ -107,6 +107,9 @@ class _CustomInputState extends State<CustomInput> {
         //   widget.onTapOutside?.call(_controller.text);
         // },
         onChanged: (v) {
+          if (widget.isExtra) {
+            widget.onExtraInputChange?.call();
+          }
           debouncer.run(() {
             widget.onUpdate?.call(_controller.text);
           });

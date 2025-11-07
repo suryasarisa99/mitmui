@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/widgets.dart';
 import 'package:mitmui/utils/logger.dart';
 
 const _log = Logger("flow");
@@ -43,6 +44,8 @@ class MitmFlow {
     String interceptedState = 'none',
     List<bool>? enabledHeaders,
     List<List<String>>? headers,
+    List<bool>? enabledQueryParams,
+    String? path,
   }) {
     try {
       return MitmFlow(
@@ -64,6 +67,8 @@ class MitmFlow {
                 json['request'],
                 enabledHeaders: enabledHeaders,
                 headers: headers,
+                enabledQueryParams: enabledQueryParams,
+                path: path,
               )
             : null,
         response: json['response'] != null
@@ -109,8 +114,10 @@ class MitmFlow {
   // copyWith serverState
   MitmFlow copyWith({
     String? interceptedState,
-    List<List<String>>? headers,
-    List<bool>? enabledHeaders,
+    // List<List<String>>? headers,
+    // List<bool>? enabledHeaders,
+    // List<bool>? enabledQueryParams,
+    HttpRequest? request,
   }) {
     return MitmFlow(
       id: id,
@@ -124,14 +131,53 @@ class MitmFlow {
       timestampCreated: timestampCreated,
       clientConn: clientConn,
       serverConn: serverConn,
-      request: request?.copyWith(
-        headers: headers ?? request?.headers ?? [],
-        enabledHeaders: enabledHeaders ?? request?.enabledHeaders,
-      ),
+      // request: request?.copyWith(
+      //   headers: headers ?? request?.headers ?? [],
+      //   enabledHeaders: enabledHeaders ?? request?.enabledHeaders,
+      //   enabledQueryParams: enabledQueryParams ?? request?.enabledQueryParams,
+      // ),
+      request: request ?? this.request,
       response: response,
       websocket: websocket,
     );
   }
+
+  MitmFlow copyWithRequest(HttpRequest Function(HttpRequest req) update) {
+    return MitmFlow(
+      id: id,
+      intercepted: intercepted,
+      interceptedState: interceptedState,
+      isReplay: isReplay,
+      type: type,
+      modified: modified,
+      marked: marked,
+      comment: comment,
+      timestampCreated: timestampCreated,
+      clientConn: clientConn,
+      serverConn: serverConn,
+      request: update(request!),
+      response: response,
+      websocket: websocket,
+    );
+  }
+  // MitmFlow copyWithRequest(HttpRequest? request) {
+  //   return MitmFlow(
+  //     id: id,
+  //     intercepted: intercepted,
+  //     interceptedState: interceptedState,
+  //     isReplay: isReplay,
+  //     type: type,
+  //     modified: modified,
+  //     marked: marked,
+  //     comment: comment,
+  //     timestampCreated: timestampCreated,
+  //     clientConn: clientConn,
+  //     serverConn: serverConn,
+  //     request: request ?? this.request,
+  //     response: response,
+  //     websocket: websocket,
+  //   );
+  // }
 
   /// Parse a flow update message from the WebSocket connection
   static MitmFlow? parseFlowMessage(String message) {
@@ -429,7 +475,9 @@ class HttpRequest {
   final double? timestampStart; // Can be null for reconstructed flows
   final double? timestampEnd; // Can be null for incomplete flows
   final String? prettyHost; // Can be null
+
   final List<bool>? enabledHeaders;
+  final List<bool>? enabledQueryParams;
 
   HttpRequest({
     required this.method,
@@ -440,6 +488,7 @@ class HttpRequest {
     required this.httpVersion,
     required this.headers,
     required this.enabledHeaders,
+    required this.enabledQueryParams,
     this.contentLength,
     this.contentHash,
     this.timestampStart,
@@ -451,6 +500,8 @@ class HttpRequest {
     Map<String, dynamic> json, {
     List<List<String>>? headers,
     List<bool>? enabledHeaders,
+    List<bool>? enabledQueryParams,
+    String? path,
   }) {
     try {
       List<List<String>> parseHeaders(dynamic jsonHeaders) {
@@ -469,8 +520,9 @@ class HttpRequest {
         scheme: json['scheme'],
         host: json['host'],
         port: json['port'],
-        path: json['path'],
+        path: path ?? json['path'],
         enabledHeaders: enabledHeaders,
+        enabledQueryParams: enabledQueryParams,
         // ??
         // List<bool>.filled(
         //   (headers ?? parseHeaders(json['headers'])).length,
@@ -547,7 +599,9 @@ class HttpRequest {
     double? timestampStart,
     double? timestampEnd,
     String? prettyHost,
+    List<bool>? enabledQueryParams,
   }) {
+    debugPrint("copy with:${enabledQueryParams}");
     return HttpRequest(
       method: method ?? this.method,
       scheme: scheme ?? this.scheme,
@@ -562,6 +616,7 @@ class HttpRequest {
       timestampStart: timestampStart ?? this.timestampStart,
       timestampEnd: timestampEnd ?? this.timestampEnd,
       prettyHost: prettyHost ?? this.prettyHost,
+      enabledQueryParams: enabledQueryParams ?? this.enabledQueryParams,
     );
   }
 }

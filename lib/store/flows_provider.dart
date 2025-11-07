@@ -62,6 +62,8 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
           interceptedState: "server_block",
           headers: prvFlow?.request?.headers,
           enabledHeaders: prvFlow?.request?.enabledHeaders,
+          enabledQueryParams: prvFlow?.request?.enabledQueryParams,
+          path: prvFlow?.request?.path,
         ),
       );
     } else if (prvFlow == null) {
@@ -75,6 +77,8 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
           interceptedState: prvFlow.interceptedState,
           headers: prvFlow.request?.headers,
           enabledHeaders: prvFlow.request?.enabledHeaders,
+          enabledQueryParams: prvFlow.request?.enabledQueryParams,
+          path: prvFlow.request?.path,
         ),
       );
     }
@@ -148,67 +152,6 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
   List<MitmFlow> getFlowsByIds(Set<String> ids) {
     return ids.map((id) => state[id]).whereType<MitmFlow>().toList();
   }
-
-  // /// Set a filter for the flows
-  // void setFilter(String filter) {
-  //   _filter = filter;
-  //   _applyFilter();
-  // }
-
-  // /// Apply the current filter to the flows
-  // void _applyFilter() {
-  //   if (_filter.isEmpty) {
-  //     _filteredFlows = state.values.toList();
-  //     _filteredFlows.sort(
-  //       (a, b) => b.timestampCreated.compareTo(a.timestampCreated),
-  //     );
-  //     return;
-  //   }
-
-  //   final lowercaseFilter = _filter.toLowerCase();
-  //   _filteredFlows = state.values.where((flow) {
-  //     // Search in request URL
-  //     if (flow.request.url.toLowerCase().contains(lowercaseFilter)) {
-  //       return true;
-  //     }
-
-  //     // Search in request method
-  //     if (flow.request.method.toLowerCase().contains(lowercaseFilter)) {
-  //       return true;
-  //     }
-
-  //     // Search in host
-  //     if ((flow.request.prettyHost ?? flow.request.host).toLowerCase().contains(
-  //       lowercaseFilter,
-  //     )) {
-  //       return true;
-  //     }
-
-  //     // Search in response status (if available)
-  //     if (flow.response != null) {
-  //       if (flow.response!.statusCode.toString().contains(lowercaseFilter)) {
-  //         return true;
-  //       }
-  //     }
-
-  //     return false;
-  //   }).toList();
-
-  //   // Sort by timestamp, newest first
-  //   _filteredFlows.sort(
-  //     (a, b) => b.timestampCreated.compareTo(a.timestampCreated),
-  //   );
-  // }
-
-  /// Get WebSocket flows only
-  // List<MitmFlow> get webSocketFlows =>
-  //     state.values.where((flow) => flow.isWebSocket).toList()
-  //       ..sort((a, b) => b.timestampCreated.compareTo(a.timestampCreated));
-
-  // /// Get HTTP flows only (non-WebSocket)
-  // List<MitmFlow> get httpFlows =>
-  //     state.values.where((flow) => !flow.isWebSocket).toList()
-  //       ..sort((a, b) => b.timestampCreated.compareTo(a.timestampCreated));
 }
 
 final flowsProvider = NotifierProvider<FlowsProvider, Map<String, MitmFlow>>(

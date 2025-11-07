@@ -31,12 +31,8 @@ class InputItems extends StatefulWidget {
 
 class _InputItemsState extends State<InputItems> {
   late List<List<String>> items = widget.items;
-  // late List<bool> checked = [true, true, true, true, true];
-  late List<bool> checked = List.filled(
-    widget.items.length,
-    true,
-    growable: true,
-  );
+  late List<bool> checked =
+      widget.states ?? List.filled(widget.items.length, true, growable: true);
 
   @override
   void didUpdateWidget(covariant InputItems oldWidget) {
@@ -154,6 +150,7 @@ class _InputItemsState extends State<InputItems> {
 
                   // Info icon for headers
                   if (widget.title.startsWith("Headers")) ...[
+                    const SizedBox(width: 8),
                     Tooltip(
                       message: getHeaderDocs(items[i][0])?.summary ?? '',
                       child: Icon(
@@ -162,11 +159,10 @@ class _InputItemsState extends State<InputItems> {
                         size: 16,
                       ),
                     ),
-                    const SizedBox(width: 6),
-                  ] else
-                    SizedBox(width: 8),
+                    const SizedBox(width: 12),
+                  ],
                 ] else
-                  SizedBox(width: 50),
+                  SizedBox(width: widget.title.startsWith("Headers") ? 65 : 30),
 
                 // Key input field
                 SizedBox(width: 180, child: buildInput(i, true)),
@@ -213,7 +209,7 @@ class _InputItemsState extends State<InputItems> {
       value: extra ? '' : (isKey ? items[i][0] : items[i][1]),
       isExtra: i == items.length,
       isEnabled: !extra && checked[i],
-      onFocusExtraInput: () {
+      onExtraInputChange: () {
         setState(() {
           items.add(['', '']);
           checked.add(false);

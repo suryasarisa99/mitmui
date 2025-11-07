@@ -339,6 +339,19 @@ class MitmproxyClient {
       (r) {},
     );
   }
+
+  static Future<void> updatePath(String flowId, String path) {
+    return _handleRequest(
+      'updating path',
+      () => _dio.put(
+        '/flows/$flowId',
+        data: {
+          'request': {'path': path},
+        },
+      ),
+      (r) {},
+    );
+  }
 }
 
 enum RequestExport { curl, httpie, rawRequest, rawResponse, raw }

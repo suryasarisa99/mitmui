@@ -397,7 +397,7 @@ abstract class DetailsPanelState extends ConsumerState<DetailsPanel>
             flowId: widget.flow!.id,
             title: title,
             items: items,
-            states: widget.flow?.request?.enabledHeaders,
+            states: enabledStates,
             onItemToggled: onItemToggled,
             onItemReordered: onItemReordered,
             onItemChanged: onItemChanged,
