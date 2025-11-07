@@ -1,177 +1,13 @@
-import 'dart:convert';
+import 'dart:developer';
 
-import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
-import 'package:mitmui/dt_table/dt_table.dart';
-import 'package:mitmui/dt_table/dt_models.dart';
 import 'package:mitmui/models/flow.dart';
-import 'package:mitmui/widgets/resize.dart';
 import 'package:mitmui/store/flows_provider.dart';
-import 'package:mitmui/theme.dart';
 import 'package:mitmui/utils/logger.dart';
-import 'package:mitmui/widgets/flow-detail/flow_detail_panel_abstract.dart';
-import 'package:mitmui/widgets/flow-detail/flow_detail_url.dart';
+import 'package:mitmui/widgets/bottom_panel/flow_detail_panel_abstract.dart';
 
 const _log = Logger("flow_detail_panels");
-
-class BottomPanelAsFullScreen extends StatefulWidget {
-  final Map<String, dynamic> args;
-  const BottomPanelAsFullScreen({required this.args, super.key});
-
-  @override
-  State<BottomPanelAsFullScreen> createState() =>
-      _BottomPanelAsFullScreenState();
-}
-
-class _BottomPanelAsFullScreenState extends State<BottomPanelAsFullScreen> {
-  late final MitmFlow selectedFlow;
-
-  @override
-  void initState() {
-    super.initState();
-    _log.info('Selected flow: ${widget.args['args2']}');
-    selectedFlow = MitmFlow.fromJson(jsonDecode(widget.args['args2']['flow']));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FlowDetailURL(
-          scheme: selectedFlow.request?.scheme ?? '',
-          host: selectedFlow.request?.prettyHost ?? '',
-          path: selectedFlow.request?.path ?? '',
-          statusCode: selectedFlow.response?.statusCode ?? 0,
-          method: selectedFlow.request?.method ?? '',
-          onOpenInNewWindow: () => {},
-        ),
-        Expanded(
-          child: ResizableContainer(
-            axis: Axis.horizontal,
-            child1: RequestDetailsPanel(
-              flow: selectedFlow,
-              resizeController: ResizableController(),
-            ),
-            child2: ResponseDetailsPanel(
-              flow: selectedFlow,
-              resizeController: ResizableController(),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class BottomPanel extends ConsumerStatefulWidget {
-  const BottomPanel({required this.dtController, super.key});
-  final DtController dtController;
-
-  @override
-  ConsumerState<BottomPanel> createState() => _BottomPanelState();
-}
-
-class _BottomPanelState extends ConsumerState<BottomPanel> {
-  String? flowId;
-  final resizeController = ResizableController();
-
-  @override
-  void initState() {
-    super.initState();
-    widget.dtController.addSpecificListener(_listener);
-  }
-
-  void _listener(DtControllerChange change) {
-    if (change.type == ChangeType.focusedRow) {
-      String? rowId = widget.dtController.focusedRowId;
-      if (rowId != null && rowId != flowId) {
-        final x = ref.read(flowsProvider)[rowId];
-        if (x == null) return;
-        setState(() {
-          flowId = x.id;
-        });
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    // widget.dataGridController.removeSpecificListener();
-    super.dispose();
-  }
-
-  void onOpenInNewWindow(MitmFlow flow) async {
-    final window = await DesktopMultiWindow.createWindow(
-      jsonEncode({
-        'args1': 'Sub window',
-        'args2': {'flow': jsonEncode(flow.toJson())},
-      }),
-    );
-    window
-      ..setFrame(const Offset(0, 0) & const Size(1280, 720))
-      ..center()
-      ..setTitle('Another window')
-      ..show();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = AppTheme.from(Theme.brightnessOf(context));
-    if (flowId == null) {
-      return const SizedBox.shrink();
-    }
-    // final selectedFlow = ref.watch(selectedFlowProvider(flowId!));
-    final selectedFlow = ref.watch(
-      flowsProvider.select((flows) => flows[flowId!]),
-    );
-    // final selectedFlow = ref.watch(flowsProvider)[flowId!];
-    if (selectedFlow == null) {
-      return const SizedBox.shrink();
-    }
-    _log.success("rebuilding flow details for ${selectedFlow.id}");
-    return Container(
-      color: theme.surface,
-      // color: Colors.red,
-      width: double.infinity,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          FlowDetailURL(
-            scheme: selectedFlow.request?.scheme ?? '',
-            host: selectedFlow.request?.prettyHost ?? '',
-            path: selectedFlow.request?.path ?? '',
-            statusCode: selectedFlow.response?.statusCode ?? 0,
-            method: selectedFlow.request?.method ?? '',
-            onOpenInNewWindow: () => onOpenInNewWindow(selectedFlow),
-          ),
-          if (selectedFlow.request != null)
-            Expanded(
-              child: ResizableContainer(
-                controller: resizeController,
-                axis: Axis.horizontal,
-                dividerColor: Colors.grey[800]!,
-                onDragDividerWidth: 2,
-                onDragDividerColor: const Color.fromARGB(255, 105, 93, 92),
-                child1: RequestDetailsPanel(
-                  flow: selectedFlow,
-                  resizeController: resizeController,
-                ),
-                child2: ResponseDetailsPanel(
-                  flow: selectedFlow,
-                  resizeController: resizeController,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
 
 class RequestDetailsPanel extends DetailsPanel {
   const RequestDetailsPanel({
@@ -198,12 +34,12 @@ class _RequestDetailsPanelState extends DetailsPanelState {
 
   @override
   void updateData() {
-    print("=====update data=======");
+    print("======Request Detail Panel Updated======");
 
     queryParams = getQueryParamsList();
     cookies = getCookiesList();
     headers = widget.flow?.request?.headers ?? [];
-    print("Headers: ${headers.first}");
+    print("Headers count: ${headers.length}: ${headers.first}");
 
     tabTitles = [
       if (headers.isNotEmpty) 'Headers (${headers.length})',
@@ -217,6 +53,7 @@ class _RequestDetailsPanelState extends DetailsPanelState {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("rebuilding request details panel");
     return Column(
       children: [
         buildHeader(),
@@ -259,50 +96,48 @@ class _RequestDetailsPanelState extends DetailsPanelState {
   //   MitmproxyClient.updateHeaders(widget.flow!.id, headers);
   // }
 
+  List<List<String>> getFilteredHeaders() {
+    final enabledHeaders = widget.flow?.request?.enabledHeaders;
+    if (enabledHeaders == null) return headers;
+    // only keep checked and header with non empty key
+    List<List<String>> filteredItems = [
+      for (final (i, header) in headers.indexed)
+        if (enabledHeaders[i] && header[0].isNotEmpty) header,
+    ];
+    return filteredItems;
+  }
+
   Widget buildHeaders() {
     return buildInputItems(
-      items: headers,
       title: 'Headers',
+      items: headers,
+      enabledStates: widget.flow?.request?.enabledHeaders,
       keyValueJoiner: ': ',
       linesJoiner: '\n',
       onItemAdded: (item, index) {
         ref.read(flowsProvider.notifier).addHeader(widget.flow!.id, item, true);
-        // headers.add(item);
       },
       onItemChanged: (index, key, value) {
         if (index < headers.length) {
           headers[index] = [key, value];
+          ref
+              .read(flowsProvider.notifier)
+              .updateHeader(widget.flow!.id, index, key, value);
+
+          MitmproxyClient.updateHeaders(widget.flow!.id, getFilteredHeaders());
+        } else {
+          headers.add([key, value]);
         }
-        List<List<String>> filteredItems = headers;
-        if (widget.flow?.request?.enabledHeaders != null) {
-          filteredItems = headers
-              .asMap()
-              .entries
-              .where(
-                (entry) => widget.flow!.request!.enabledHeaders![entry.key],
-              )
-              .map((e) => e.value)
-              .toList();
-        }
-        MitmproxyClient.updateHeaders(widget.flow!.id, filteredItems);
       },
       onItemToggled: (index, v) {
         var enabledHeaders = widget.flow!.request!.enabledHeaders;
-        enabledHeaders ??= List.filled(headers.length, true);
         enabledHeaders[index] = v;
         ref
             .read(flowsProvider.notifier)
             .addOrUpdateFlow(
               widget.flow!.copyWith(enabledHeaders: enabledHeaders),
             );
-        List<List<String>> filteredItems = headers;
-        filteredItems = headers
-            .asMap()
-            .entries
-            .where((entry) => enabledHeaders![entry.key])
-            .map((e) => e.value)
-            .toList();
-        MitmproxyClient.updateHeaders(widget.flow!.id, filteredItems);
+        MitmproxyClient.updateHeaders(widget.flow!.id, getFilteredHeaders());
       },
       onItemReordered: (oldIndex, newIndex) {
         if (oldIndex < newIndex) {
@@ -310,13 +145,11 @@ class _RequestDetailsPanelState extends DetailsPanelState {
         }
         final item = headers.removeAt(oldIndex);
         headers.insert(newIndex, item);
-        MitmproxyClient.updateHeaders(widget.flow!.id, headers);
+        MitmproxyClient.updateHeaders(widget.flow!.id, getFilteredHeaders());
         ref
             .read(flowsProvider.notifier)
             .addOrUpdateFlow(widget.flow!.copyWith(headers: headers));
       },
-
-      enabledStates: headers.map((e) => true).toList(),
     );
   }
 

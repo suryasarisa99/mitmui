@@ -134,20 +134,6 @@ abstract class DetailsPanelState extends ConsumerState<DetailsPanel>
             padding: const EdgeInsets.all(0.0),
             constraints: BoxConstraints(minHeight: 24, minWidth: 24),
             onPressed: () {
-              // Toggle fullscreen mode for the current panel
-              // if (isRequest) {
-              //   if (widget.resizeController.isChild1Hidden) {
-              //     widget.resizeController.showFirstChild();
-              //   } else {
-              //     widget.resizeController.hideFirstChild();
-              //   }
-              // } else {
-              //   if (widget.resizeController.isChild2Hidden) {
-              //     widget.resizeController.showSecondChild();
-              //   } else {
-              //     widget.resizeController.hideSecondChild();
-              //   }
-              // }
               if (isRequest) {
                 if (widget.resizeController.isChild2Hidden) {
                   widget.resizeController.showSecondChild();
@@ -367,15 +353,6 @@ abstract class DetailsPanelState extends ConsumerState<DetailsPanel>
     required Function(List<String>, int) onItemAdded,
     List<bool>? enabledStates,
   }) {
-    // Ensure there's always an empty row at the end for new items
-
-    // // Add empty row if the last item is not empty or if list is empty
-    // if (displayItems.isEmpty ||
-    //     (displayItems.last[0].isNotEmpty || displayItems.last[1].isNotEmpty)) {
-    //   displayItems.add(['', '']);
-    //   displayStates.add(false);
-    // }
-
     return Column(
       children: [
         // Header
@@ -410,9 +387,10 @@ abstract class DetailsPanelState extends ConsumerState<DetailsPanel>
         // Items List
         Expanded(
           child: InputItems(
+            flowId: widget.flow!.id,
             title: title,
             items: items,
-            states: widget.flow?.request?.enabledHeaders,
+            states: widget.flow?.request?.enabledHeaders ?? [],
             onItemToggled: onItemToggled,
             onItemReordered: onItemReordered,
             onItemChanged: onItemChanged,

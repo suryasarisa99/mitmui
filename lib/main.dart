@@ -6,7 +6,7 @@ import 'package:mitmui/global.dart';
 import 'package:mitmui/screens/filter_manager.dart';
 import 'package:mitmui/screens/status_screen.dart';
 import 'package:mitmui/utils/logger.dart';
-import 'package:mitmui/widgets/flow-detail/flow_detail_panels.dart';
+import 'package:mitmui/widgets/bottom_panel/bottom_panel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 import 'screens/flow_list_screen.dart';

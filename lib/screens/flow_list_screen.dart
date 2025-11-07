@@ -7,9 +7,9 @@ import 'package:mitmui/global.dart';
 import 'package:mitmui/services/websocket_service.dart';
 import 'package:mitmui/theme.dart';
 import 'package:mitmui/widgets/filter/filter_btn.dart';
+import 'package:mitmui/widgets/bottom_panel/bottom_panel.dart';
 import 'package:mitmui/widgets/resize.dart';
 import '../widgets/flow_data_grid.dart';
-import '../widgets/flow-detail/flow_detail_panels.dart';
 
 class FlowListScreen extends ConsumerStatefulWidget {
   const FlowListScreen({super.key});

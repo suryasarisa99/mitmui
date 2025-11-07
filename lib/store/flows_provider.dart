@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:flutter/material.dart';
 import 'package:mitmui/models/flow.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -41,11 +44,18 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
     // _applyFilter();
   }
 
+  // 2 , 3, 1
+  // when we first intercept flow: 3,3 3,3
   void handleMessage(Map<String, dynamic> message) {
     final MitmFlow? prvFlow = state[message['id']];
     final bool isIntercepted = message['intercepted'] ?? false;
     final interceptedState = prvFlow?.interceptedState;
+
+    // log(
+    //   "req headers (${prvFlow?.request?.headers.length}): ${prvFlow?.request?.headers}",
+    // );
     if (interceptedState == 'none' && isIntercepted) {
+      // print("add/update: condition: 1");
       addOrUpdateFlow(
         MitmFlow.fromJson(
           message,
@@ -55,11 +65,10 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
         ),
       );
     } else if (prvFlow == null) {
+      // print("add/update: condition: 2");
       addOrUpdateFlow(MitmFlow.fromJson(message));
     } else {
-      print(
-        "Updating flow with prv state ${prvFlow.id} with new data ${prvFlow.interceptedState}",
-      );
+      // print("add/update: condition: 3 ${prvFlow.interceptedState}");
       addOrUpdateFlow(
         MitmFlow.fromJson(
           message,
@@ -88,8 +97,21 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
     final flow = state[flowId];
     if (flow != null) {
       flow.request?.headers.add(header);
-      flow.request?.enabledHeaders?.add(status);
-      state = {...state, flowId: flow};
+      flow.request?.enabledHeaders.add(status);
+
+      final x = MitmFlow.fromJson(flow.toJson());
+      state = {...state, flowId: x};
+    }
+  }
+
+  void updateHeader(String flowId, int index, String key, String value) {
+    final flow = state[flowId];
+    if (flow != null) {
+      debugPrint("flow updated:id: ${flowId}");
+      flow.request?.headers[index] = [key, value];
+
+      final x = MitmFlow.fromJson(flow.toJson());
+      state = {...state, flowId: x};
     }
   }
 

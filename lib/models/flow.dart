@@ -429,7 +429,7 @@ class HttpRequest {
   final double? timestampStart; // Can be null for reconstructed flows
   final double? timestampEnd; // Can be null for incomplete flows
   final String? prettyHost; // Can be null
-  final List<bool>? enabledHeaders;
+  final List<bool> enabledHeaders;
 
   HttpRequest({
     required this.method,
@@ -439,7 +439,7 @@ class HttpRequest {
     required this.path,
     required this.httpVersion,
     required this.headers,
-    this.enabledHeaders,
+    required this.enabledHeaders,
     this.contentLength,
     this.contentHash,
     this.timestampStart,
@@ -459,14 +459,26 @@ class HttpRequest {
             .toList();
       }
 
+      // final parsedHeaders = parseHeaders(json['headers']);
+      // final h = parsedHeaders.length > (headers?.length ?? 0)
+      //     ? parsedHeaders
+      //     : headers;
+
       return HttpRequest(
         method: json['method'],
         scheme: json['scheme'],
         host: json['host'],
         port: json['port'],
         path: json['path'],
-        enabledHeaders: enabledHeaders,
+        enabledHeaders:
+            enabledHeaders ??
+            List<bool>.filled(
+              (headers ?? parseHeaders(json['headers'])).length,
+              true,
+              growable: true,
+            ),
         httpVersion: json['http_version'],
+        // headers: h!,
         headers: headers ?? parseHeaders(json['headers']),
         contentLength: json['contentLength'],
         contentHash: json['contentHash'],

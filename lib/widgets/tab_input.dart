@@ -1,25 +1,32 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mitmui/utils/debouncer.dart';
 
 class CustomInput extends StatefulWidget {
-  final Function(String)? onFieldSubmitted;
-  final Function(String)? onChanged;
   final Function()? onTap;
-  final Function(String)? onTab;
+  final Function(String)? onFieldSubmitted;
+  final Function(String)? onUpdate;
+  final Function(String)? onChanged;
   final Function(String)? onTapOutside;
+  final Function()? onFocusExtraInput;
   final String value;
   final bool isEnabled;
+  final bool isExtra;
   final FocusNode? focusNode;
+  final String flowId;
+
   const CustomInput({
+    required this.flowId,
     this.onFieldSubmitted,
     this.onChanged,
     this.onTap,
-    this.onTab,
     required this.value,
     this.onTapOutside,
+    required this.onUpdate,
     this.focusNode,
     this.isEnabled = true,
+    this.isExtra = false,
+    this.onFocusExtraInput,
     super.key,
   });
 
@@ -31,23 +38,33 @@ class _CustomInputState extends State<CustomInput> {
   late final TextEditingController _controller = TextEditingController(
     text: widget.value,
   );
+  late final debouncer = Debouncer(const Duration(milliseconds: 350));
+
+  @override
+  void didUpdateWidget(covariant CustomInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.flowId != widget.flowId) {
+      _controller.text = widget.value;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Focus(
       autofocus: false,
       canRequestFocus: false,
-      onKeyEvent: (n, event) {
-        if (event is KeyDownEvent &&
-            event.logicalKey == LogicalKeyboardKey.tab) {
-          widget.onTab?.call(_controller.text);
-          return KeyEventResult.handled;
+      onFocusChange: (hasFocus) {
+        if (hasFocus) {
+          if (widget.isExtra) {
+            widget.onFocusExtraInput?.call();
+          } else {
+            // widget.onUpdate?.call(_controller.text);
+          }
         }
-        return KeyEventResult.ignored;
       },
       child: TextFormField(
         controller: _controller,
-        focusNode: widget.focusNode,
+        // focusNode: widget.focusNode,
 
         // enabled: isEnabled,
         style: TextStyle(
@@ -58,7 +75,7 @@ class _CustomInputState extends State<CustomInput> {
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 8,
-            vertical: 11,
+            vertical: 12,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(4),
@@ -74,8 +91,8 @@ class _CustomInputState extends State<CustomInput> {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(4),
             borderSide: const BorderSide(
-              color: Color.fromARGB(211, 174, 184, 252),
-              width: 0.6,
+              color: Color.fromARGB(210, 255, 167, 95),
+              width: 2,
             ),
           ),
           disabledBorder: OutlineInputBorder(
@@ -83,11 +100,20 @@ class _CustomInputState extends State<CustomInput> {
             borderSide: BorderSide(color: Colors.grey[800]!, width: 1),
           ),
         ),
-        onChanged: widget.onChanged,
-        onFieldSubmitted: widget.onFieldSubmitted,
-        onTap: widget.onTap,
-        onTapOutside: (event) {
-          widget.onTapOutside?.call(_controller.text);
+        // onChanged: widget.onChanged,
+        // onFieldSubmitted: widget.onFieldSubmitted,
+        // onTap: widget.onTap,
+        // onTapOutside: (event) {
+        //   widget.onTapOutside?.call(_controller.text);
+        // },
+        onChanged: (v) {
+          debouncer.run(() {
+            widget.onUpdate?.call(_controller.text);
+          });
+        },
+        onTapOutside: (e) {
+          // widget.onUpdate?.call(_controller.text);
+          FocusScope.of(context).unfocus();
         },
       ),
     );
