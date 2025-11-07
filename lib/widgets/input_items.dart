@@ -6,12 +6,13 @@ import 'package:mitmui/widgets/tab_input.dart';
 class InputItems extends StatefulWidget {
   final String flowId;
   final List<List<String>> items;
-  final List<bool> states;
+  final List<bool>? states;
   final Function(int, bool) onItemToggled;
   final Function(int, int) onItemReordered;
   final Function(int, String, String) onItemChanged;
   final Function(List<String>, int) onItemAdded;
   final String title;
+
   const InputItems({
     required this.flowId,
     required this.title,
@@ -30,14 +31,20 @@ class InputItems extends StatefulWidget {
 
 class _InputItemsState extends State<InputItems> {
   late List<List<String>> items = widget.items;
-  late List<bool> checked = widget.states;
+  // late List<bool> checked = [true, true, true, true, true];
+  late List<bool> checked = List.filled(
+    widget.items.length,
+    true,
+    growable: true,
+  );
 
   @override
   void didUpdateWidget(covariant InputItems oldWidget) {
     super.didUpdateWidget(oldWidget);
     debugPrint("widget update: input_items");
     items = widget.items;
-    checked = widget.states;
+    checked =
+        widget.states ?? List.filled(widget.items.length, true, growable: true);
   }
 
   @override

@@ -97,7 +97,11 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
     final flow = state[flowId];
     if (flow != null) {
       flow.request?.headers.add(header);
-      flow.request?.enabledHeaders.add(status);
+      if (flow.request?.enabledHeaders != null) {
+        flow.request?.enabledHeaders!.add(status);
+      } else {
+        // ignore
+      }
 
       final x = MitmFlow.fromJson(flow.toJson());
       state = {...state, flowId: x};

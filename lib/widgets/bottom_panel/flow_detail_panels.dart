@@ -34,12 +34,11 @@ class _RequestDetailsPanelState extends DetailsPanelState {
 
   @override
   void updateData() {
-    print("======Request Detail Panel Updated======");
+    debugPrint("======Request Detail Panel Updated======");
 
     queryParams = getQueryParamsList();
     cookies = getCookiesList();
     headers = widget.flow?.request?.headers ?? [];
-    print("Headers count: ${headers.length}: ${headers.first}");
 
     tabTitles = [
       if (headers.isNotEmpty) 'Headers (${headers.length})',
@@ -63,7 +62,7 @@ class _RequestDetailsPanelState extends DetailsPanelState {
             child: TabBarView(
               controller: tabController,
               children: [
-                if (headers.isNotEmpty) buildHeaders(),
+                if (headers.isNotEmpty) buildEditableHeaders(),
                 if (queryParams.isNotEmpty)
                   buildItems(
                     items: queryParams,
@@ -96,22 +95,25 @@ class _RequestDetailsPanelState extends DetailsPanelState {
   //   MitmproxyClient.updateHeaders(widget.flow!.id, headers);
   // }
 
-  List<List<String>> getFilteredHeaders() {
-    final enabledHeaders = widget.flow?.request?.enabledHeaders;
-    if (enabledHeaders == null) return headers;
+  List<List<String>> getFilteredHeaders(List<bool> enabled) {
+    // if (enabledHeaders == null) return headers;
     // only keep checked and header with non empty key
     List<List<String>> filteredItems = [
       for (final (i, header) in headers.indexed)
-        if (enabledHeaders[i] && header[0].isNotEmpty) header,
+        if (enabled[i] && header[0].isNotEmpty) header,
     ];
     return filteredItems;
   }
 
-  Widget buildHeaders() {
+  Widget buildEditableHeaders() {
+    final enabledHeaders =
+        widget.flow?.request?.enabledHeaders ??
+        List.filled(headers.length, true, growable: true);
+
     return buildInputItems(
       title: 'Headers',
       items: headers,
-      enabledStates: widget.flow?.request?.enabledHeaders,
+      enabledStates: null,
       keyValueJoiner: ': ',
       linesJoiner: '\n',
       onItemAdded: (item, index) {
@@ -124,20 +126,27 @@ class _RequestDetailsPanelState extends DetailsPanelState {
               .read(flowsProvider.notifier)
               .updateHeader(widget.flow!.id, index, key, value);
 
-          MitmproxyClient.updateHeaders(widget.flow!.id, getFilteredHeaders());
+          MitmproxyClient.updateHeaders(
+            widget.flow!.id,
+            getFilteredHeaders(enabledHeaders),
+          );
         } else {
           headers.add([key, value]);
         }
       },
       onItemToggled: (index, v) {
-        var enabledHeaders = widget.flow!.request!.enabledHeaders;
+        // var enabledHeaders = widget.flow!.request!.enabledHeaders;
         enabledHeaders[index] = v;
+        debugPrint("enabledHeaders: $enabledHeaders");
         ref
             .read(flowsProvider.notifier)
             .addOrUpdateFlow(
               widget.flow!.copyWith(enabledHeaders: enabledHeaders),
             );
-        MitmproxyClient.updateHeaders(widget.flow!.id, getFilteredHeaders());
+        MitmproxyClient.updateHeaders(
+          widget.flow!.id,
+          getFilteredHeaders(enabledHeaders),
+        );
       },
       onItemReordered: (oldIndex, newIndex) {
         if (oldIndex < newIndex) {
@@ -145,7 +154,10 @@ class _RequestDetailsPanelState extends DetailsPanelState {
         }
         final item = headers.removeAt(oldIndex);
         headers.insert(newIndex, item);
-        MitmproxyClient.updateHeaders(widget.flow!.id, getFilteredHeaders());
+        MitmproxyClient.updateHeaders(
+          widget.flow!.id,
+          getFilteredHeaders(enabledHeaders),
+        );
         ref
             .read(flowsProvider.notifier)
             .addOrUpdateFlow(widget.flow!.copyWith(headers: headers));

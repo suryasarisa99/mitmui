@@ -126,7 +126,7 @@ class MitmFlow {
       serverConn: serverConn,
       request: request?.copyWith(
         headers: headers ?? request?.headers ?? [],
-        enabledHeaders: enabledHeaders ?? request?.enabledHeaders ?? [],
+        enabledHeaders: enabledHeaders ?? request?.enabledHeaders,
       ),
       response: response,
       websocket: websocket,
@@ -429,7 +429,7 @@ class HttpRequest {
   final double? timestampStart; // Can be null for reconstructed flows
   final double? timestampEnd; // Can be null for incomplete flows
   final String? prettyHost; // Can be null
-  final List<bool> enabledHeaders;
+  final List<bool>? enabledHeaders;
 
   HttpRequest({
     required this.method,
@@ -470,13 +470,13 @@ class HttpRequest {
         host: json['host'],
         port: json['port'],
         path: json['path'],
-        enabledHeaders:
-            enabledHeaders ??
-            List<bool>.filled(
-              (headers ?? parseHeaders(json['headers'])).length,
-              true,
-              growable: true,
-            ),
+        enabledHeaders: enabledHeaders,
+        // ??
+        // List<bool>.filled(
+        //   (headers ?? parseHeaders(json['headers'])).length,
+        //   true,
+        //   growable: true,
+        // ),
         httpVersion: json['http_version'],
         // headers: h!,
         headers: headers ?? parseHeaders(json['headers']),
