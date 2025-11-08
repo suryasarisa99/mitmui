@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:re_editor/re_editor.dart';
 
 const EdgeInsetsGeometry _kDefaultFindMargin = EdgeInsets.only(right: 10);
@@ -115,11 +116,40 @@ class CodeFindPanelView extends StatelessWidget implements PreferredSizeWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              _buildTextField(
-                context: context,
-                controller: controller.findInputController,
-                focusNode: controller.findInputFocusNode,
-                iconsWidth: _kDefaultFindIconWidth * 1.5,
+              Focus(
+                autofocus: false,
+                canRequestFocus: false,
+                onKeyEvent: (node, event) {
+                  debugPrint("key event: $event");
+                  if (event.logicalKey == LogicalKeyboardKey.escape) {
+                    controller.close();
+                    return KeyEventResult.handled;
+                  }
+                  if (event.logicalKey == LogicalKeyboardKey.enter) {
+                    if (HardwareKeyboard.instance.isShiftPressed) {
+                      controller.previousMatch();
+                    } else {
+                      controller.nextMatch();
+                    }
+                    return KeyEventResult.handled;
+                  }
+                  if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                    controller.previousMatch();
+                    return KeyEventResult.handled;
+                  }
+                  if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                    controller.nextMatch();
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
+                },
+
+                child: _buildTextField(
+                  context: context,
+                  controller: controller.findInputController,
+                  focusNode: controller.findInputFocusNode,
+                  iconsWidth: _kDefaultFindIconWidth * 1.5,
+                ),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
