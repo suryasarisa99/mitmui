@@ -119,31 +119,72 @@ class CodeFindPanelView extends StatelessWidget implements PreferredSizeWidget {
               Focus(
                 autofocus: false,
                 canRequestFocus: false,
+                // onKeyEvent: (node, event) {
+                //   // arrow down or enter to next match
+                //   // arrow up or shift + enter to previous match
+
+                //   // this only requires key up event (uses shift )
+                //   if (event is KeyUpEvent &&
+                //       event.logicalKey == LogicalKeyboardKey.enter &&
+                //       HardwareKeyboard.instance.isShiftPressed) {
+                //     controller.previousMatch();
+                //     return KeyEventResult.handled;
+                //   }
+
+                //   // the rest events does not uses modifier keys.
+                //   if (event is! KeyDownEvent) {
+                //     return KeyEventResult.ignored;
+                //   }
+                //   if (event.logicalKey == LogicalKeyboardKey.enter) {
+                //     controller.nextMatch();
+                //     return KeyEventResult.handled;
+                //   }
+                //   if (event.logicalKey == LogicalKeyboardKey.escape) {
+                //     controller.close();
+                //     return KeyEventResult.handled;
+                //   }
+
+                //   if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                //     controller.previousMatch();
+                //     return KeyEventResult.handled;
+                //   }
+                //   if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                //     controller.nextMatch();
+                //     return KeyEventResult.handled;
+                //   }
+                //   return KeyEventResult.ignored;
+                // },
                 onKeyEvent: (node, event) {
-                  debugPrint("key event: $event");
-                  if (event.logicalKey == LogicalKeyboardKey.escape) {
-                    controller.close();
-                    return KeyEventResult.handled;
-                  }
+                  if (event is! KeyDownEvent) return KeyEventResult.ignored;
+
+                  final shift = HardwareKeyboard.instance.isShiftPressed;
+
                   if (event.logicalKey == LogicalKeyboardKey.enter) {
-                    if (HardwareKeyboard.instance.isShiftPressed) {
+                    if (shift) {
                       controller.previousMatch();
                     } else {
                       controller.nextMatch();
                     }
                     return KeyEventResult.handled;
                   }
+
+                  if (event.logicalKey == LogicalKeyboardKey.escape) {
+                    controller.close();
+                    return KeyEventResult.handled;
+                  }
+
                   if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
                     controller.previousMatch();
                     return KeyEventResult.handled;
                   }
+
                   if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
                     controller.nextMatch();
                     return KeyEventResult.handled;
                   }
+
                   return KeyEventResult.ignored;
                 },
-
                 child: _buildTextField(
                   context: context,
                   controller: controller.findInputController,

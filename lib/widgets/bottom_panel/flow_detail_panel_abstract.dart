@@ -72,6 +72,7 @@ abstract class DetailsPanelState extends ConsumerState<DetailsPanel>
         currentTab = null;
       }
       updateData();
+      codeControllerService.flowId = widget.flow!.id;
       if (mitmBodyFuture == null ||
           oldWidget.flow?.id != widget.flow?.id ||
           oldWidget.flow?.request?.timestampStart !=

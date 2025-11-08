@@ -10,6 +10,7 @@ class CodeControllerService {
   String _savedText = '';
   VoidCallback? _codeListener;
   final String type;
+  String flowId = '';
 
   // constructor
   CodeControllerService(this.type);
@@ -44,7 +45,7 @@ class CodeControllerService {
     codeController.dispose();
   }
 
-  void handleSave(String flowId) {
+  void handleSave(String x) {
     _savedText = codeController.text;
     isModified.value = false;
     addListener();

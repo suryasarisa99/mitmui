@@ -70,54 +70,75 @@ class _ReEditorState extends State<ReEditor> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
-          child: CodeEditor(
-            readOnly: false,
-            showCursorWhenReadOnly: true,
+          child: Focus(
             autofocus: false,
-            // findController: findController, // Connect the find controller
-            controller: widget.codeControllerService.codeController,
-            style: CodeEditorStyle(
-              fontSize: 16,
-              backgroundColor: Colors.transparent,
-              codeTheme: CodeHighlightTheme(
-                languages: {
-                  'json': CodeHighlightThemeMode(mode: langJson),
-                  'javascript': CodeHighlightThemeMode(mode: langJavascript),
-                  'css': CodeHighlightThemeMode(mode: langCss),
-                  'xml': CodeHighlightThemeMode(mode: langXml),
-                  'yaml': CodeHighlightThemeMode(mode: langYaml),
-                  'graphql': CodeHighlightThemeMode(mode: langGraphql),
-                  'protobuf': CodeHighlightThemeMode(mode: langProtobuf),
-                  'markdown': CodeHighlightThemeMode(mode: langMarkdown),
-                },
-                theme: tomorrowNightTheme,
+            canRequestFocus: false,
+            onFocusChange: (has) {
+              debugPrint("editor focus change: $has");
+            },
+            onKeyEvent: (has, e) {
+              debugPrint("event type: ${e.runtimeType}");
+              final hk = HardwareKeyboard.instance;
+              if (!widget.codeControllerService.isModified.value) {
+                return KeyEventResult.ignored;
+              }
+              if (e.logicalKey == LogicalKeyboardKey.keyS &&
+                  (hk.isMetaPressed || hk.isControlPressed)) {
+                debugPrint("save");
+                widget.codeControllerService.handleSave("");
+                return KeyEventResult.handled;
+              }
+              return KeyEventResult.ignored;
+            },
+            child: CodeEditor(
+              readOnly: false,
+              showCursorWhenReadOnly: true,
+              autofocus: false,
+              // findController: findController, // Connect the find controller
+              controller: widget.codeControllerService.codeController,
+              style: CodeEditorStyle(
+                fontSize: 16,
+                backgroundColor: Colors.transparent,
+                codeTheme: CodeHighlightTheme(
+                  languages: {
+                    'json': CodeHighlightThemeMode(mode: langJson),
+                    'javascript': CodeHighlightThemeMode(mode: langJavascript),
+                    'css': CodeHighlightThemeMode(mode: langCss),
+                    'xml': CodeHighlightThemeMode(mode: langXml),
+                    'yaml': CodeHighlightThemeMode(mode: langYaml),
+                    'graphql': CodeHighlightThemeMode(mode: langGraphql),
+                    'protobuf': CodeHighlightThemeMode(mode: langProtobuf),
+                    'markdown': CodeHighlightThemeMode(mode: langMarkdown),
+                  },
+                  theme: tomorrowNightTheme,
+                ),
               ),
+
+              // for line numbers and chunk indicators
+              indicatorBuilder:
+                  (context, editingController, chunkController, notifier) {
+                    return Row(
+                      children: [
+                        DefaultCodeLineNumber(
+                          controller: editingController,
+                          notifier: notifier,
+                        ),
+                        DefaultCodeChunkIndicator(
+                          width: 20,
+                          controller: chunkController,
+                          notifier: notifier,
+                        ),
+                      ],
+                    );
+                  },
+
+              findBuilder: (context, controller, readOnly) =>
+                  CodeFindPanelView(controller: controller, readOnly: readOnly),
+              // for right click context menu
+              toolbarController: const ContextMenuControllerImpl(),
+
+              shortcutOverrideActions: <Type, Action<Intent>>{},
             ),
-
-            // for line numbers and chunk indicators
-            indicatorBuilder:
-                (context, editingController, chunkController, notifier) {
-                  return Row(
-                    children: [
-                      DefaultCodeLineNumber(
-                        controller: editingController,
-                        notifier: notifier,
-                      ),
-                      DefaultCodeChunkIndicator(
-                        width: 20,
-                        controller: chunkController,
-                        notifier: notifier,
-                      ),
-                    ],
-                  );
-                },
-
-            findBuilder: (context, controller, readOnly) =>
-                CodeFindPanelView(controller: controller, readOnly: readOnly),
-            // for right click context menu
-            toolbarController: const ContextMenuControllerImpl(),
-
-            shortcutOverrideActions: <Type, Action<Intent>>{},
           ),
         ),
       ],
