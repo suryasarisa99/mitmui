@@ -352,6 +352,23 @@ class MitmproxyClient {
       (r) {},
     );
   }
+
+  static Future<void> updateBody(
+    String flowId, {
+    required String type,
+    required String body,
+  }) {
+    return _handleRequest(
+      'updating body',
+      () => _dio.put(
+        '/flows/$flowId',
+        data: {
+          type: {'content': body},
+        },
+      ),
+      (r) {},
+    );
+  }
 }
 
 enum RequestExport { curl, httpie, rawRequest, rawResponse, raw }

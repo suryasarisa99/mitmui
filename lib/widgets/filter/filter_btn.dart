@@ -31,18 +31,18 @@ class _FilterBtnState extends State<FilterBtn> {
         ? LogicalKeyboardKey.keyF
         : LogicalKeyboardKey.keyI;
 
-    hk.addHandler((event) {
-      final isCtrlPressed = Platform.isMacOS
-          ? hk.isMetaPressed
-          : hk.isControlPressed;
-      if (event is KeyDownEvent &&
-          event.logicalKey == shortCutKey &&
-          isCtrlPressed) {
-        _showFilterManager();
-        return true;
-      }
-      return false;
-    });
+    // hk.addHandler((event) {
+    //   final isCtrlPressed = Platform.isMacOS
+    //       ? hk.isMetaPressed
+    //       : hk.isControlPressed;
+    //   if (event is KeyDownEvent &&
+    //       event.logicalKey == shortCutKey &&
+    //       isCtrlPressed) {
+    //     _showFilterManager();
+    //     return true;
+    //   }
+    //   return false;
+    // });
   }
 
   void _showFilterManager() {

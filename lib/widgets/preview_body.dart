@@ -4,7 +4,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter/material.dart';
 import 'package:mitmui/models/response_body.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
-import 'package:mitmui/widgets/re_editor.dart';
+import 'package:mitmui/widgets/editor/code_controller_service.dart';
+import 'package:mitmui/widgets/editor/re_editor.dart';
 import 'package:mitmui/utils/logger.dart';
 
 const _log = Logger("preview_body");
@@ -16,8 +17,10 @@ class PreviewBody extends StatelessWidget {
     required this.contentType,
     required this.contentLength,
     // this.dataFuture,
-    this.flowId,
+    required this.flowId,
     required this.url,
+    required this.onSave,
+    required this.codeControllerService,
   });
 
   final String? contentType;
@@ -25,7 +28,9 @@ class PreviewBody extends StatelessWidget {
   final Future<MitmBody>? bodyFuture;
   // final Future<dynamic>? dataFuture;
   final String url;
-  final String? flowId; // Flow ID for API calls
+  final String flowId; // Flow ID for API calls
+  final void Function(String text)? onSave;
+  final CodeControllerService codeControllerService;
 
   @override
   Widget build(BuildContext context) {
@@ -120,25 +125,24 @@ class PreviewBody extends StatelessWidget {
               final formattedJson = JsonEncoder.withIndent(
                 '  ',
               ).convert(jsonDecode(mitmBody.text));
-              return ReEditor(text: formattedJson, lang: 'json');
+              return ReEditor(
+                text: formattedJson,
+                codeControllerService: codeControllerService,
+                onSave: onSave,
+              );
             } catch (e) {
-              return ReEditor(text: mitmBody.text, lang: 'json');
+              return ReEditor(
+                text: mitmBody.text,
+                codeControllerService: codeControllerService,
+                onSave: onSave,
+              );
             }
-          } else if (mitmBody.viewName == 'HTML' ||
-              contentType.contains('html') ||
-              mitmBody.viewName == 'XML' ||
-              contentType.contains('xml') ||
-              mitmBody.viewName == 'XHTML' ||
-              contentType.contains('xhtml')) {
-            return ReEditor(text: mitmBody.text, lang: 'xml');
-          } else if (mitmBody.viewName == 'JavaScript' ||
-              contentType.contains('javascript')) {
-            return ReEditor(text: mitmBody.text, lang: 'javascript');
-          } else if (mitmBody.viewName == 'Css' ||
-              contentType.contains('css')) {
-            return ReEditor(text: mitmBody.text, lang: 'css');
           } else {
-            return ReEditor(text: mitmBody.text, lang: 'text');
+            return ReEditor(
+              text: mitmBody.text,
+              codeControllerService: codeControllerService,
+              onSave: onSave,
+            );
           }
         }
       },

@@ -7,6 +7,7 @@ import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/http_docs.dart';
 import 'package:mitmui/models/flow.dart' as models;
 import 'package:mitmui/models/response_body.dart';
+import 'package:mitmui/widgets/editor/code_controller_service.dart';
 import 'package:mitmui/widgets/input_items.dart';
 import 'package:mitmui/widgets/resize.dart';
 import 'package:mitmui/utils/statusCode.dart';
@@ -35,6 +36,7 @@ abstract class DetailsPanelState extends ConsumerState<DetailsPanel>
   bool get isSinglePanel =>
       widget.resizeController.isChild1Hidden ||
       widget.resizeController.isChild2Hidden;
+  late final codeControllerService = CodeControllerService(title.toLowerCase());
 
   void updateData();
 
@@ -134,6 +136,31 @@ abstract class DetailsPanelState extends ConsumerState<DetailsPanel>
                 tabs: tabTitles.map((e) => Tab(text: e)).toList(),
               ),
             ),
+          ),
+          ValueListenableBuilder<bool>(
+            valueListenable: codeControllerService.isModified,
+            builder: (context, value, _) {
+              return value
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            codeControllerService.handleSave(widget.flow!.id);
+                          },
+                          child: const Text('Save'),
+                        ),
+                        const SizedBox(width: 8),
+                        TextButton(
+                          onPressed: () {
+                            codeControllerService.handleCancel();
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink();
+            },
           ),
           IconButton(
             iconSize: 22,
@@ -538,6 +565,15 @@ abstract class DetailsPanelState extends ConsumerState<DetailsPanel>
       // dataFuture: mitmDataFuture,
       flowId: widget.flow!.id,
       url: widget.flow!.request?.url ?? '',
+      codeControllerService: codeControllerService,
+      onSave: (text) {
+        log("body onSave called");
+        MitmproxyClient.updateBody(
+          widget.flow!.id,
+          type: isRequest ? "request" : "response",
+          body: text,
+        );
+      },
     );
   }
 }
