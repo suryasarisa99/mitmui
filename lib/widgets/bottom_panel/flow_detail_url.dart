@@ -1,27 +1,34 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mitmui/store/derrived_flows_provider.dart';
 import 'package:mitmui/utils/statusCode.dart';
 import 'package:mitmui/widgets/small_icon_btn.dart';
 
-class FlowDetailURL extends StatelessWidget {
+class FlowDetailURL extends ConsumerWidget {
   const FlowDetailURL({
-    required this.host,
-    required this.path,
-    required this.statusCode,
-    required this.method,
-    required this.scheme,
+    required this.id,
     required this.onOpenInNewWindow,
     super.key,
   });
-  final String scheme;
-  final String host;
-  final String path;
-  final int statusCode;
-  final String method;
+  final String id;
   final Function() onOpenInNewWindow;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = flowProvider(id);
+    final statusCode = ref.watch(
+      provider.select((f) => f?.response?.statusCode),
+    );
+    final (path, scheme, method, host) = ref.watch(
+      provider.select(
+        (f) => (
+          f?.request?.path ?? '',
+          f?.request?.scheme ?? '',
+          f?.request?.method ?? '',
+          f?.request?.host ?? '',
+        ),
+      ),
+    );
     // separate pathparameters and query parameters from path
     final pathParts = path.split('?');
     final pathWithoutQuery = pathParts[0];

@@ -165,7 +165,7 @@ class _InputItemsState extends State<InputItems> {
                   SizedBox(width: widget.title.startsWith("Headers") ? 65 : 30),
 
                 // Key input field
-                SizedBox(width: 180, child: buildInput(i, true)),
+                SizedBox(width: 150, child: buildInput(i, true)),
                 const SizedBox(width: 12),
 
                 // Value input field

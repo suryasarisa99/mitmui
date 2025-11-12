@@ -2,7 +2,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
+import 'package:mitmui/utils/logger.dart';
 import 'package:re_editor/re_editor.dart';
+
+final _log = Logger("code_controller_service");
 
 class CodeControllerService {
   var codeController = CodeLineEditingController();
@@ -16,6 +19,7 @@ class CodeControllerService {
   CodeControllerService(this.type);
 
   void init(String text) {
+    _log.debug("init code_controller_service");
     _savedText = text;
     // codeController.text = text;
     codeController = CodeLineEditingController.fromText(text);
@@ -39,13 +43,15 @@ class CodeControllerService {
   }
 
   void dispose() {
+    _log.debug("disposing code_controller_service");
     if (_codeListener != null) codeController.removeListener(_codeListener!);
-    // _savedText = '';
-    // isModified.dispose();
+    _savedText = '';
+    // isModified.value = false;
     codeController.dispose();
   }
 
-  void handleSave(String x) {
+  void handleSave() {
+    debugPrint("saving id: $flowId , type: $type");
     _savedText = codeController.text;
     isModified.value = false;
     addListener();

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/dialog/token_input_dialog.dart';
+import 'package:mitmui/dt_table/dt_models.dart';
 import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/global.dart';
 import 'package:mitmui/services/websocket_service.dart';
@@ -26,6 +27,8 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
   late final WebSocketService webSocketService = ref.read(
     websocketServiceProvider,
   );
+  final resizeController = ResizableController();
+  final flowId = ValueNotifier<String?>(null);
 
   @override
   void initState() {
@@ -35,6 +38,27 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
       // Subscribe to WebSocket service after the first frame
       check();
     });
+    // hide bottom panel initially
+    resizeController.hideSecondChild();
+    _dtController.addSpecificListener(_flowIdListener);
+  }
+
+  void _flowIdListener(DtControllerChange change) {
+    if (change.type == ChangeType.focusedRow) {
+      String? rowId = _dtController.focusedRowId;
+      if (rowId == null) {
+        resizeController.hideSecondChild();
+        return;
+      }
+      if (rowId != flowId.value) {
+        if (resizeController.isChild2Hidden) {
+          resizeController.showSecondChild();
+        }
+        setState(() {
+          flowId.value = rowId;
+        });
+      }
+    }
   }
 
   void check() async {
@@ -151,6 +175,7 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
     return Container(
       color: theme.surfaceDark,
       child: ResizableContainer(
+        controller: resizeController,
         axis: Axis.vertical,
         dividerColor: Colors.grey[600]!,
         onDragDividerColor: Colors.red,
@@ -159,7 +184,7 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
         dividerHandleWidth: 18,
         maxRatio: 1,
         child1: FlowDataGrid(controller: _dtController),
-        child2: BottomPanel(dtController: _dtController),
+        child2: BottomPanel(dtController: _dtController, flowId: flowId),
       ),
     );
   }

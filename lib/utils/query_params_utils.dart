@@ -1,17 +1,9 @@
 import 'package:mitmui/models/flow.dart';
+import 'package:mitmui/utils/parser_utils.dart';
 
 class QueryParamsUtils {
   static List<List<String>> getQueryParamsList(MitmFlow? flow) {
-    final pathList = flow?.request?.path.split('?') ?? [];
-    if (pathList.length < 2) return [];
-    final queryParams = pathList[1];
-    if (queryParams.isEmpty) return [];
-    return queryParams.split('&').map((e) {
-      final parts = e.split('=');
-      final key = Uri.decodeComponent(parts[0]);
-      final value = parts.length > 1 ? Uri.decodeComponent(parts[1]) : '';
-      return [key, value];
-    }).toList();
+    return ParserUtils.parseQuery(flow?.request?.path);
   }
 
   static String buildQueryParamsString(List<List<String>> queryParams) {

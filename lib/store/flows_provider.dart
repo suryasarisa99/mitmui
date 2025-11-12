@@ -97,30 +97,36 @@ class FlowsProvider extends Notifier<Map<String, MitmFlow>> {
     }
   }
 
-  void addHeader(String flowId, List<String> header, bool status) {
+  void updateReq(String flowId, HttpRequest Function(HttpRequest) newRequest) {
     final flow = state[flowId];
     if (flow != null) {
-      flow.request?.headers.add(header);
-      if (flow.request?.enabledHeaders != null) {
-        flow.request?.enabledHeaders!.add(status);
-      } else {
-        // ignore
-      }
-
-      final x = MitmFlow.fromJson(flow.toJson());
-      state = {...state, flowId: x};
+      state = {
+        ...state,
+        flowId: flow.copyWith(request: newRequest(flow.request!)),
+      };
     }
   }
 
-  void updateHeader(String flowId, int index, String key, String value) {
-    final flow = state[flowId];
-    if (flow != null) {
-      debugPrint("flow updated:id: ${flowId}");
-      flow.request?.headers[index] = [key, value];
+  void addHeader(String flowId, List<String> header, bool status) {
+    updateReq(flowId, (req) {
+      final headers = req.headers..add(header);
+      final enabledHeaders = req.enabledHeaders != null
+          ? (List<bool>.from(req.enabledHeaders!)..add(status))
+          : null;
+      return req.copyWith(headers: headers, enabledHeaders: enabledHeaders);
+    });
+  }
 
-      final x = MitmFlow.fromJson(flow.toJson());
-      state = {...state, flowId: x};
-    }
+  void updateEnabledHeaders(String flowId, List<bool> enabledHeaders) {
+    updateReq(flowId, (req) => req.copyWith(enabledHeaders: enabledHeaders));
+  }
+
+  void updateHeader(String flowId, int index, String key, String value) {
+    updateReq(flowId, (req) {
+      final headers = req.headers;
+      headers[index] = [key, value];
+      return req.copyWith(headers: headers);
+    });
   }
 
   /// Clear all flows

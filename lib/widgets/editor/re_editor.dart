@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_highlight/themes/tomorrow-night.dart';
-import 'package:mitmui/widgets/editor/code_controller_service.dart';
+import 'package:mitmui/services/code_controller_service.dart';
 import 'package:mitmui/widgets/editor/context_menu.dart';
 import 'package:mitmui/widgets/editor/find.dart';
-import 'package:mitmui/widgets/small_icon_btn.dart';
 import 'package:re_editor/re_editor.dart';
 
 // languages
@@ -27,19 +26,11 @@ import 'package:re_highlight/languages/yaml.dart';
 class ReEditor extends StatefulWidget {
   final String text;
 
-  /// Called when the user presses Save. Receives the current editor content.
-  final void Function(String)? onSave;
-
-  /// Called when the user presses Cancel.
-  final VoidCallback? onCancel;
-
   final CodeControllerService codeControllerService;
 
   const ReEditor({
     super.key,
     required this.text,
-    this.onSave,
-    this.onCancel,
     required this.codeControllerService,
   });
 
@@ -58,9 +49,9 @@ class _ReEditorState extends State<ReEditor> {
 
   @override
   void dispose() {
+    super.dispose();
     searchController.dispose();
     widget.codeControllerService.dispose();
-    super.dispose();
   }
 
   // late final toolBarController = SelectionToolbarController();
@@ -73,19 +64,14 @@ class _ReEditorState extends State<ReEditor> {
           child: Focus(
             autofocus: false,
             canRequestFocus: false,
-            onFocusChange: (has) {
-              debugPrint("editor focus change: $has");
-            },
             onKeyEvent: (has, e) {
-              debugPrint("event type: ${e.runtimeType}");
               final hk = HardwareKeyboard.instance;
               if (!widget.codeControllerService.isModified.value) {
                 return KeyEventResult.ignored;
               }
               if (e.logicalKey == LogicalKeyboardKey.keyS &&
                   (hk.isMetaPressed || hk.isControlPressed)) {
-                debugPrint("save");
-                widget.codeControllerService.handleSave("");
+                widget.codeControllerService.handleSave();
                 return KeyEventResult.handled;
               }
               return KeyEventResult.ignored;

@@ -205,7 +205,7 @@ class PanelWindow extends StatelessWidget {
             //   child: const Text('Close this window'),
             // ),
             SizedBox(height: 20),
-            Expanded(child: BottomPanelAsFullScreen(args: args)),
+            // Expanded(child: BottomPanelAsFullScreen(args: args)),
           ],
         ),
       ),
