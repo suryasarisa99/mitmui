@@ -28,21 +28,21 @@ class _FilterBtnState extends State<FilterBtn> {
     final hk = HardwareKeyboard.instance;
 
     final shortCutKey = widget.title == "filter"
-        ? LogicalKeyboardKey.keyF
+        ? LogicalKeyboardKey.keyK
         : LogicalKeyboardKey.keyI;
 
-    // hk.addHandler((event) {
-    //   final isCtrlPressed = Platform.isMacOS
-    //       ? hk.isMetaPressed
-    //       : hk.isControlPressed;
-    //   if (event is KeyDownEvent &&
-    //       event.logicalKey == shortCutKey &&
-    //       isCtrlPressed) {
-    //     _showFilterManager();
-    //     return true;
-    //   }
-    //   return false;
-    // });
+    hk.addHandler((event) {
+      final isCtrlPressed = Platform.isMacOS
+          ? hk.isMetaPressed
+          : hk.isControlPressed;
+      if (event is KeyDownEvent &&
+          event.logicalKey == shortCutKey &&
+          isCtrlPressed) {
+        _showFilterManager();
+        return true;
+      }
+      return false;
+    });
   }
 
   void _showFilterManager() {
