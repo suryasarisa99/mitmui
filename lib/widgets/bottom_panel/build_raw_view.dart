@@ -41,7 +41,7 @@ class BuildRawView extends ConsumerWidget {
               ),
               // Url path
               TextSpan(
-                text: '${flow?.request?.path}\n',
+                text: '${flow?.request?.path} ',
                 style: TextStyle(fontSize: 15, color: Color(0xffA89CF7)),
               ),
             ],
@@ -106,7 +106,7 @@ class BuildRawView extends ConsumerWidget {
             headerSpans.add(
               const TextSpan(
                 // text: "\n\n--- Body Content ---\n\n",
-                text: "\n\n",
+                text: "\n",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Color(0xFFAEB9FC),
