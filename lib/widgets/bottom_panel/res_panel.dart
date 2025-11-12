@@ -15,19 +15,12 @@ class ResPanelTitles extends AbstractPanelTitles {
   @override
   List<String> buildTabLabels(WidgetRef ref, String id) {
     final headerCount = ref.watch(
-      headersProvider(id).select((l) => l?.length ?? 0),
-    );
-    final queryCount = ref.watch(
-      parsedQueryProvider(id).select((l) => l.length),
-    );
-    final cookieCount = ref.watch(
-      parsedCookiesProvider(id).select((l) => l.length),
+      responseHeadersProvider(id).select((l) => l?.length ?? 0),
     );
 
     return [
       "Headers ($headerCount)",
-      "Query ($queryCount)",
-      "Cookies ($cookieCount)",
+      // "Set-Cookies ($cookieCount)",
       "Body",
       // "Raw",
     ];
@@ -67,12 +60,6 @@ class _ResponsePanelState extends PanelAbstractState {
         title: "Headers",
         keyValueJoiner: ":",
         linesJoiner: "\n",
-      ),
-      QueryView(
-        id: widget.id,
-        title: "Query",
-        keyValueJoiner: "=",
-        linesJoiner: "&",
       ),
       CookiesView(
         id: widget.id,
