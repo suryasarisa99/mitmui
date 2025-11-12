@@ -157,101 +157,116 @@ class _ResizableContainerState extends State<ResizableContainer> {
           return const SizedBox.shrink();
         }
 
-        // If one child is hidden, the other takes up all the space.
-        if (_controller.isChild1Hidden) {
-          return widget.child2;
-        }
-        if (_controller.isChild2Hidden) {
-          return widget.child1;
-        }
+        final child1Size = _controller.isChild1Hidden
+            ? 0.0
+            : (_controller.isChild2Hidden
+                  ? totalSize
+                  : totalSize * _controller.currentRatio);
 
-        final child1Size = totalSize * _controller.currentRatio;
         final currentDividerWidth =
             (_isDragging ? widget.onDragDividerWidth : widget.dividerWidth) ??
             widget.dividerWidth;
 
+        final showDivider =
+            !_controller.isChild1Hidden && !_controller.isChild2Hidden;
+
         return Stack(
           children: [
             // --- First Child (Top or Left) ---
-            Positioned(
-              top: 0,
-              left: 0,
-              width: widget.axis == Axis.horizontal
-                  ? child1Size
-                  : constraints.maxWidth,
-              height: widget.axis == Axis.vertical
-                  ? child1Size
-                  : constraints.maxHeight,
-              child: widget.child1,
-            ),
+            if (!_controller.isChild1Hidden)
+              Positioned(
+                top: 0,
+                left: 0,
+                width: widget.axis == Axis.horizontal
+                    ? child1Size
+                    : constraints.maxWidth,
+                height: widget.axis == Axis.vertical
+                    ? child1Size
+                    : constraints.maxHeight,
+                child: widget.child1,
+              ),
 
             // --- Second Child (Bottom or Right) ---
-            Positioned(
-              top: widget.axis == Axis.vertical
-                  ? child1Size + currentDividerWidth
-                  : 0,
-              left: widget.axis == Axis.horizontal
-                  ? child1Size + currentDividerWidth
-                  : 0,
-              width: widget.axis == Axis.horizontal
-                  ? constraints.maxWidth - child1Size - currentDividerWidth
-                  : constraints.maxWidth,
-              height: widget.axis == Axis.vertical
-                  ? constraints.maxHeight - child1Size - currentDividerWidth
-                  : constraints.maxHeight,
-              child: widget.child2,
-            ),
+            if (!_controller.isChild2Hidden)
+              Positioned(
+                top: widget.axis == Axis.vertical
+                    ? (_controller.isChild1Hidden
+                          ? 0.0
+                          : child1Size + currentDividerWidth)
+                    : 0,
+                left: widget.axis == Axis.horizontal
+                    ? (_controller.isChild1Hidden
+                          ? 0.0
+                          : child1Size + currentDividerWidth)
+                    : 0,
+                width: widget.axis == Axis.horizontal
+                    ? (_controller.isChild1Hidden
+                          ? constraints.maxWidth
+                          : constraints.maxWidth -
+                                child1Size -
+                                currentDividerWidth)
+                    : constraints.maxWidth,
+                height: widget.axis == Axis.vertical
+                    ? (_controller.isChild1Hidden
+                          ? constraints.maxHeight
+                          : constraints.maxHeight -
+                                child1Size -
+                                currentDividerWidth)
+                    : constraints.maxHeight,
+                child: widget.child2,
+              ),
 
             // --- Draggable Divider ---
-            Positioned(
-              top: widget.axis == Axis.vertical
-                  ? child1Size - (widget.dividerHandleWidth / 2)
-                  : 0,
-              left: widget.axis == Axis.horizontal
-                  ? child1Size - (widget.dividerHandleWidth / 2)
-                  : 0,
-              width: widget.axis == Axis.horizontal
-                  ? widget.dividerHandleWidth
-                  : constraints.maxWidth,
-              height: widget.axis == Axis.vertical
-                  ? widget.dividerHandleWidth
-                  : constraints.maxHeight,
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onPanStart: (_) => setState(() => _isDragging = true),
-                onPanEnd: (_) => setState(() => _isDragging = false),
-                onPanUpdate: (details) {
-                  final delta = widget.axis == Axis.horizontal
-                      ? details.delta.dx
-                      : details.delta.dy;
-                  final newRatio =
-                      _controller.currentRatio + (delta / totalSize);
-                  _controller.setRatio(
-                    newRatio.clamp(widget.minRatio, widget.maxRatio),
-                  );
-                },
-                child: MouseRegion(
-                  cursor: widget.axis == Axis.horizontal
-                      ? SystemMouseCursors.resizeLeftRight
-                      : SystemMouseCursors.resizeUpDown,
-                  child: Center(
-                    child: Container(
-                      width: widget.axis == Axis.horizontal
-                          ? currentDividerWidth
-                          : double.infinity,
-                      height: widget.axis == Axis.vertical
-                          ? currentDividerWidth
-                          : double.infinity,
-                      color:
-                          (_isDragging
-                              ? widget.onDragDividerColor
-                              : widget.dividerColor) ??
-                          widget.dividerColor,
+            if (showDivider)
+              Positioned(
+                top: widget.axis == Axis.vertical
+                    ? child1Size - (widget.dividerHandleWidth / 2)
+                    : 0,
+                left: widget.axis == Axis.horizontal
+                    ? child1Size - (widget.dividerHandleWidth / 2)
+                    : 0,
+                width: widget.axis == Axis.horizontal
+                    ? widget.dividerHandleWidth
+                    : constraints.maxWidth,
+                height: widget.axis == Axis.vertical
+                    ? widget.dividerHandleWidth
+                    : constraints.maxHeight,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onPanStart: (_) => setState(() => _isDragging = true),
+                  onPanEnd: (_) => setState(() => _isDragging = false),
+                  onPanUpdate: (details) {
+                    final delta = widget.axis == Axis.horizontal
+                        ? details.delta.dx
+                        : details.delta.dy;
+                    final newRatio =
+                        _controller.currentRatio + (delta / totalSize);
+                    _controller.setRatio(
+                      newRatio.clamp(widget.minRatio, widget.maxRatio),
+                    );
+                  },
+                  child: MouseRegion(
+                    cursor: widget.axis == Axis.horizontal
+                        ? SystemMouseCursors.resizeLeftRight
+                        : SystemMouseCursors.resizeUpDown,
+                    child: Center(
+                      child: Container(
+                        width: widget.axis == Axis.horizontal
+                            ? currentDividerWidth
+                            : double.infinity,
+                        height: widget.axis == Axis.vertical
+                            ? currentDividerWidth
+                            : double.infinity,
+                        color:
+                            (_isDragging
+                                ? widget.onDragDividerColor
+                                : widget.dividerColor) ??
+                            widget.dividerColor,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
           ],
         );
       },
