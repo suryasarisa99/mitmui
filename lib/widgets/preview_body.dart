@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 
 import 'package:flutter/material.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
+import 'package:mitmui/services/mitm_body_service.dart';
 import 'package:mitmui/store/derrived_flows_provider.dart';
 import 'package:mitmui/services/code_controller_service.dart';
 import 'package:mitmui/widgets/editor/re_editor.dart';
@@ -26,11 +27,13 @@ class PreviewBody extends ConsumerStatefulWidget {
     required this.id,
     required this.type,
     required this.codeControllerService,
+    required this.mitmBodyService,
   });
 
   final String id;
   final String type;
   final CodeControllerService codeControllerService;
+  final MitmBodyService mitmBodyService;
 
   @override
   ConsumerState<PreviewBody> createState() => PreviewBodyState();
@@ -54,6 +57,7 @@ class PreviewBodyState extends ConsumerState<PreviewBody> {
   void initState() {
     super.initState();
     _startListening();
+    widget.mitmBodyService.reloadBody();
   }
 
   void _startListening() {
@@ -81,6 +85,8 @@ class PreviewBodyState extends ConsumerState<PreviewBody> {
   }
 
   void _onDataChanged() {
+    widget.mitmBodyService.reloadBody();
+    debugPrint("data changed for flow id: ${widget.id}");
     if (_isActive && mounted) {
       setState(() {
         _isLoading = false;
@@ -152,13 +158,13 @@ class PreviewBodyState extends ConsumerState<PreviewBody> {
     final url = _url ?? '';
 
     final urlWithoutQuery = Uri.parse(url).resolve('').toString();
+    debugPrint("Building PreviewBody for flow id: ${widget.id}");
 
     if (_isLoading == true) {
       return const Center(child: CircularProgressIndicator());
     }
-
     return FutureBuilder(
-      future: MitmproxyClient.getMitmBody(widget.id, widget.type),
+      future: widget.mitmBodyService.getMitmBody(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());

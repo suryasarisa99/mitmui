@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/models/response_body.dart';
+import 'package:mitmui/services/mitm_body_service.dart';
 import 'package:mitmui/store/derrived_flows_provider.dart';
 import 'package:mitmui/utils/statusCode.dart';
 
@@ -8,14 +9,13 @@ class BuildRawView extends ConsumerWidget {
   const BuildRawView({
     super.key,
     required this.isRequest,
-    // required this.widget,
-    required this.mitmBodyFuture,
+    required this.mitmBodyService,
     required this.id,
   });
 
   final bool isRequest;
   // final DetailsPanel widget;
-  final Future<MitmBody>? mitmBodyFuture;
+  final MitmBodyService mitmBodyService;
   final String id;
 
   @override
@@ -29,7 +29,7 @@ class BuildRawView extends ConsumerWidget {
     return SingleChildScrollView(
       padding: const EdgeInsets.only(top: 8.0),
       child: FutureBuilder(
-        future: mitmBodyFuture,
+        future: mitmBodyService.getMitmBody(),
         builder: (context, snapshot) {
           final List<InlineSpan> headerSpans = [
             // method and path

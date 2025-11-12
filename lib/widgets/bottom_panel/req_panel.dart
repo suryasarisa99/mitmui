@@ -30,7 +30,7 @@ class ReqPanelTitles extends AbstractPanelTitles {
       "Query ($queryCount)",
       "Cookies ($cookieCount)",
       "Body",
-      // "Raw",
+      "Raw",
     ];
   }
 }
@@ -48,7 +48,7 @@ class RequestPanel extends PanelAbstract {
 
 class _RequestPanelState extends PanelAbstractState {
   @override
-  get tabsLen => 4;
+  get tabsLen => 5;
 
   @override
   get title => "request";
@@ -83,7 +83,8 @@ class _RequestPanelState extends PanelAbstractState {
         keyValueJoiner: "=",
         linesJoiner: "; ",
       ),
-      buildPreviewBody(), // Use helper method
+      buildPreviewBody(),
+      buildRawBody(),
     ];
   }
 }

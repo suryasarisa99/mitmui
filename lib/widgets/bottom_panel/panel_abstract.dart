@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mitmui/services/mitm_body_service.dart';
+import 'package:mitmui/widgets/bottom_panel/build_raw_view.dart';
 import 'package:mitmui/widgets/bottom_panel/items_view.dart';
 import 'package:mitmui/widgets/bottom_panel/panel_header.dart';
 import 'package:mitmui/widgets/bottom_panel/panel_titles.dart';
@@ -31,6 +33,7 @@ abstract class PanelAbstractState extends State<PanelAbstract>
 
   //declarations
   late final codeControllerService = CodeControllerService(title);
+  late final mitmBodyService = MitmBodyService(id: widget.id, type: title);
   late TabController tabController = TabController(
     length: tabsLen,
     vsync: this,
@@ -64,6 +67,7 @@ abstract class PanelAbstractState extends State<PanelAbstract>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.id != widget.id) {
       codeControllerService.flowId = widget.id;
+      mitmBodyService.update(widget.id);
     }
   }
 
@@ -108,8 +112,17 @@ abstract class PanelAbstractState extends State<PanelAbstract>
         key: _previewBodyKey,
         id: widget.id,
         type: title,
+        mitmBodyService: mitmBodyService,
         codeControllerService: codeControllerService,
       ),
+    );
+  }
+
+  Widget buildRawBody() {
+    return BuildRawView(
+      isRequest: title.toLowerCase() == 'request',
+      mitmBodyService: mitmBodyService,
+      id: widget.id,
     );
   }
 }

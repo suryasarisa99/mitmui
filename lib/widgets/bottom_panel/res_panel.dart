@@ -22,7 +22,7 @@ class ResPanelTitles extends AbstractPanelTitles {
       "Headers ($headerCount)",
       // "Set-Cookies ($cookieCount)",
       "Body",
-      // "Raw",
+      "Raw",
     ];
   }
 }
@@ -40,7 +40,7 @@ class ResponsePanel extends PanelAbstract {
 
 class _ResponsePanelState extends PanelAbstractState {
   @override
-  get tabsLen => 4;
+  get tabsLen => 3;
 
   @override
   get title => "response";
@@ -50,7 +50,7 @@ class _ResponsePanelState extends PanelAbstractState {
       ResPanelTitles(id: widget.id, tabController: tabController);
 
   @override
-  int get previewBodyTabIndex => 3; // Preview body is at index 3
+  int get previewBodyTabIndex => 1; // Preview body is at index 3
 
   @override
   List<Widget> buildViews() {
@@ -61,13 +61,8 @@ class _ResponsePanelState extends PanelAbstractState {
         keyValueJoiner: ":",
         linesJoiner: "\n",
       ),
-      CookiesView(
-        id: widget.id,
-        title: "Cookies",
-        keyValueJoiner: "=",
-        linesJoiner: "; ",
-      ),
-      buildPreviewBody(), // Use helper method
+      buildPreviewBody(),
+      buildRawBody(),
     ];
   }
 }
