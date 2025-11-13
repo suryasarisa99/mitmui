@@ -259,12 +259,13 @@ class MitmproxyClient {
   /// export request string
   static Future<String> getExportReq(String flowId, RequestExport exportType) {
     final data = {
-      "arguments": [exportType.name, "@$flowId"],
+      "arguments": [exportType.toString(), "@$flowId"],
     };
     return _handleRequest(
       'fetching export request',
       () => _dio.post('/commands/export', data: data),
       (r) => r.data['value'] as String,
+      // () => data.toString(),
     );
   }
 
@@ -371,7 +372,19 @@ class MitmproxyClient {
   }
 }
 
-enum RequestExport { curl, httpie, rawRequest, rawResponse, raw }
+enum RequestExport {
+  curl,
+  httpie,
+  rawRequest('raw_request'),
+  rawResponse('raw_response'),
+  raw;
+
+  final String value;
+  const RequestExport([this.value = '']);
+
+  @override
+  String toString() => value.isNotEmpty ? value : name;
+}
 
 enum MarkCircle {
   red(":red_circle:"),

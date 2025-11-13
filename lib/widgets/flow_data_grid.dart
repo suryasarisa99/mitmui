@@ -12,6 +12,8 @@ import 'package:mitmui/services/websocket_service.dart';
 import 'package:mitmui/store/filtered_flows_provider.dart';
 import 'package:mitmui/store/flows_provider.dart';
 import 'package:mitmui/utils/logger.dart';
+import 'package:mitmui/widgets/compare/compareWrapper.dart';
+import 'package:mitmui/widgets/compare/test1.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 
 import 'flow_data_source.dart';
@@ -234,6 +236,13 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
           callback: () => deleteSelected(selectedIds),
           title: "Delete",
         ),
+        if (selectedIds.length == 2) ...[
+          MenuSeparator(),
+          MenuAction(
+            callback: () => compare(selectedIds),
+            title: "Compare Selected",
+          ),
+        ],
       ],
     );
   }
@@ -378,5 +387,17 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
   void resumeIntercept(String flowId, String oldState) {
     ref.read(flowsProvider.notifier).updateFlowState(flowId, oldState);
     MitmproxyClient.resumeIntercept(flowId);
+  }
+
+  void compare(Set<String> selectedIds) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          child: Comparewrapper(id1: selectedIds.first, id2: selectedIds.last),
+          // child: Test1(),
+        );
+      },
+    );
   }
 }

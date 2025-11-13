@@ -9,6 +9,7 @@ class AppColors {
   final Color surfaceLight;
   final Color surfaceMoreLight;
   final Color surfaceDark;
+  final Color surfaceTooDark;
   final Color surfaceTint;
   final Color surfaceBright;
 
@@ -28,6 +29,7 @@ class AppColors {
     required this.surfaceLight,
     required this.surfaceMoreLight,
     required this.surfaceDark,
+    required this.surfaceTooDark,
     required this.surfaceTint,
     required this.surfaceBright,
     required this.iconColor,
@@ -71,6 +73,7 @@ const darkColors = AppColors(
   surfaceLight: Color(0xff232628), //header
   surfaceMoreLight: Color(0xff26282A), // odd rows
   surfaceDark: Color(0xff161819), // panel header
+  surfaceTooDark: Color(0xFF121415), // panel header
   surfaceTint: Color(0xff1C1E20), // even rows
   surfaceBright: Color(0xff2E3031), // background
   iconColor: Color(0xFF8895B1),
