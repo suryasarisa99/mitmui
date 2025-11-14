@@ -36,7 +36,10 @@ class BuildRawView extends ConsumerWidget {
               // method
               TextSpan(
                 text: '${flow?.request?.method} ',
-                style: TextStyle(fontSize: 16, color: Colors.green),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: getMethodColor(flow?.request?.method),
+                ),
               ),
               // Url path
               TextSpan(

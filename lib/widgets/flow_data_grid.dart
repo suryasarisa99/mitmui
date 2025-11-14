@@ -231,17 +231,17 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
           title: "Mark",
         ),
         MenuAction(
+          attributes: MenuActionAttributes(disabled: selectedIds.length != 2),
+          callback: () => compare(selectedIds),
+          title: "Compare Selected",
+        ),
+        MenuAction(
           activator: SingleActivator(LogicalKeyboardKey.delete),
           callback: () => deleteSelected(selectedIds),
           title: "Delete",
         ),
-        if (selectedIds.length == 2) ...[
-          MenuSeparator(),
-          MenuAction(
-            callback: () => compare(selectedIds),
-            title: "Compare Selected",
-          ),
-        ],
+
+        // MenuSeparator(),
       ],
     );
   }
@@ -397,8 +397,6 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
             id1: selectedIds.first,
             id2: selectedIds.last,
           ),
-          // child: Comparewrapper(id1: selectedIds.first, id2: selectedIds.last),
-          // child: Test1(),
         );
       },
     );

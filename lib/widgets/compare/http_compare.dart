@@ -1,9 +1,9 @@
-import 'dart:math' as Math;
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:diff_match_patch/diff_match_patch.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
-import 'package:mitmui/models/flow.dart';
+import 'package:mitmui/models/http_compare_message.dart';
+import 'package:mitmui/models/http_syntax_colors.dart';
 import 'package:mitmui/theme.dart';
 import 'package:mitmui/utils/diff.dart';
 import 'package:mitmui/utils/statusCode.dart';
@@ -34,231 +34,9 @@ class HttpSection {
   });
 }
 
-/// Represents an HTTP message (request or response) with structured parts
-class HttpMessage {
-  final String? method; // GET, POST, etc. (null for response)
-  final String? url; // Full URL (null for response)
-  final String? statusCode; // 200, 404, etc. (null for request)
-  final String? statusMessage; // OK, Not Found, etc. (null for request)
-  final String httpVersion; // HTTP/1.1, HTTP/2, etc.
-  final List<List<String>> headers; // Header key-value pairs
-  final String body; // Raw body content
-  final bool isRequest;
-
-  const HttpMessage({
-    this.method,
-    this.url,
-    this.statusCode,
-    this.statusMessage,
-    required this.httpVersion,
-    required this.headers,
-    required this.body,
-    this.isRequest = true,
-  });
-
-  // bool get isRequest => method != null && url != null;
-  // bool get isResponse => statusCode != null;
-  bool get isResponse => !isRequest;
-
-  /// Helper to create from raw HTTP text
-  factory HttpMessage.fromRawRequest(String rawText) {
-    final lines = rawText.split('\n');
-    if (lines.isEmpty) {
-      return HttpMessage(httpVersion: 'HTTP/1.1', headers: [], body: '');
-    }
-
-    // Parse request line: GET /path HTTP/1.1
-    final firstLine = lines[0].trim();
-    final parts = firstLine.split(' ');
-    final method = parts.isNotEmpty ? parts[0] : 'GET';
-    final url = parts.length > 1 ? parts[1] : '/';
-    final httpVersion = parts.length > 2 ? parts[2] : 'HTTP/1.1';
-
-    // Parse headers and body
-    final headers = <String, String>{};
-    int bodyStartIndex = 1;
-
-    for (int i = 1; i < lines.length; i++) {
-      final line = lines[i].trim();
-      if (line.isEmpty) {
-        bodyStartIndex = i + 1;
-        break;
-      }
-      final colonIndex = line.indexOf(':');
-      if (colonIndex > 0) {
-        final key = line.substring(0, colonIndex).trim();
-        final value = line.substring(colonIndex + 1).trim();
-        headers[key] = value;
-      }
-    }
-
-    final body = lines.skip(bodyStartIndex).join('\n');
-
-    return HttpMessage(
-      method: method,
-      url: url,
-      httpVersion: httpVersion,
-      // headers: headers,
-      headers: [],
-      body: body,
-    );
-  }
-
-  factory HttpMessage.fromFlow(MitmFlow flow, {required bool isRequest}) {
-    return HttpMessage(
-      httpVersion: flow.request?.httpVersion ?? '',
-      headers: flow.request?.headers ?? [],
-      isRequest: isRequest,
-      body: """[
-    {
-        "type": "flows/edit",
-        "payload": {
-            "flow": {
-                "id": "5b864419-6e41-4574-b78c-3c8ebceb4a9c",
-                "intercepted": false,
-                "is_replay": null,
-                "type": "http",
-                "modified": false,
-                "marked": "",
-                "comment": "",
-                "timestamp_created": 1753172361.03849,
-                "client_conn": {
-                    "id": "d48fd663-dde5-42a0-bacd-29d18f7bbf57",
-                    "peername": [
-                        "192.168.1.7",
-                        43046
-                    ],
-                    "sockname": [
-                        "192.168.1.14",
-                        8080
-                    ],
-                    "tls_established": true,
-                    "cert": null,
-                    "sni": "gateway.instagram.com",
-                    "cipher": "TLS_AES_256_GCM_SHA384",
-                    "alpn": "http/1.1",
-                    "tls_version": "TLSv1.3",
-                    "timestamp_start": 1753172360.862132,
-                    "timestamp_tls_setup": 1753172361.036887,
-                    "timestamp_end": null
-                },
-                "server_conn": {
-                    "id": "e9edbd9c-1606-4b92-b723-974bd4a74fb3",
-                    "peername": [
-                        "2a03:2880:f0a4:106:face:b00c:0:6206",
-                        443,
-                        0,
-                        0
-                    ],
-                    "sockname": [
-                        "2401:4900:8fce:f5d6:21f9:3daa:a5f6:fb3a",
-                        49881,
-                        0,
-                        0
-                    ],
-                    "address": [
-                        "2a03:2880:f0a4:106:face:b00c:0:6206",
-                        443
-                    ],
-                    "tls_established": true,
-                    "cert": {
-                        "keyinfo": [
-                            "EC (secp256r1)",
-                            256
-                        ],
-                        "sha256": "982b760601ec409eebba9b6d996168018ffa63e19baeb25ecd31f0abd41c3e0d",
-                        "notbefore": 1745971200,
-                        "notafter": 1753833599,
-                        "serial": "10267941578913480389388808227858711935",
-                        "subject": [
-                            [
-                                "C",
-                                "US"
-                            ],""",
-      method: flow.request?.method,
-      url: flow.request?.path,
-      statusCode: flow.response?.statusCode.toString() ?? '',
-      statusMessage: getStatusCodeMessage(flow.response?.statusCode),
-    );
-  }
-
-  factory HttpMessage.fromRawResponse(String rawText) {
-    final lines = rawText.split('\n');
-    if (lines.isEmpty) {
-      return HttpMessage(httpVersion: 'HTTP/1.1', headers: [], body: '');
-    }
-
-    // Parse status line: HTTP/1.1 200 OK
-    final firstLine = lines[0].trim();
-    final parts = firstLine.split(' ');
-    final httpVersion = parts.isNotEmpty ? parts[0] : 'HTTP/1.1';
-    final statusCode = parts.length > 1 ? parts[1] : '200';
-    final statusMessage = parts.length > 2 ? parts.sublist(2).join(' ') : 'OK';
-
-    // Parse headers and body
-    final headers = <String, String>{};
-    int bodyStartIndex = 1;
-
-    for (int i = 1; i < lines.length; i++) {
-      final line = lines[i].trim();
-      if (line.isEmpty) {
-        bodyStartIndex = i + 1;
-        break;
-      }
-      final colonIndex = line.indexOf(':');
-      if (colonIndex > 0) {
-        final key = line.substring(0, colonIndex).trim();
-        final value = line.substring(colonIndex + 1).trim();
-        headers[key] = value;
-      }
-    }
-
-    final body = lines.skip(bodyStartIndex).join('\n');
-
-    return HttpMessage(
-      httpVersion: httpVersion,
-      statusCode: statusCode,
-      statusMessage: statusMessage,
-      headers: [],
-      body: body,
-    );
-  }
-}
-
-/// Color scheme for HTTP syntax highlighting
-class HttpSyntaxColors {
-  final Color method; // GET, POST, etc.
-  final Color url; // URL path
-  final Color urlQueryKey; // Query parameter keys
-  final Color urlQueryValue; // Query parameter values
-  final Color httpVersion; // HTTP version
-  final Color headerKey; // Header keys
-  final Color headerValue; // Header values
-  final Color cookieKey; // Cookie keys
-  final Color cookieValue; // Cookie values
-  final Color body; // Body content
-  final Color diffHighlight; // Background for differences
-  final Color diffText; // Text color for differences
-
-  const HttpSyntaxColors({
-    this.method = const .new(0xFFE06C75), // Red
-    this.url = const .new(0xffA89CF7), // Purple
-    this.urlQueryKey = const .new(0xFFD19A66), // Orange
-    this.urlQueryValue = const .new(0xFF98C379), // Green
-    this.httpVersion = const .new(0xFFC678DD), // Purple
-    this.headerKey = const .new(0xff86BFA3), // Teal
-    this.headerValue = const .new(0xFFDC7C7C), // Light Red
-    this.cookieKey = const .new(0xFFD19A66), // Orange
-    this.cookieValue = const .new(0xFF98C379), // Green
-    this.body = const .new(0xFFE5C07B), // Orange/Yellow
-    this.diffHighlight = const .new(0xFF006DC1), // Blue background
-    this.diffText = const .new(0xFFFFFFFF), // White text
-  });
-}
-
-class HttpCompare extends ConsumerStatefulWidget {
-  final HttpMessage message1;
-  final HttpMessage message2;
+class HttpCompare extends StatefulWidget {
+  final HttpCompareMessage message1;
+  final HttpCompareMessage message2;
   final bool lazyLoad;
   final HttpSyntaxColors? syntaxColors;
 
@@ -271,10 +49,10 @@ class HttpCompare extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _HttpCompareState();
+  State<StatefulWidget> createState() => _HttpCompareState();
 }
 
-class _HttpCompareState extends ConsumerState<HttpCompare> {
+class _HttpCompareState extends State<HttpCompare> {
   List<DiffLine> leftLines = [];
   List<DiffLine> rightLines = [];
   int linesCount = 0;
@@ -331,11 +109,11 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
     setState(() {
       leftLines = result.left;
       rightLines = result.right;
-      linesCount = Math.max(leftLines.length, rightLines.length);
+      linesCount = math.max(leftLines.length, rightLines.length);
     });
   }
 
-  String _httpMessageToText(HttpMessage msg) {
+  String _httpMessageToText(HttpCompareMessage msg) {
     final buffer = StringBuffer();
 
     // First line
@@ -361,7 +139,7 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
     return buffer.toString();
   }
 
-  List<HttpSection> _calculateSections(HttpMessage msg) {
+  List<HttpSection> _calculateSections(HttpCompareMessage msg) {
     final sections = <HttpSection>[];
     int lineIndex = 0;
 
@@ -444,7 +222,7 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
     _textPainter.layout(maxWidth: maxWidth);
 
     final actualHeight = _textPainter.height;
-    return Math.max(_minLineHeight, actualHeight);
+    return math.max(_minLineHeight, actualHeight);
   }
 
   @override
@@ -454,7 +232,12 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final lineNumberWidth = (linesCount.toString().length * 13.0) + 2;
-        final availableWidth = (constraints.maxWidth - lineNumberWidth - 8) / 2;
+        /*
+        -8 for adjustment, can't know some differences may occur to fix that.
+        -16 for padding
+        */
+        final availableWidth =
+            (constraints.maxWidth - lineNumberWidth - 8 - 16) / 2;
 
         if (maxTextWidth != availableWidth && leftLines.isNotEmpty) {
           maxTextWidth = availableWidth;
@@ -469,7 +252,7 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
               rightLines[i],
               maxTextWidth,
             );
-            lineHeights.add(Math.max(leftHeight, rightHeight));
+            lineHeights.add(math.max(leftHeight, rightHeight));
 
             if (!widget.lazyLoad) {
               final leftWrapped = (leftHeight / _minLineHeight).ceil();
@@ -479,9 +262,15 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
             }
           }
         }
+        final containerHeight = math.min(
+          lineHeights.reduce((a, b) => a + b) + 8,
+          constraints.maxHeight,
+        );
+        debugPrint('Container height: $containerHeight');
 
         return Container(
           color: theme.surface,
+          height: containerHeight,
           padding: const .all(0),
           child: (leftLines.isEmpty && rightLines.isEmpty)
               ? const Center(child: CircularProgressIndicator())
@@ -494,7 +283,7 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
                       lineHeights: lineHeights,
                       lazyLoad: widget.lazyLoad,
                     ),
-                    const VerticalDivider(width: 1),
+                    // const VerticalDivider(width: 1),
                     Expanded(
                       child: _buildSideView(
                         lines: leftLines,
@@ -505,7 +294,7 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
                         maxWidth: maxTextWidth,
                       ),
                     ),
-                    const VerticalDivider(width: 1),
+                    SizedBox(child: const VerticalDivider(width: 1)),
                     Expanded(
                       child: _buildSideView(
                         lines: rightLines,
@@ -545,6 +334,7 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
           final lineSpans = _buildHttpLine(line, section, i, isLeft, theme);
 
           return Container(
+            padding: const .only(left: 8.0),
             decoration: const BoxDecoration(
               border: Border(
                 bottom: BorderSide(
@@ -591,13 +381,17 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
 
     return SingleChildScrollView(
       controller: controller,
-      child: SelectableText.rich(
-        TextSpan(children: allSpans),
-        style: const TextStyle(
-          fontFamily: 'monospace',
-          fontSize: _fontSize,
-          fontWeight: FontWeight.w400,
-          height: _textHeight,
+
+      child: Padding(
+        padding: const .only(left: 8.0),
+        child: SelectableText.rich(
+          TextSpan(children: allSpans),
+          style: const TextStyle(
+            fontFamily: 'monospace',
+            fontSize: _fontSize,
+            fontWeight: FontWeight.w400,
+            height: _textHeight,
+          ),
         ),
       ),
     );
@@ -698,7 +492,7 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
               TextSpan(
                 text: parts[0],
                 style: TextStyle(
-                  color: hasDiff ? _colors.diffText : _colors.method,
+                  color: hasDiff ? _colors.diffText : getMethodColor(parts[0]),
                   backgroundColor: bgColor,
                   fontFamily: 'monospace',
                   fontSize: _fontSize,
@@ -992,7 +786,7 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
           spans.add(
             TextSpan(
               text: '=',
-              style: TextStyle(backgroundColor: bgColor),
+              style: TextStyle(color: Colors.grey, backgroundColor: bgColor),
             ),
           );
 
@@ -1028,7 +822,7 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
           spans.add(
             TextSpan(
               text: '&',
-              style: TextStyle(backgroundColor: bgColor),
+              style: TextStyle(color: Colors.grey, backgroundColor: bgColor),
             ),
           );
         }
@@ -1068,7 +862,7 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
         spans.add(
           TextSpan(
             text: '=',
-            style: TextStyle(backgroundColor: bgColor),
+            style: TextStyle(color: Colors.grey, backgroundColor: bgColor),
           ),
         );
 
@@ -1106,7 +900,6 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
             text: '; ',
             style: TextStyle(
               color: hasDiff ? _colors.diffText : _colors.headerValue,
-              // color: _colors.headerValue,
               backgroundColor: bgColor,
               fontFamily: 'monospace',
               fontSize: _fontSize,

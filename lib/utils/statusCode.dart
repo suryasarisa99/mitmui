@@ -15,6 +15,27 @@ Color getStatusCodeColor(int? statusCode) {
   return Colors.grey;
 }
 
+Color getMethodColor(String? method) {
+  switch (method) {
+    case 'GET':
+      return const Color(0xFF28FF57);
+    case 'POST':
+      return const Color(0xFFFF53F4);
+    case 'PUT':
+      return const Color(0xFFFF6E26);
+    case 'DELETE':
+      return const Color(0xFFFF1100);
+    case 'PATCH':
+      return const Color(0xFFF8FF29);
+    case 'HEAD':
+      return Colors.grey;
+    case 'OPTIONS':
+      return const Color(0xFF75D3FF);
+    default:
+      return const Color(0xFFFFFFFF);
+  }
+}
+
 String getStatusCodeMessage(int? statusCode) {
   if (statusCode == null) return 'Unknown';
 
