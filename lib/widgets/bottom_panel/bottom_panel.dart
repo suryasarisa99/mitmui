@@ -4,7 +4,6 @@ import 'package:mitmui/dt_table/dt_table.dart';
 import 'package:mitmui/theme.dart';
 import 'package:mitmui/utils/logger.dart';
 import 'package:mitmui/widgets/bottom_panel/flow_detail_url.dart';
-import 'package:mitmui/widgets/bottom_panel/panel_abstract.dart';
 import 'package:mitmui/widgets/bottom_panel/req_panel.dart';
 import 'package:mitmui/widgets/bottom_panel/res_panel.dart';
 import 'package:mitmui/widgets/resize.dart';
@@ -70,7 +69,7 @@ class _BottomPanelState extends ConsumerState<BottomPanel> {
               axis: Axis.horizontal,
               dividerColor: Colors.grey[800]!,
               onDragDividerWidth: 2,
-              onDragDividerColor: const Color.fromARGB(255, 105, 93, 92),
+              onDragDividerColor: const .fromARGB(255, 105, 93, 92),
               child1: RequestPanel(
                 resizeController: resizeController,
                 id: flowId!,
@@ -109,8 +108,8 @@ class _BottomPanelState extends ConsumerState<BottomPanel> {
 //   @override
 //   Widget build(BuildContext context) {
 //     return Column(
-//       mainAxisSize: MainAxisSize.min,
-//       crossAxisAlignment: CrossAxisAlignment.start,
+//       mainAxisSize: .min,
+//       crossAxisAlignment: .start,
 //       children: [
 //         FlowDetailURL(
 //           scheme: selectedFlow.request?.scheme ?? '',

@@ -86,12 +86,12 @@ class _FilterGroupWidgetState extends State<FilterGroupWidget> {
     // is Hidden
     if (_isHidden && !widget.isRoot) {
       return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           ?_buildConnector(),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(top: 8.0),
+              padding: const .only(top: 8.0),
               child: _buildGroupHeader(),
             ),
           ),
@@ -104,8 +104,8 @@ class _FilterGroupWidgetState extends State<FilterGroupWidget> {
     // is Root
     if (widget.isRoot) {
       return Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: .min,
+        crossAxisAlignment: .end,
         children: [
           Flexible(child: SingleChildScrollView(child: content)),
           SizedBox(height: 18),
@@ -115,27 +115,25 @@ class _FilterGroupWidgetState extends State<FilterGroupWidget> {
     }
 
     // is not Root
-    final groupColors = [
-      const Color.fromARGB(255, 44, 32, 46),
-      const Color.fromARGB(255, 38, 36, 31),
-      const Color.fromARGB(255, 25, 33, 25),
-      const Color.fromARGB(255, 42, 52, 51),
-      const Color.fromARGB(255, 37, 39, 46),
-      const Color.fromARGB(255, 46, 37, 37),
+    final groupColors = <Color>[
+      const .fromARGB(255, 44, 32, 46),
+      const .fromARGB(255, 38, 36, 31),
+      const .fromARGB(255, 25, 33, 25),
+      const .fromARGB(255, 42, 52, 51),
+      const .fromARGB(255, 37, 39, 46),
+      const .fromARGB(255, 46, 37, 37),
     ];
     final color = groupColors[widget.index % groupColors.length];
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       children: [
         ?_buildConnector(),
         if (!_isHidden)
           Expanded(
             child: Container(
-              margin: EdgeInsets.only(top: widget.isRoot ? 0 : 8),
-              padding: !_isHidden
-                  ? EdgeInsets.all(widget.isRoot ? 0 : 12)
-                  : null,
+              margin: .only(top: widget.isRoot ? 0 : 8),
+              padding: !_isHidden ? .all(widget.isRoot ? 0 : 12) : null,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 border: widget.isRoot
@@ -159,7 +157,7 @@ class _FilterGroupWidgetState extends State<FilterGroupWidget> {
 
   Widget _buildContent() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: .end,
       children: [
         // Group Header
         if (!widget.isRoot) _buildGroupHeader(),
@@ -187,7 +185,7 @@ class _FilterGroupWidgetState extends State<FilterGroupWidget> {
             icon: Icon(Icons.add, size: 14),
             label: Text('Add Condition', style: TextStyle(fontSize: 13)),
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const .symmetric(horizontal: 12),
             ),
           ),
         ),
@@ -204,7 +202,7 @@ class _FilterGroupWidgetState extends State<FilterGroupWidget> {
               style: TextStyle(color: Colors.grey, fontSize: 13),
             ),
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const .symmetric(horizontal: 12),
             ),
           ),
         ),
@@ -224,7 +222,7 @@ class _FilterGroupWidgetState extends State<FilterGroupWidget> {
                 Navigator.of(context).pop();
               },
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
+                padding: const .symmetric(
                   horizontal: 16,
                   // vertical: 4,
                 ),
@@ -248,7 +246,7 @@ class _FilterGroupWidgetState extends State<FilterGroupWidget> {
                   Navigator.of(context).pop();
                 },
                 style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
+                  padding: const .symmetric(
                     horizontal: 16,
                     // vertical: 4,
                   ),
@@ -270,7 +268,7 @@ class _FilterGroupWidgetState extends State<FilterGroupWidget> {
     final theme = AppTheme.from(Theme.brightnessOf(context));
     return Container(
       height: 28,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const .symmetric(horizontal: 8),
       decoration: BoxDecoration(
         color: theme.surfaceBright,
         borderRadius: BorderRadius.circular(4),
@@ -305,7 +303,7 @@ class _FilterGroupWidgetState extends State<FilterGroupWidget> {
             onTap: _hideGroup,
             borderRadius: BorderRadius.circular(4),
             child: Padding(
-              padding: const EdgeInsets.all(4),
+              padding: const .all(4),
               child: Icon(
                 _isHidden ? Icons.expand_more : Icons.expand_less,
                 size: 14,
@@ -332,7 +330,7 @@ class _FilterGroupWidgetState extends State<FilterGroupWidget> {
               },
               borderRadius: BorderRadius.circular(4),
               child: Padding(
-                padding: const EdgeInsets.all(4),
+                padding: const .all(4),
                 child: Icon(
                   Icons.more_vert,
                   size: 14,
@@ -436,9 +434,9 @@ class _GroupMenuPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 160,
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const .symmetric(vertical: 4),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: [
           TextButton(
             onPressed: () {
@@ -446,7 +444,7 @@ class _GroupMenuPicker extends StatelessWidget {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: .symmetric(horizontal: 16, vertical: 8),
             ),
             child: SizedBox(
               width: double.infinity,
@@ -462,7 +460,7 @@ class _GroupMenuPicker extends StatelessWidget {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: .symmetric(horizontal: 16, vertical: 8),
             ),
             child: const SizedBox(
               width: double.infinity,
@@ -476,7 +474,7 @@ class _GroupMenuPicker extends StatelessWidget {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: .symmetric(horizontal: 16, vertical: 8),
             ),
             child: const SizedBox(
               width: double.infinity,

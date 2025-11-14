@@ -64,7 +64,7 @@ void run() {
       print(line);
     }
 
-    print('\n' + '=' * 40 + '\n');
+    print('\n${'=' * 40}\n');
   }
 }
 

@@ -74,7 +74,7 @@ class _FilterConditionWidgetState extends State<FilterConditionWidget> {
     final popupClr = theme.surfaceLight;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       children: [
         // Left connector indicator or space (if has next child)
         if (widget.showConnector)
@@ -91,7 +91,7 @@ class _FilterConditionWidgetState extends State<FilterConditionWidget> {
             child: Container(
               key: _containerKey,
               height: 32,
-              margin: const EdgeInsets.only(top: 8),
+              margin: const .only(top: 8),
               decoration: BoxDecoration(
                 color: theme.surface,
                 borderRadius: BorderRadius.circular(6),
@@ -134,7 +134,7 @@ class _FilterConditionWidgetState extends State<FilterConditionWidget> {
                       child: InkWell(
                         onTap: () => _keyPickerKey.currentState?.show(),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          padding: const .symmetric(horizontal: 10),
                           decoration: BoxDecoration(
                             border: Border(
                               right: BorderSide(
@@ -145,7 +145,7 @@ class _FilterConditionWidgetState extends State<FilterConditionWidget> {
                           ),
                           alignment: Alignment.centerLeft,
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: .spaceBetween,
                             children: [
                               SizedBox(
                                 width: 110,
@@ -196,7 +196,7 @@ class _FilterConditionWidgetState extends State<FilterConditionWidget> {
                       onTap: () => _operatorPickerKey.currentState?.show(),
                       child: Container(
                         width: 50,
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        padding: const .symmetric(horizontal: 8),
                         decoration: BoxDecoration(
                           border: Border(
                             right: BorderSide(
@@ -231,7 +231,7 @@ class _FilterConditionWidgetState extends State<FilterConditionWidget> {
                         ),
                         border: InputBorder.none,
                         focusedBorder: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(
+                        contentPadding: const .symmetric(
                           horizontal: 10,
                           vertical: 8,
                         ),
@@ -298,14 +298,14 @@ class _ConditionMenuPopup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 180,
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const .symmetric(vertical: 4),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: [
           TextButton(
             onPressed: onWrapInGroup,
             style: TextButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: .symmetric(horizontal: 16, vertical: 8),
             ),
             child: const SizedBox(
               width: double.infinity,
@@ -321,7 +321,7 @@ class _ConditionMenuPopup extends StatelessWidget {
               onChanged();
             },
             style: TextButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: .symmetric(horizontal: 16, vertical: 8),
             ),
             child: SizedBox(
               width: double.infinity,
@@ -335,7 +335,7 @@ class _ConditionMenuPopup extends StatelessWidget {
           TextButton(
             onPressed: onRemove,
             style: TextButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: .symmetric(horizontal: 16, vertical: 8),
             ),
             child: const SizedBox(
               width: double.infinity,
@@ -369,13 +369,13 @@ class _OperatorPickerPopup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 200,
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const .symmetric(vertical: 8),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: .min,
+        crossAxisAlignment: .start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            padding: const .symmetric(horizontal: 16, vertical: 4),
             child: Text(
               'Operators',
               style: TextStyle(
@@ -399,7 +399,7 @@ class _OperatorPickerPopup extends StatelessWidget {
                   onChanged();
                 },
                 style: TextButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: .symmetric(horizontal: 16, vertical: 8),
                 ),
                 child: SizedBox(
                   width: double.infinity,
@@ -418,7 +418,7 @@ class _OperatorPickerPopup extends StatelessWidget {
               onChanged();
             },
             style: TextButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: .symmetric(horizontal: 16, vertical: 8),
             ),
             child: SizedBox(
               width: double.infinity,
@@ -464,7 +464,7 @@ class _KeyPickerPopupState extends State<_KeyPickerPopup> {
     return Material(
       color: Colors.transparent,
       child: Container(
-        padding: const EdgeInsets.all(8),
+        padding: const .all(8),
         width: 220,
         height: 320,
         child: Column(
@@ -480,10 +480,7 @@ class _KeyPickerPopupState extends State<_KeyPickerPopup> {
                 filled: true,
                 fillColor: theme.surfaceBright,
                 prefixIcon: Icon(Icons.search, size: 16),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
+                contentPadding: .symmetric(horizontal: 12, vertical: 8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(6),
                   borderSide: BorderSide.none,
@@ -500,10 +497,7 @@ class _KeyPickerPopupState extends State<_KeyPickerPopup> {
                     onTap: () => widget.onSelected(key),
                     borderRadius: BorderRadius.circular(4),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
+                      padding: const .symmetric(horizontal: 12, vertical: 8),
                       child: Text(key.name, style: TextStyle(fontSize: 13)),
                     ),
                   );

@@ -35,19 +35,19 @@ class _TokenInputDialogState extends State<TokenInputDialog> {
       backgroundColor: appTheme.surfaceBright,
       child: Container(
         width: 450,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+        padding: const .symmetric(horizontal: 20, vertical: 32),
         decoration: BoxDecoration(
           // color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: .start,
+          mainAxisSize: .min,
           children: [
             Text("Enter this command in terminal:"),
             const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              padding: const .symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
                 color: appTheme.surfaceDark,
@@ -136,7 +136,7 @@ class _OrSeparator extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const .symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: theme.colorScheme.surfaceContainerHighest.withValues(
               alpha: 0.12,

@@ -58,7 +58,7 @@ class _ReEditorState extends State<ReEditor> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: .stretch,
       children: [
         Expanded(
           child: Focus(

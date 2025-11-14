@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/models/flow.dart';
 import 'package:mitmui/store/flows_provider.dart';
 import 'package:mitmui/utils/parser_utils.dart';
-import 'package:mitmui/utils/query_params_utils.dart';
 
 // derived providers
 // family is used to pass index parameter

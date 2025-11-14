@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mitmui/services/mitm_body_service.dart';
 import 'package:mitmui/widgets/bottom_panel/build_raw_view.dart';
-import 'package:mitmui/widgets/bottom_panel/items_view.dart';
 import 'package:mitmui/widgets/bottom_panel/panel_header.dart';
 import 'package:mitmui/widgets/bottom_panel/panel_titles.dart';
 import 'package:mitmui/services/code_controller_service.dart';
@@ -86,7 +85,7 @@ abstract class PanelAbstractState extends State<PanelAbstract>
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 8),
+            padding: const .only(left: 16.0, right: 16.0, top: 8),
             child: TabBarView(
               key: ValueKey(widget.id),
               controller: tabController,

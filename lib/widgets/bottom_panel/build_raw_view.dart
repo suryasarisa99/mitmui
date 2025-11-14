@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mitmui/models/response_body.dart';
 import 'package:mitmui/services/mitm_body_service.dart';
 import 'package:mitmui/store/derrived_flows_provider.dart';
 import 'package:mitmui/utils/statusCode.dart';
@@ -27,7 +26,7 @@ class BuildRawView extends ConsumerWidget {
         : flow?.response?.headers ?? [];
     flow?.request?.headers ?? [];
     return SingleChildScrollView(
-      padding: const EdgeInsets.only(top: 8.0),
+      padding: const .only(top: 8.0),
       child: FutureBuilder(
         future: mitmBodyService.getMitmBody(),
         builder: (context, snapshot) {
@@ -42,7 +41,7 @@ class BuildRawView extends ConsumerWidget {
               // Url path
               TextSpan(
                 text: '${flow?.request?.path} ',
-                style: TextStyle(fontSize: 15, color: Color(0xffA89CF7)),
+                style: TextStyle(fontSize: 15, color: .new(0xffA89CF7)),
               ),
             ],
 
@@ -67,16 +66,13 @@ class BuildRawView extends ConsumerWidget {
               (header) => [
                 TextSpan(
                   text: '${header[0]}: ',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Color(0xff86BFA3),
-                  ),
+                  style: const TextStyle(fontSize: 16, color: .new(0xff86BFA3)),
                 ),
                 TextSpan(
                   text: '${header[1]}\n',
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Color.fromARGB(255, 220, 124, 124),
+                    color: .fromARGB(255, 220, 124, 124),
                   ),
                 ),
               ],
@@ -109,7 +105,7 @@ class BuildRawView extends ConsumerWidget {
                 text: "\n",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFFAEB9FC),
+                  color: .new(0xFFAEB9FC),
                 ),
               ),
             );

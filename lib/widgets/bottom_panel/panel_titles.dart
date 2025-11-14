@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mitmui/store/derrived_flows_provider.dart';
 
 /// Abstract class for building TabBar panels with dynamic tab labels.
 abstract class AbstractPanelTitles extends ConsumerWidget {
@@ -25,11 +24,11 @@ abstract class AbstractPanelTitles extends ConsumerWidget {
       controller: tabController,
       isScrollable: true,
       tabAlignment: TabAlignment.start,
-      labelColor: const Color(0xFFFF7474),
+      labelColor: const .new(0xFFFF7474),
       unselectedLabelColor: Colors.grey,
-      indicatorColor: const Color(0xFFFD5A4F),
-      labelPadding: const EdgeInsets.symmetric(horizontal: 8.0),
-      indicatorPadding: EdgeInsets.zero,
+      indicatorColor: const .new(0xFFFD5A4F),
+      labelPadding: const .symmetric(horizontal: 8.0),
+      indicatorPadding: .zero,
       labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.normal),
       tabs: [for (final label in tabLabels) Tab(text: label)],
     );

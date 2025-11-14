@@ -1,4 +1,3 @@
-// lib/filter_manager.dart
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -139,10 +138,10 @@ class FilterManager extends ChangeNotifier {
 
   // String getRegexValue(FilterOperator operator, FilterCondition node) {
   //   return switch (operator) {
-  //     FilterOperator.equals => '^${_escapeRegex(node.value)}\$',
-  //     FilterOperator.startsWith => '^${_escapeRegex(node.value)}',
-  //     FilterOperator.endsWith => '${_escapeRegex(node.value)}\$',
-  //     FilterOperator.regex => node.value,
+  //     .equals => '^${_escapeRegex(node.value)}\$',
+  //     .startsWith => '^${_escapeRegex(node.value)}',
+  //     .endsWith => '${_escapeRegex(node.value)}\$',
+  //     .regex => node.value,
   //   };
   // }
 
@@ -151,43 +150,43 @@ class FilterManager extends ChangeNotifier {
     String escapedValue = _escapeRegex(node.value);
     String value = node.value;
     switch (node.keyType) {
-      case FilterKey.fileExtension:
+      case .fileExtension:
         regexValue = switch (node.operator) {
-          FilterOperator.equals => '\\.$escapedValue(\\?|\$)',
-          FilterOperator.startsWith => '\\.$escapedValue[^.?/]*?(\\?|\$)',
-          FilterOperator.endsWith => '\\.[^.?/]*?$escapedValue(\\?|\$)',
-          FilterOperator.regex => '\\.($value)(\\?|\$)',
+          .equals => '\\.$escapedValue(\\?|\$)',
+          .startsWith => '\\.$escapedValue[^.?/]*?(\\?|\$)',
+          .endsWith => '\\.[^.?/]*?$escapedValue(\\?|\$)',
+          .regex => '\\.($value)(\\?|\$)',
         };
         break;
-      case FilterKey.queryParam:
+      case .queryParam:
         final searchPattern = (node.operator == FilterOperator.regex)
             ? value
             : escapedValue;
         regexValue = '\\?.*$searchPattern';
         break;
-      case FilterKey.queryKey:
+      case .queryKey:
         regexValue = switch (node.operator) {
-          FilterOperator.equals => '=$escapedValue(&|\$)',
-          FilterOperator.startsWith => '[?&]$escapedValue[^=&]*=',
-          FilterOperator.endsWith => '=[^&]*?$escapedValue(&|\$)',
-          FilterOperator.regex => '[?&]($value)[^=&]*=',
+          .equals => '=$escapedValue(&|\$)',
+          .startsWith => '[?&]$escapedValue[^=&]*=',
+          .endsWith => '=[^&]*?$escapedValue(&|\$)',
+          .regex => '[?&]($value)[^=&]*=',
         };
         break;
-      case FilterKey.queryValue:
+      case .queryValue:
         regexValue = switch (node.operator) {
-          FilterOperator.equals => '=$escapedValue(?=&|\$)',
-          FilterOperator.startsWith => '=$escapedValue[^&]*',
-          FilterOperator.endsWith => '=[^&]*$escapedValue(?=&|\$)',
-          FilterOperator.regex => '=[^&]*($value)[^&]*',
+          .equals => '=$escapedValue(?=&|\$)',
+          .startsWith => '=$escapedValue[^&]*',
+          .endsWith => '=[^&]*$escapedValue(?=&|\$)',
+          .regex => '=[^&]*($value)[^&]*',
         };
         break;
 
       default:
         regexValue = switch (node.operator) {
-          FilterOperator.equals => '^${_escapeRegex(node.value)}\$',
-          FilterOperator.startsWith => '^${_escapeRegex(node.value)}',
-          FilterOperator.endsWith => '${_escapeRegex(node.value)}\$',
-          FilterOperator.regex => node.value,
+          .equals => '^${_escapeRegex(node.value)}\$',
+          .startsWith => '^${_escapeRegex(node.value)}',
+          .endsWith => '${_escapeRegex(node.value)}\$',
+          .regex => node.value,
         };
     }
     return regexValue;

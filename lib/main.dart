@@ -6,7 +6,6 @@ import 'package:mitmui/global.dart';
 import 'package:mitmui/screens/filter_manager.dart';
 import 'package:mitmui/screens/status_screen.dart';
 import 'package:mitmui/utils/logger.dart';
-import 'package:mitmui/widgets/bottom_panel/bottom_panel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 import 'screens/flow_list_screen.dart';
@@ -83,9 +82,9 @@ void main(
 }
 
 final colorScheme = ColorScheme.fromSeed(
-  seedColor: Color(0xffD13639),
+  seedColor: .new(0xffD13639),
   brightness: Brightness.dark,
-  surface: const Color(0xff1C1E20),
+  surface: const .new(0xff1C1E20),
 );
 
 class MainApp extends StatelessWidget {
@@ -106,23 +105,23 @@ class MainApp extends StatelessWidget {
       textTheme: const TextTheme(
         bodyMedium: TextStyle(fontSize: 14, color: Colors.white),
       ),
-      scaffoldBackgroundColor: Color(0xff1C1E20),
+      scaffoldBackgroundColor: .new(0xff1C1E20),
 
       appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xff1C1E20),
+        backgroundColor: .new(0xff1C1E20),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         toolbarHeight: 25,
       ),
-      secondaryHeaderColor: Color(0xff1C1E20),
+      secondaryHeaderColor: .new(0xff1C1E20),
       // primaryColor: Colors.green,
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(),
-        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        contentPadding: .symmetric(horizontal: 8, vertical: 8),
         isDense: true,
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(
-            color: Color.fromARGB(255, 255, 255, 255).withValues(alpha: 0.5),
+            color: .fromARGB(255, 255, 255, 255).withValues(alpha: 0.5),
             width: 2,
           ),
         ),
@@ -167,7 +166,7 @@ class PanelWindow extends StatelessWidget {
 
     final darkTheme = ThemeData(
       useMaterial3: false,
-      colorSchemeSeed: const Color.fromARGB(255, 255, 55, 55),
+      colorSchemeSeed: const .fromARGB(255, 255, 55, 55),
       brightness: Brightness.dark,
       textTheme: const TextTheme(
         bodyMedium: TextStyle(fontSize: 14, color: Colors.white),
@@ -180,7 +179,7 @@ class PanelWindow extends StatelessWidget {
       darkTheme: darkTheme,
       themeMode: ThemeMode.system, // Use system theme preference
       home: Scaffold(
-        backgroundColor: Color(0xff1C1E20),
+        backgroundColor: .new(0xff1C1E20),
         body: Column(
           children: [
             // if (args != null)

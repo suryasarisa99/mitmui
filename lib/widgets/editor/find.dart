@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:re_editor/re_editor.dart';
 
-const EdgeInsetsGeometry _kDefaultFindMargin = EdgeInsets.only(right: 10);
+const EdgeInsetsGeometry _kDefaultFindMargin = .only(right: 10);
 const double _kDefaultFindPanelWidth = 360;
 const double _kDefaultFindPanelHeight = 36;
 const double _kDefaultReplacePanelHeight = _kDefaultFindPanelHeight * 2;
@@ -13,13 +13,13 @@ const double _kDefaultFindIconWidth = 30;
 const double _kDefaultFindIconHeight = 30;
 const double _kDefaultFindInputFontSize = 13;
 const double _kDefaultFindResultFontSize = 12;
-const EdgeInsetsGeometry _kDefaultFindPadding = EdgeInsets.only(
+const EdgeInsetsGeometry _kDefaultFindPadding = .only(
   left: 5,
   right: 5,
   top: 2.5,
   bottom: 2.5,
 );
-const EdgeInsetsGeometry _kDefaultFindInputContentPadding = EdgeInsets.only(
+const EdgeInsetsGeometry _kDefaultFindInputContentPadding = .only(
   left: 5,
   right: 5,
 );
@@ -84,7 +84,7 @@ class CodeFindPanelView extends StatelessWidget implements PreferredSizeWidget {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Container(
-          color: const Color.fromARGB(255, 57, 57, 57),
+          color: const .fromARGB(255, 57, 57, 57),
           child: SizedBox(
             width: _kDefaultFindPanelWidth,
             child: Column(
@@ -193,7 +193,7 @@ class CodeFindPanelView extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: .end,
                 children: [
                   _buildCheckText(
                     context: context,
@@ -222,7 +222,7 @@ class CodeFindPanelView extends StatelessWidget implements PreferredSizeWidget {
         ),
         Expanded(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: .end,
             children: [
               _buildIconButton(
                 onPressed: value.result == null
@@ -306,9 +306,8 @@ class CodeFindPanelView extends StatelessWidget implements PreferredSizeWidget {
         style: TextStyle(color: inputTextColor, fontSize: inputFontSize),
         decoration: decoration.copyWith(
           isDense: false,
-          contentPadding:
-              (decoration.contentPadding ?? EdgeInsets.symmetric(vertical: 0))
-                  .add(EdgeInsets.only(right: iconsWidth)),
+          contentPadding: (decoration.contentPadding ?? .symmetric(vertical: 0))
+              .add(.only(right: iconsWidth)),
         ),
         controller: controller,
       ),

@@ -106,11 +106,11 @@ class FlowDataSource extends DtSource {
     // int? rowId = int.tryParse(row.getCells().first.value);
     late Color rowColor;
     if (isSelected) {
-      rowColor = const Color(0xffD13639); // Selected row color
+      rowColor = const .new(0xffD13639); // Selected row color
     } else {
       rowColor = index.isEven
-          ? const Color(0xff1E1E1E) // Even rows - darker (same as background)
-          : const Color(0xff26282A);
+          ? const .new(0xff1E1E1E) // Even rows - darker (same as background)
+          : const .new(0xff26282A);
     }
     final cells = row.cells.mapIndexed((cIndex, cell) {
       late String text;
@@ -142,8 +142,8 @@ class FlowDataSource extends DtSource {
             SmIconButton(
               icon: Icons.play_arrow,
               color: row.state == "server_block"
-                  ? const Color(0xFF9399FF)
-                  : const Color(0xFF8BEF8E),
+                  ? const .new(0xFF9399FF)
+                  : const .new(0xFF8BEF8E),
               onPressed: () => resumeIntercept(row.id, row.state),
             ),
             SizedBox(width: 4),
@@ -172,9 +172,9 @@ class FlowDataSource extends DtSource {
   Color getMethodColor(String method) {
     switch (method) {
       case 'GET':
-        return const Color.fromARGB(255, 102, 186, 255);
+        return const .fromARGB(255, 102, 186, 255);
       case 'POST':
-        return const Color(0xFF74E277);
+        return const .new(0xFF74E277);
       case 'PUT':
         return Colors.orange;
       case 'DELETE':

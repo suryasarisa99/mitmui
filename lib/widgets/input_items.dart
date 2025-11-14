@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:mitmui/http_docs.dart';
 import 'package:mitmui/widgets/tab_input.dart';
 
@@ -50,7 +49,7 @@ class _InputItemsState extends State<InputItems> {
     return FocusTraversalGroup(
       // child: ReorderableListView.builder(
       child: ListView.builder(
-        padding: EdgeInsets.only(bottom: 10),
+        padding: .only(bottom: 10),
         itemCount: items.length + 1,
         itemExtent: itemHeight,
         // buildDefaultDragHandles: false,
@@ -99,7 +98,7 @@ class _InputItemsState extends State<InputItems> {
                 //     index: i,
                 //     child: Container(
                 //       width: 10,
-                //       padding: const EdgeInsets.all(0),
+                //       padding: const .all(0),
                 //       child: Icon(
                 //         Icons.drag_indicator,
                 //         color: Colors.grey[400],
@@ -132,8 +131,8 @@ class _InputItemsState extends State<InputItems> {
                           ),
                           fillColor: WidgetStateColor.resolveWith((states) {
                             return checked[i]
-                                ? const Color(0xFFFF7474)
-                                : const Color.fromARGB(255, 68, 68, 68);
+                                ? const .new(0xFFFF7474)
+                                : const .fromARGB(255, 68, 68, 68);
                           }),
                           value: checked[i],
                           onChanged: (value) {

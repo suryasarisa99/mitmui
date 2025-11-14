@@ -27,9 +27,9 @@ class _FilterBtnState extends State<FilterBtn> {
     });
     final hk = HardwareKeyboard.instance;
 
-    final shortCutKey = widget.title == "filter"
-        ? LogicalKeyboardKey.keyK
-        : LogicalKeyboardKey.keyI;
+    final LogicalKeyboardKey shortCutKey = widget.title == "filter"
+        ? .keyK
+        : .keyI;
 
     hk.addHandler((event) {
       final isCtrlPressed = Platform.isMacOS
@@ -66,7 +66,7 @@ class _FilterBtnState extends State<FilterBtn> {
       child: SizedBox(
         height: 20,
         child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          padding: const .symmetric(horizontal: 12, vertical: 2),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(4),
             border: Border.all(

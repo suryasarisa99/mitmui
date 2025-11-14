@@ -4,7 +4,7 @@ Color getStatusCodeColor(int? statusCode) {
   if (statusCode == null) return Colors.grey;
 
   if (statusCode >= 200 && statusCode < 300) {
-    return const Color.fromARGB(255, 106, 245, 111);
+    return const .fromARGB(255, 106, 245, 111);
   } else if (statusCode >= 300 && statusCode < 400) {
     return Colors.blue;
   } else if (statusCode >= 400 && statusCode < 500) {

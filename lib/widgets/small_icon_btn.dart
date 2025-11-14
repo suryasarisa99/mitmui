@@ -24,7 +24,7 @@ class SmIconButton extends StatelessWidget {
       splashRadius: splashRadius,
       constraints: BoxConstraints(minWidth: btnSize, minHeight: btnSize),
       color: Colors.red,
-      padding: EdgeInsets.zero,
+      padding: .zero,
       // style: ButtonStyle(
       //   iconColor: WidgetStateProperty.resolveWith((states) {
       //     print("states: $states");

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:mitmui/utils/debouncer.dart';
 
 class CustomInput extends StatefulWidget {
@@ -73,31 +72,28 @@ class _CustomInputState extends State<CustomInput> {
         ),
         decoration: InputDecoration(
           isDense: true,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 12,
-          ),
+          contentPadding: const .symmetric(horizontal: 8, vertical: 12),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(4),
-            borderSide: BorderSide(color: Colors.grey[600]!, width: 0.6),
+            borderSide: .new(color: Colors.grey[600]!, width: 0.6),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(4),
             borderSide: BorderSide(
-              color: const Color.fromARGB(150, 117, 117, 117),
+              color: const .fromARGB(150, 117, 117, 117),
               width: 0.6,
             ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(4),
             borderSide: const BorderSide(
-              color: Color.fromARGB(210, 255, 167, 95),
+              color: .fromARGB(210, 255, 167, 95),
               width: 2,
             ),
           ),
           disabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(4),
-            borderSide: BorderSide(color: Colors.grey[800]!, width: 1),
+            borderSide: .new(color: Colors.grey[800]!, width: 1),
           ),
         ),
         // onChanged: widget.onChanged,

@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/store/derrived_flows_provider.dart';
 import 'package:mitmui/widgets/bottom_panel/items_widget.dart';
 
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Abstract base class for widgets that watch a list of key-value items
 /// from a Riverpod provider and display them using [ItemsWidget].

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mitmui/models/filter_models.dart';
-import 'package:mitmui/theme.dart';
 
 // class FilterConnector extends StatelessWidget {
 //   static const double x = 8;
 //   static const gap = 0;
-//   static const borderClr = Color.fromARGB(255, 138, 138, 138);
+//   static const borderClr = .fromARGB(255, 138, 138, 138);
 //   static const lineWidth = 1.2;
 
 //   const FilterConnector({
@@ -20,7 +19,7 @@ import 'package:mitmui/theme.dart';
 //   Widget build(BuildContext context) {
 //     final isAnd = operator == LogicalOperator.and;
 //     final color = isAnd ? Colors.red : Colors.blue;
-//     final bgColor = color.withValues(alpha: 0.1);
+//     final bgColor = .withValues(alpha: 0.1);
 //     return GestureDetector(
 //       // behavior: HitTestBehavior.translucent,
 //       onTap: onToggle,
@@ -28,7 +27,7 @@ import 'package:mitmui/theme.dart';
 //         width: 40,
 //         height: 20,
 //         child: Container(
-//           color: const Color.fromARGB(255, 56, 56, 56),
+//           color: const .fromARGB(255, 56, 56, 56),
 //           child: Stack(
 //             clipBehavior: Clip.none,
 //             children: [
@@ -44,8 +43,8 @@ import 'package:mitmui/theme.dart';
 //                       bottomLeft: Radius.circular(4),
 //                     ),
 //                     border: Border(
-//                       bottom: BorderSide(color: borderClr, width: lineWidth),
-//                       left: BorderSide(color: borderClr, width: lineWidth),
+//                       bottom: .new(color: borderClr, width: lineWidth),
+//                       left: .new(color: borderClr, width: lineWidth),
 //                     ),
 //                   ),
 //                 ),
@@ -63,8 +62,8 @@ import 'package:mitmui/theme.dart';
 //                       topLeft: Radius.circular(4),
 //                     ),
 //                     border: Border(
-//                       top: BorderSide(color: borderClr, width: lineWidth),
-//                       left: BorderSide(color: borderClr, width: lineWidth),
+//                       top: .new(color: borderClr, width: lineWidth),
+//                       left: .new(color: borderClr, width: lineWidth),
 //                     ),
 //                   ),
 //                 ),
@@ -75,7 +74,7 @@ import 'package:mitmui/theme.dart';
 //                 top: -x - gap,
 //                 child: Container(
 //                   width: 35,
-//                   padding: const EdgeInsets.symmetric(
+//                   padding: const .symmetric(
 //                     horizontal: 6,
 //                     vertical: 2,
 //                   ),
@@ -136,14 +135,14 @@ class FilterConnector extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              margin: const EdgeInsets.only(left: 20),
+              margin: const .only(left: 20),
               width: 20,
               height: x,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(4)),
                 border: Border(
-                  top: BorderSide(color: borderClr, width: lineWidth),
-                  left: BorderSide(color: borderClr, width: lineWidth),
+                  top: .new(color: borderClr, width: lineWidth),
+                  left: .new(color: borderClr, width: lineWidth),
                 ),
               ),
             ),
@@ -154,7 +153,7 @@ class FilterConnector extends StatelessWidget {
               },
               child: Container(
                 width: 35,
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                padding: const .symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: bgColor,
                   borderRadius: BorderRadius.circular(6),
@@ -177,12 +176,12 @@ class FilterConnector extends StatelessWidget {
             Container(
               width: 20,
               height: x,
-              margin: const EdgeInsets.only(left: 20),
+              margin: const .only(left: 20),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(4)),
                 border: Border(
-                  bottom: BorderSide(color: borderClr, width: lineWidth),
-                  left: BorderSide(color: borderClr, width: lineWidth),
+                  bottom: .new(color: borderClr, width: lineWidth),
+                  left: .new(color: borderClr, width: lineWidth),
                 ),
               ),
             ),

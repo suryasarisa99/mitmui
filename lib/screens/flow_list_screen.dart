@@ -130,7 +130,7 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
             ),
           ),
           toolbarHeight: kTextTabBarHeight - 16,
-          actionsPadding: const EdgeInsets.only(right: 8, top: 6, bottom: 5),
+          actionsPadding: const .only(right: 8, top: 6, bottom: 5),
           actions: [
             FilterBtn(filterManager: filterManager, title: "filter"),
             SizedBox(width: 8),
@@ -144,7 +144,7 @@ class _FlowListScreenState extends ConsumerState<FlowListScreen> {
                     snapshot.hasData && snapshot.data!.isConnected;
                 return IconButton(
                   iconSize: 18,
-                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                  padding: .symmetric(vertical: 4, horizontal: 4),
                   constraints: BoxConstraints(minWidth: 32, minHeight: 32),
                   icon: Icon(
                     isConnected ? Icons.cloud_done : Icons.cloud_off,

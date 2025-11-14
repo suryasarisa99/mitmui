@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:math' as Math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -232,8 +231,6 @@ class HttpSyntaxColors {
   final Color url; // URL path
   final Color urlQueryKey; // Query parameter keys
   final Color urlQueryValue; // Query parameter values
-  // final Color statusCode; // HTTP status code
-  // final Color statusMessage; // Status message
   final Color httpVersion; // HTTP version
   final Color headerKey; // Header keys
   final Color headerValue; // Header values
@@ -244,20 +241,18 @@ class HttpSyntaxColors {
   final Color diffText; // Text color for differences
 
   const HttpSyntaxColors({
-    this.method = const Color(0xFFE06C75), // Red
-    this.url = const Color(0xffA89CF7), // Purple
-    this.urlQueryKey = const Color(0xFFD19A66), // Orange
-    this.urlQueryValue = const Color(0xFF98C379), // Green
-    // this.statusCode = const Color(0xFFE5C07B), // Yellow
-    // this.statusMessage = const Color(0xFF98C379), // Green
-    this.httpVersion = const Color(0xFFC678DD), // Purple
-    this.headerKey = const Color(0xff86BFA3), // Teal
-    this.headerValue = const Color(0xFFDC7C7C), // Light Red
-    this.cookieKey = const Color(0xFFD19A66), // Orange
-    this.cookieValue = const Color(0xFF98C379), // Green
-    this.body = const Color(0xFFE5C07B), // Orange/Yellow
-    this.diffHighlight = const Color(0xFF006DC1), // Blue background
-    this.diffText = const Color(0xFFFFFFFF), // White text
+    this.method = const .new(0xFFE06C75), // Red
+    this.url = const .new(0xffA89CF7), // Purple
+    this.urlQueryKey = const .new(0xFFD19A66), // Orange
+    this.urlQueryValue = const .new(0xFF98C379), // Green
+    this.httpVersion = const .new(0xFFC678DD), // Purple
+    this.headerKey = const .new(0xff86BFA3), // Teal
+    this.headerValue = const .new(0xFFDC7C7C), // Light Red
+    this.cookieKey = const .new(0xFFD19A66), // Orange
+    this.cookieValue = const .new(0xFF98C379), // Green
+    this.body = const .new(0xFFE5C07B), // Orange/Yellow
+    this.diffHighlight = const .new(0xFF006DC1), // Blue background
+    this.diffText = const .new(0xFFFFFFFF), // White text
   });
 }
 
@@ -353,9 +348,9 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
     }
 
     // Headers
-    msg.headers.forEach((header) {
+    for (var header in msg.headers) {
       buffer.writeln('${header[0]}: ${header[1]}');
-    });
+    }
 
     // Empty line before body
     buffer.writeln();
@@ -487,7 +482,7 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
 
         return Container(
           color: theme.surface,
-          padding: const EdgeInsets.all(0),
+          padding: const .all(0),
           child: (leftLines.isEmpty && rightLines.isEmpty)
               ? const Center(child: CircularProgressIndicator())
               : Row(
@@ -553,7 +548,7 @@ class _HttpCompareState extends ConsumerState<HttpCompare> {
             decoration: const BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: Color.fromARGB(82, 255, 255, 255),
+                  color: .fromARGB(82, 255, 255, 255),
                   width: 0.4,
                 ),
               ),

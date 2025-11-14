@@ -34,9 +34,9 @@ class InputsView extends StatelessWidget {
       children: [
         // Header
         Padding(
-          padding: const EdgeInsets.only(bottom: 8),
+          padding: const .only(bottom: 8),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: .spaceBetween,
             children: [
               Text(
                 title,

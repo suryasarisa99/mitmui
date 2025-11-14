@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/utils/ref_extension.dart';
 import 'package:mitmui/widgets/compare/http_compare.dart';
 

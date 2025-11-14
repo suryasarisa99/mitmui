@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/store/derrived_flows_provider.dart';
-import 'package:mitmui/store/flows_provider.dart';
 import 'package:mitmui/utils/query_params_utils.dart';
 import 'package:mitmui/utils/ref_extension.dart';
 import 'package:mitmui/widgets/bottom_panel/inputs_view.dart';

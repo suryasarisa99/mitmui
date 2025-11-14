@@ -44,20 +44,20 @@ class AppColors {
 }
 
 // const lightColors = AppColors(
-//   primary: Color(0xFF1A98FF),
-//   secondary: Color(0xFF42A5F5),
-//   // background: Color(0xFFE4E4E6),
-//   background: Color(0xFFECEEF0),
-//   surface: Color.fromARGB(255, 215, 221, 228),
-//   surface2: Color.fromARGB(255, 189, 198, 209),
-//   iconColor: Color(0xFF57647C),
-//   text: Color(0xFF222222),
-//   tertiaryInv: Color(0xFFFFFFFF),
-//   tertiary: Color(0xFF000000),
-//   greenText: Color(0xFF14A219),
-//   redText: Color(0xFFF44336),
-//   yellow: Color.fromARGB(255, 255, 162, 0),
-//   accent: Color(0xFF0D92FF),
+//   primary: .new(0xFF1A98FF),
+//   secondary: .new(0xFF42A5F5),
+//   // background: .new(0xFFE4E4E6),
+//   background: .new(0xFFECEEF0),
+//   surface: .fromARGB(255, 215, 221, 228),
+//   surface2: .fromARGB(255, 189, 198, 209),
+//   iconColor: .new(0xFF57647C),
+//   text: .new(0xFF222222),
+//   tertiaryInv: .new(0xFFFFFFFF),
+//   tertiary: .new(0xFF000000),
+//   greenText: .new(0xFF14A219),
+//   redText: .new(0xFFF44336),
+//   yellow: .fromARGB(255, 255, 162, 0),
+//   accent: .new(0xFF0D92FF),
 // );
 
 final clr1 = Color(0xff1C1E20); // surface
@@ -67,23 +67,23 @@ final clr3 = Color(0xff26282A); // odd rows - little lighter
 final clr4 = Color(0xff161819); // more dark (panel header)
 
 const darkColors = AppColors(
-  primary: Color(0xFF269DFF),
-  secondary: Color(0xFF1976D2),
-  surface: Color(0xff1C1E20), // background
-  surfaceLight: Color(0xff232628), //header
-  surfaceMoreLight: Color(0xff26282A), // odd rows
-  surfaceDark: Color(0xff161819), // panel header
-  surfaceTooDark: Color(0xFF121415), // panel header
-  surfaceTint: Color(0xff1C1E20), // even rows
-  surfaceBright: Color(0xff2E3031), // background
-  iconColor: Color(0xFF8895B1),
-  tertiary: Color(0xFFFFFFFF),
-  tertiaryInv: Color(0xFF000000),
-  text: Color(0xFFF5F5F5),
-  greenText: Color(0xFF4CAF50),
-  redText: Color(0xFFF44336),
-  yellow: Color.fromARGB(255, 255, 217, 0),
-  accent: Color.fromARGB(255, 119, 153, 255),
+  primary: .new(0xFF269DFF),
+  secondary: .new(0xFF1976D2),
+  surface: .new(0xff1C1E20), // background
+  surfaceLight: .new(0xff232628), //header
+  surfaceMoreLight: .new(0xff26282A), // odd rows
+  surfaceDark: .new(0xff161819), // panel header
+  surfaceTooDark: .new(0xFF121415), // panel header
+  surfaceTint: .new(0xff1C1E20), // even rows
+  surfaceBright: .new(0xff2E3031), // background
+  iconColor: .new(0xFF8895B1),
+  tertiary: .new(0xFFFFFFFF),
+  tertiaryInv: .new(0xFF000000),
+  text: .new(0xFFF5F5F5),
+  greenText: .new(0xFF4CAF50),
+  redText: .new(0xFFF44336),
+  yellow: .fromARGB(255, 255, 217, 0),
+  accent: .fromARGB(255, 119, 153, 255),
 );
 
 class AppTheme {

@@ -56,7 +56,7 @@ class _ResizableTextFieldState extends State<ResizableTextField> {
 
     // Listen for text changes to resize the field.
     _controller.addListener(_handleTextChanged);
-    // Listen for focus changes to update the border color.
+    // Listen for focus changes to update the border .
     _focusNode.addListener(_handleFocusChanged);
   }
 
@@ -142,7 +142,7 @@ class _ResizableTextFieldState extends State<ResizableTextField> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       width: _currentWidth,
-      padding: EdgeInsets.symmetric(
+      padding: .symmetric(
         horizontal: horizontalPaddingCompensation,
         vertical: verticalPaddingCompensation,
       ),
@@ -177,10 +177,7 @@ class _ResizableTextFieldState extends State<ResizableTextField> {
           focusedErrorBorder: InputBorder.none,
           isDense: true,
           hintText: widget.hintText,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 4,
-            vertical: 6,
-          ),
+          contentPadding: const .symmetric(horizontal: 4, vertical: 6),
         ),
       ),
     );

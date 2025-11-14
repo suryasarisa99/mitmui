@@ -31,9 +31,9 @@ class ItemsWidget extends StatelessWidget {
         itemBuilder: (context, index) {
           if (index == 0) {
             return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const .only(bottom: 8),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: .spaceBetween,
                 children: <Widget>[
                   Text(
                     title,
@@ -55,14 +55,11 @@ class ItemsWidget extends StatelessWidget {
           } else {
             final item = items[index - 1];
             return Card(
-              margin: const EdgeInsets.symmetric(vertical: 2),
-              color: const Color(0xFF23242A),
+              margin: const .symmetric(vertical: 2),
+              color: const .new(0xFF23242A),
 
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 0.0,
-                  horizontal: 8.0,
-                ),
+                padding: const .symmetric(vertical: 0.0, horizontal: 8.0),
                 child: Row(
                   children: [
                     if (title.startsWith("Headers")) ...[
@@ -82,7 +79,7 @@ class ItemsWidget extends StatelessWidget {
                         item[0],
                         style: const TextStyle(
                           fontSize: 14,
-                          color: Color(0xFFAEB9FC),
+                          color: .new(0xFFAEB9FC),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -97,7 +94,7 @@ class ItemsWidget extends StatelessWidget {
                     //           text: '${item[0]}: ',
                     //           style: const TextStyle(
                     //             fontWeight: FontWeight.w600,
-                    //             color: Color(0xFFAEB9FC),
+                    //             color: .new(0xFFAEB9FC),
                     //           ),
                     //         ),
                     //         TextSpan(

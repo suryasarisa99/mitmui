@@ -417,13 +417,13 @@ enum MarkCircle {
     // light variants
     if (isSelected) {
       return switch (this) {
-        MarkCircle.red => const Color.fromARGB(255, 255, 183, 178),
-        MarkCircle.orange => const Color.fromARGB(255, 255, 191, 94),
-        MarkCircle.yellow => const Color.fromARGB(255, 255, 246, 161),
-        MarkCircle.green => const Color.fromARGB(255, 160, 255, 163),
-        MarkCircle.blue => const Color.fromARGB(255, 175, 219, 255),
-        MarkCircle.purple => const Color.fromARGB(255, 242, 172, 255),
-        MarkCircle.brown => const Color.fromARGB(255, 182, 160, 151),
+        MarkCircle.red => const .fromARGB(255, 255, 183, 178),
+        MarkCircle.orange => const .fromARGB(255, 255, 191, 94),
+        MarkCircle.yellow => const .fromARGB(255, 255, 246, 161),
+        MarkCircle.green => const .fromARGB(255, 160, 255, 163),
+        MarkCircle.blue => const .fromARGB(255, 175, 219, 255),
+        MarkCircle.purple => const .fromARGB(255, 242, 172, 255),
+        MarkCircle.brown => const .fromARGB(255, 182, 160, 151),
         MarkCircle.unMark => Colors.transparent,
       };
     } else {
@@ -431,10 +431,10 @@ enum MarkCircle {
         MarkCircle.red => Colors.red,
         MarkCircle.orange => Colors.orange,
         MarkCircle.yellow => Colors.yellow,
-        MarkCircle.green => const Color.fromARGB(255, 98, 213, 102),
-        MarkCircle.blue => const Color.fromARGB(255, 62, 168, 255),
-        MarkCircle.purple => const Color.fromARGB(255, 223, 84, 248),
-        MarkCircle.brown => const Color.fromARGB(255, 165, 121, 106),
+        MarkCircle.green => const .fromARGB(255, 98, 213, 102),
+        MarkCircle.blue => const .fromARGB(255, 62, 168, 255),
+        MarkCircle.purple => const .fromARGB(255, 223, 84, 248),
+        MarkCircle.brown => const .fromARGB(255, 165, 121, 106),
         MarkCircle.unMark => Colors.transparent,
       };
     }

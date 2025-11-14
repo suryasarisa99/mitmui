@@ -106,16 +106,16 @@ class _StatusScreenState extends ConsumerState<StatusScreen> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const .all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           children: [
             // Status card
             Card(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const .all(16.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: .start,
                   children: [
                     Row(
                       children: [
@@ -162,7 +162,7 @@ class _StatusScreenState extends ConsumerState<StatusScreen> {
                   itemBuilder: (context, index) {
                     final reversedIndex = _statusMessages.length - 1 - index;
                     return Padding(
-                      padding: const EdgeInsets.symmetric(
+                      padding: const .symmetric(
                         horizontal: 16.0,
                         vertical: 4.0,
                       ),
@@ -183,7 +183,7 @@ class _StatusScreenState extends ConsumerState<StatusScreen> {
                 icon: const Icon(Icons.refresh),
                 label: const Text('Reconnect'),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: const .symmetric(vertical: 12),
                 ),
               ),
             ),
@@ -192,7 +192,7 @@ class _StatusScreenState extends ConsumerState<StatusScreen> {
               child: ElevatedButton(
                 onPressed: () => GoRouter.of(context).replace('/filter'),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: const .symmetric(vertical: 12),
                 ),
                 child: const Text('Filter Demo Screen'),
               ),
@@ -202,7 +202,7 @@ class _StatusScreenState extends ConsumerState<StatusScreen> {
               child: ElevatedButton(
                 onPressed: () => GoRouter.of(context).replace('/'),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: const .symmetric(vertical: 12),
                 ),
                 child: const Text('Flow List'),
               ),

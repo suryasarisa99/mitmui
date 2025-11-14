@@ -28,10 +28,8 @@ class PanelHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xff161819),
-        border: Border(
-          bottom: BorderSide(color: Colors.grey.shade800, width: 0.5),
-        ),
+        color: .new(0xff161819),
+        border: Border(bottom: .new(color: Colors.grey.shade800, width: 0.5)),
       ),
       child: Row(
         children: [
@@ -50,7 +48,7 @@ class PanelHeader extends StatelessWidget {
             builder: (context, value, _) {
               return value
                   ? Row(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: .min,
                       children: [
                         TextButton(
                           onPressed: () {
@@ -73,7 +71,7 @@ class PanelHeader extends StatelessWidget {
           IconButton(
             iconSize: 22,
             splashRadius: 16,
-            padding: const EdgeInsets.all(0.0),
+            padding: const .all(0.0),
             constraints: BoxConstraints(minHeight: 24, minWidth: 24),
             onPressed: () {
               if (isRequest) {
@@ -148,7 +146,7 @@ class _PanelHeaderBtnsState extends State<PanelHeaderBtns> {
   Widget build(BuildContext context) {
     if (isSinglePanel) {
       return Padding(
-        padding: const EdgeInsets.only(left: 10),
+        padding: const .only(left: 10),
         child: _buildToggleButtons(),
       );
     } else {
@@ -162,11 +160,11 @@ class _PanelHeaderBtnsState extends State<PanelHeaderBtns> {
 
   Widget _buildToggleButtons() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      padding: const .symmetric(vertical: 6.0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Row(
-          mainAxisSize: MainAxisSize.min, // Make the row wrap its content
+          mainAxisSize: .min, // Make the row wrap its content
           children: <Widget>[
             _buildToggleButton(
               text: 'Req',
@@ -200,9 +198,9 @@ class _PanelHeaderBtnsState extends State<PanelHeaderBtns> {
       borderRadius: BorderRadius.circular(0),
       child: Container(
         color: isSelected
-            ? const Color.fromARGB(205, 238, 76, 26)
-            : const Color.fromARGB(197, 66, 66, 66),
-        padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 3.5),
+            ? const .fromARGB(205, 238, 76, 26)
+            : const .fromARGB(197, 66, 66, 66),
+        padding: const .symmetric(horizontal: 14.0, vertical: 3.5),
         child: Text(
           text,
           style: TextStyle(

@@ -144,7 +144,7 @@ class _CompareState extends ConsumerState<Compare> {
         }
         return Container(
           color: theme.surface,
-          padding: const EdgeInsets.all(0),
+          padding: const .all(0),
           child: (leftLines.isEmpty && rightLines.isEmpty)
               ? const Center(child: CircularProgressIndicator())
               : Row(
@@ -204,11 +204,11 @@ class _CompareState extends ConsumerState<Compare> {
           final lineSpans = _buildDiffLine(line, i, isLeft, theme);
 
           return Container(
-            // padding: const EdgeInsets.symmetric(horizontal: 8),
+            // padding: const .symmetric(horizontal: 8),
             decoration: const BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: Color.fromARGB(82, 255, 255, 255),
+                  color: .fromARGB(82, 255, 255, 255),
                   width: 0.4,
                 ),
               ),
@@ -331,8 +331,8 @@ class _CompareState extends ConsumerState<Compare> {
           break;
         case DIFF_DELETE:
         case DIFF_INSERT:
-          bgColor = const Color(0xFF006DC1);
-          textColor = const Color(0xFFFFFFFF);
+          bgColor = const .new(0xFF006DC1);
+          textColor = const .new(0xFFFFFFFF);
           break;
       }
 

@@ -601,7 +601,7 @@ class HttpRequest {
     String? prettyHost,
     List<bool>? enabledQueryParams,
   }) {
-    debugPrint("copy with:${enabledQueryParams}");
+    debugPrint("copy with:$enabledQueryParams");
     return HttpRequest(
       method: method ?? this.method,
       scheme: scheme ?? this.scheme,

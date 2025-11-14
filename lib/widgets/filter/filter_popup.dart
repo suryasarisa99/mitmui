@@ -31,18 +31,18 @@ class FilterPopup extends StatelessWidget {
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: screenHeight * 0.8),
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const .all(16),
             width: 600,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               color: theme.surface,
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: .start,
+              mainAxisSize: .min,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(left: 12, top: 8),
+                  padding: const .only(left: 12, top: 8),
                   child: Text(
                     title.toUpperCase(),
                     style: TextStyle(

@@ -219,7 +219,7 @@ class PreviewBodyState extends ConsumerState<PreviewBody> {
                 _log.error("Error loading image: $error");
                 return Center(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: .center,
                     children: [
                       const Icon(
                         Icons.broken_image,

@@ -722,23 +722,23 @@ class _DtTableState extends State<DtTable> {
           return Container(
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: Colors.grey[700]!, width: 1),
+                bottom: .new(color: Colors.grey[700]!, width: 1),
                 right: actualIndex < widget.headerColumns.length - 1
-                    ? BorderSide(color: Colors.grey[700]!, width: 1)
-                    : BorderSide.none,
+                    ? .new(color: Colors.grey[700]!, width: 1)
+                    : .none,
               ),
             ),
             width: _columnWidths[actualIndex],
             height: widget.headerHeight,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: .spaceBetween,
               children: [
                 Expanded(
                   child: GestureDetector(
                     onTap: () =>
                         widget.source.sort(actualIndex, column.isNumeric),
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
+                      padding: const .only(left: 8.0),
                       child: Row(
                         children: [
                           Expanded(
@@ -827,7 +827,7 @@ class _DtTableState extends State<DtTable> {
                     .mapIndexed((cIndex, cell) {
                       final actualIndex = startIndex + cIndex;
                       return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        padding: const .symmetric(horizontal: 8.0),
                         width: _columnWidths[actualIndex],
                         child: cell,
                       );
