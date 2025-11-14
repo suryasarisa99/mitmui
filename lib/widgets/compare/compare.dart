@@ -119,7 +119,7 @@ class _CompareState extends ConsumerState<Compare> {
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate available width for each text panel
-        final lineNumberWidth = (linesCount.toString().length * 13.0);
+        final lineNumberWidth = (linesCount.toString().length * 13.0) + 2;
         final availableWidth = (constraints.maxWidth - lineNumberWidth - 8) / 2;
 
         // Recalculate line heights if width changed

@@ -29,7 +29,8 @@ class LineNumbers extends StatelessWidget {
     final theme = AppTheme.from(Theme.brightnessOf(context));
     final linesCount = max(leftLines.length, rightLines.length);
     final charWidth = 13.0;
-    final double lineNumberWidth = (linesCount.toString().length * charWidth);
+    final double lineNumberWidth =
+        (linesCount.toString().length * charWidth) + 2;
 
     if (lineHeights.isEmpty) {
       return SizedBox(width: lineNumberWidth);
@@ -74,7 +75,7 @@ class LineNumbers extends StatelessWidget {
               );
             }
             return Container(
-              height: lineHeights[i], // Use dynamic height
+              height: lineHeights[i],
               alignment: Alignment.topRight,
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
               decoration: BoxDecoration(
