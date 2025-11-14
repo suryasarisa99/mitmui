@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_highlight/themes/tomorrow-night.dart';
 import 'package:mitmui/services/code_controller_service.dart';
 import 'package:mitmui/widgets/editor/context_menu.dart';
 import 'package:mitmui/widgets/editor/find.dart';
@@ -15,6 +14,7 @@ import 'package:re_highlight/languages/markdown.dart';
 import 'package:re_highlight/languages/protobuf.dart';
 import 'package:re_highlight/languages/xml.dart';
 import 'package:re_highlight/languages/yaml.dart';
+import 'package:re_highlight/styles/atom-one-dark.dart';
 
 // themes
 
@@ -96,7 +96,8 @@ class _ReEditorState extends State<ReEditor> {
                     'protobuf': CodeHighlightThemeMode(mode: langProtobuf),
                     'markdown': CodeHighlightThemeMode(mode: langMarkdown),
                   },
-                  theme: tomorrowNightTheme,
+                  // theme: tomorrowNightTheme,
+                  theme: atomOneDarkTheme,
                 ),
               ),
 

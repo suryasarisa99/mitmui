@@ -119,7 +119,7 @@ class BuildRawView extends ConsumerWidget {
                 text: snapshot.data?.text,
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Colors.white,
+                  color: Color(0xFFE5C07B),
                   fontFamily: 'monospace',
                 ),
               ),
