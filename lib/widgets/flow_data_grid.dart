@@ -12,8 +12,6 @@ import 'package:mitmui/services/websocket_service.dart';
 import 'package:mitmui/store/filtered_flows_provider.dart';
 import 'package:mitmui/store/flows_provider.dart';
 import 'package:mitmui/utils/logger.dart';
-import 'package:mitmui/widgets/compare/compare2Wrapper.dart';
-import 'package:mitmui/widgets/compare/compareWrapper.dart';
 import 'package:mitmui/widgets/compare/test1.dart';
 import 'package:super_context_menu/super_context_menu.dart';
 

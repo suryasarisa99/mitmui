@@ -3,8 +3,10 @@ description: "A new Flutter project."
 publish_to: "none"
 version: 0.1.0
 
+# uses dart sdk 3.10.0 (flutter: 3.38.0), which supports dot short hands
+
 environment:
-  sdk: ^3.8.0
+  sdk: ^3.10.0
 
 dependencies:
   collection: ^1.19.1

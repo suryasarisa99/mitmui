@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mitmui/api/mitmproxy_client.dart';
 import 'package:mitmui/utils/ref_extension.dart';
-import 'package:mitmui/widgets/compare/compare2.dart';
+import 'package:mitmui/widgets/compare/http_compare.dart';
 
 class HttpCompareWrapper extends ConsumerStatefulWidget {
   const HttpCompareWrapper({super.key, required this.id1, required this.id2});
