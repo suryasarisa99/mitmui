@@ -200,7 +200,7 @@ class _FlowDataGridState extends ConsumerState<FlowDataGrid> {
         ),
         MenuAction(
           attributes: MenuActionAttributes(disabled: modifiedIds.isEmpty),
-          activator: SingleActivator(LogicalKeyboardKey.enter, meta: true),
+          activator: SingleActivator(LogicalKeyboardKey.backspace, meta: true),
           callback: () => revertChanges(modifiedIds),
           title: "Revert Changes",
         ),
